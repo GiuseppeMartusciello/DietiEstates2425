@@ -11,6 +11,8 @@ export class Listing {
   address: string;
 
   @Column()
+  comune: string;
+  @Column()
   city: string;
 
   @Column()
