@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { configValidationSchema } from './config.schema';
 import { AuthModule } from './auth/auth.module';
 import { AgencyModule } from './agency/agency.module';
@@ -47,7 +45,5 @@ import { ResearchModule } from './research/research.module';
     SupportAdminModule,
     ClientModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
