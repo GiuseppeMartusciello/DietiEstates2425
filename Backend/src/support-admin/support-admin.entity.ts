@@ -11,7 +11,7 @@ import { Agency } from '../agency/agency.entity';
 @Entity()
 export class SupportAdmin {
   @PrimaryColumn('uuid')
-  id: string;
+  userId: string;
 
   @OneToOne(() => User, (user) => user.id, {
     nullable: true,

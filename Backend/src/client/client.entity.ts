@@ -17,13 +17,16 @@ export class Client {
   @PrimaryColumn('uuid')
   userId: string;
 
-  @Column({ type: 'boolean' })
+  @Column()
+  address: string;
+
+  @Column({ type: 'boolean', default: true })
   promotionalNotification: boolean;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: true })
   offerNotification: boolean;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: true })
   searchNotification: boolean;
 
   @OneToOne(() => User, {

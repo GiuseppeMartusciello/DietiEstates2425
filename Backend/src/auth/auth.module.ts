@@ -11,9 +11,15 @@ import { Notification } from 'src/notification/notification.entity';
 import { Research } from 'src/research/research.entity';
 import { Listing } from 'src/listing/Listing.entity';
 import { SupportAdmin } from 'src/support-admin/support-admin.entity';
+import { AuthService } from './auth.service';
+import { JwtStrategy } from './jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([
       User,
       Client,
@@ -26,7 +32,20 @@ import { SupportAdmin } from 'src/support-admin/support-admin.entity';
       Listing,
       SupportAdmin,
     ]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: {
+          expiresIn: 3600,
+        },
+      }),
+    }),
   ],
   controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+  exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}
