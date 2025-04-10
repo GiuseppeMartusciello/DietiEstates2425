@@ -10,5 +10,4 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async hello(): {};
 }

@@ -7,6 +7,6 @@ export class AuthController {
 
   @Get()
   async hello() {
-    return this.authService.hello();
+    //return this.authService.hello();
   }
 }

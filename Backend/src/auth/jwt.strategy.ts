@@ -30,6 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) throw new UnauthorizedException('Unathorized');
 
     if (user.role === 'CLIENT') {
-      const client = this.clientRep;
+      //const client = this.clientRep;
     }
+  }
 }

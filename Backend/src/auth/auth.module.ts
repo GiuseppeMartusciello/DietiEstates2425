@@ -11,6 +11,7 @@ import { Notification } from 'src/notification/notification.entity';
 import { Research } from 'src/research/research.entity';
 import { Listing } from 'src/listing/Listing.entity';
 import { SupportAdmin } from 'src/support-admin/support-admin.entity';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
@@ -28,5 +29,6 @@ import { SupportAdmin } from 'src/support-admin/support-admin.entity';
     ]),
   ],
   controllers: [AuthController],
+  providers: [AuthService],
 })
 export class AuthModule {}
