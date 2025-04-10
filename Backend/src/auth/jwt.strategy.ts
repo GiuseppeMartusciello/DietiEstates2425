@@ -32,6 +32,4 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (user.role === 'CLIENT') {
       const client = this.clientRep;
     }
-    return user;
-  }
 }

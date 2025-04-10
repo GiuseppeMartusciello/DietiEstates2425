@@ -5,6 +5,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configValidationSchema } from './config.schema';
 import { AuthModule } from './auth/auth.module';
+import { AgencyModule } from './agency/agency.module';
+import { AgentModule } from './agent/agent.module';
+import { ListingModule } from './listing/listing.module';
+import { AgencyManagerModule } from './agency-manager/agency-manager.module';
+import { NotificationModule } from './notification/notification.module';
+import { PropertyOfferModule } from './property_offer/property_offer.module';
+import { SupportAdminModule } from './support-admin/support-admin.module';
+import { ClientModule } from './client/client.module';
+import { ResearchModule } from './research/research.module';
 
 @Module({
   imports: [
@@ -28,6 +37,15 @@ import { AuthModule } from './auth/auth.module';
       }),
     }),
     AuthModule,
+    AgencyModule,
+    AgentModule,
+    ListingModule,
+    AgencyManagerModule,
+    NotificationModule,
+    PropertyOfferModule,
+    ResearchModule,
+    SupportAdminModule,
+    ClientModule,
   ],
   controllers: [AppController],
   providers: [AppService],
