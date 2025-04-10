@@ -3,12 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Research } from './research.entity';
 import { Repository } from 'typeorm';
 import { CreateResearchDto } from './create-research.dto';
+import { Client } from 'src/client/client.entity';
+import { ResearchRepository } from './research.repository';
 
 @Injectable()
 export class ResearchService {
-    constructor(
-        @InjectRepository(Research)
-        private readonly researchRepository: Repository<Research>,
+    constructor(private readonly researchRepository: ResearchRepository,
     ){}
     
 
@@ -21,12 +21,19 @@ export class ResearchService {
         return found;
     }
 
-//    async createResearch(createResearchDto: CreateResearchDto): Promise<Research>{
-//        const { text } = createResearchDto;
-//
-//        const task = this.researchRepository.create({
-//            text
-//            
-//        })
-//    }
+    async getResearchByClientId(id: string): Promise<Research>{
+        const found = await this.researchRepository.findOneBy({ id });
+
+        if(!found)
+            throw new NotFoundException(`Research id  "${id}" not found`);
+        
+        return found;
+    }
+    
+
+    createResearch(createResearchDto: CreateResearchDto, client: Client): Promise<Research> {
+        return this.researchRepository.createResearch(createResearchDto,client);
+    }
+
+
 }

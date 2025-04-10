@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsEmail,
@@ -26,6 +27,7 @@ export class AuthCredentialDto {
   password: string;
 
   @IsDate()
+  @Type(() => Date)
   birthDate: Date;
 
   @IsNotEmpty()
