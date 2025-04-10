@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Research } from './research.entity';
 import { Repository } from 'typeorm';
+import { CreateResearchDto } from './create-research.dto';
 
 @Injectable()
 export class ResearchService {
@@ -19,4 +20,13 @@ export class ResearchService {
         
         return found;
     }
+
+//    async createResearch(createResearchDto: CreateResearchDto): Promise<Research>{
+//        const { text } = createResearchDto;
+//
+//        const task = this.researchRepository.create({
+//            text
+//            
+//        })
+//    }
 }

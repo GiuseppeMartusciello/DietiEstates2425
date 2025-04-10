@@ -10,4 +10,5 @@ export class ResearchController {
     getResearchById(@Param('id') id: string): Promise<Research>{
         return this.researchService.getResearchById(id);
     }
+    
 }
