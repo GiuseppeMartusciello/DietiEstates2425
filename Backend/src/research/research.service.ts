@@ -34,7 +34,7 @@ export class ResearchService {
             order: { date: 'DESC' }, // opzionale
           });
         
-
+        
         if(!found)
             throw new NotFoundException(`No research associated with id  "${userId}" not found`);
         

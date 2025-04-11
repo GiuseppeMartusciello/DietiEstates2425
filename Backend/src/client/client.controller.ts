@@ -9,7 +9,7 @@ export class ClientController {
     constructor(private clientService: ClientService){}
 
     @Get('/:id')
-    getResearchById(@Param('id') id: string): Promise<Client>{
+    getClientById(@Param('id') id: string): Promise<Client>{
         return this.clientService.getClientById(id);
     }
 }
