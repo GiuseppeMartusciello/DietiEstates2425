@@ -12,8 +12,11 @@ import { PropertyOfferModule } from './property_offer/property_offer.module';
 import { SupportAdminModule } from './support-admin/support-admin.module';
 import { ClientModule } from './client/client.module';
 import { ResearchModule } from './research/research.module';
+import { GeoapifyService } from './common/services/geopify.service';
 
 @Module({
+  providers: [GeoapifyService],
+  exports: [GeoapifyService],
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env'],

@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { ListingCategory } from '../common/types/listing-category';
 import { Agency } from '../agency/agency.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Listing {
@@ -12,6 +13,7 @@ export class Listing {
 
   @Column()
   comune: string;
+  
   @Column()
   city: string;
 

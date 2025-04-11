@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Client } from '../client/client.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Research {
@@ -19,5 +20,6 @@ export class Research {
   text: string;
 
   @ManyToOne(() => Client, (client) => client.research)
+  @Exclude()
   client: Client;
 }

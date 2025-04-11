@@ -84,7 +84,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userItem.supportAdmin = supportAdmin;
     }
 
-    console.log(userItem);
+
     return userItem;
   }
 }
