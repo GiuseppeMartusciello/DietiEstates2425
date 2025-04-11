@@ -10,14 +10,11 @@ export class ClientService {
     private readonly clientRepository: Repository<Client>,
   ) {}
 
+  async getClientById(id: string): Promise<Client> {
+    const found = await this.clientRepository.findOneBy({ userId: id });
 
-    async getClientById(userId: string): Promise<Client>{
-        const found = await this.clientRepository.findOneBy({ userId });
+    if (!found) throw new NotFoundException(`Research id  "${id}" not found`);
 
-        if(!found)
-            throw new NotFoundException(`Research id  "${userId}" not found`);
-        
-        return found;
-    }
-
+    return found;
+  }
 }

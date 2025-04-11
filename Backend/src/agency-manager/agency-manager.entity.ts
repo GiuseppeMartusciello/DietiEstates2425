@@ -20,5 +20,6 @@ export class Manager {
   user: User;
 
   @OneToOne(() => Agency, (agency) => agency.id, { onDelete: 'CASCADE' })
+  @JoinColumn()
   agency: Agency;
 }

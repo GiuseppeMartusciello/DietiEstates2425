@@ -10,7 +10,7 @@ import { AuthCredentialDto } from './dto/auth.credentials.dto';
 import { TokensDto } from './dto/tokens.dto';
 import * as bcrypt from 'bcrypt';
 import { Client } from 'src/client/client.entity';
-import { Roles } from 'src/common/types/roles';
+import { UserRoles } from 'src/common/types/user-roles';
 import { JwtPayload } from './dto/jwt-payload.dto';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.credentials.dto';
@@ -54,7 +54,7 @@ export class AuthService {
       birthDate,
       gender,
       phone,
-      role: Roles.CLIENT,
+      role: UserRoles.CLIENT,
       email,
       password: hashedPassword,
     });

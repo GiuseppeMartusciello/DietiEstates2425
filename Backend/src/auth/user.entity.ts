@@ -1,4 +1,5 @@
-import { Roles } from 'src/common/types/roles';
+import { Exclude } from 'class-transformer';
+import { UserRoles } from 'src/common/types/user-roles';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -16,6 +17,7 @@ export class User {
   email: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   @Column({ type: 'date' })
@@ -27,6 +29,6 @@ export class User {
   @Column()
   phone: string;
 
-  @Column({ type: 'enum', enum: Roles })
-  role: Roles;
+  @Column({ type: 'enum', enum: UserRoles })
+  role: UserRoles;
 }

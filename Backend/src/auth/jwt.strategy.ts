@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
@@ -10,7 +10,7 @@ import { Manager } from 'src/agency-manager/agency-manager.entity';
 import { Agent } from 'src/agent/agent.entity';
 import { SupportAdmin } from 'src/support-admin/support-admin.entity';
 import { Client } from 'src/client/client.entity';
-import { Roles } from 'src/common/types/roles';
+import { UserRoles } from 'src/common/types/user-roles';
 import { UserItem } from 'src/common/types/userItem';
 
 @Injectable()
@@ -39,7 +39,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<UserItem> {
     const { userId } = payload;
 
     const user = await this.userRepository.findOne({
@@ -50,7 +50,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const userItem = user as UserItem;
 
-    if (user.role === Roles.CLIENT) {
+    if (user.role === UserRoles.CLIENT) {
       const client = await this.clientRepository.findOne({
         where: { userId: user.id },
       });
@@ -58,7 +58,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (!client) throw new UnauthorizedException('Unathorized');
 
       userItem.client = client;
-    } else if (user.role === Roles.MANAGER) {
+    } else if (user.role === UserRoles.MANAGER) {
       const manager = await this.managerRepository.findOne({
         where: { userId: user.id },
       });
@@ -66,7 +66,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (!manager) throw new UnauthorizedException('Unathorized');
 
       userItem.manager = manager;
-    } else if (user.role === Roles.AGENT) {
+    } else if (user.role === UserRoles.AGENT) {
       const agent = await this.agentRepository.findOne({
         where: { userId: user.id },
       });
@@ -84,6 +84,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userItem.supportAdmin = supportAdmin;
     }
 
-    return user;
+    console.log(userItem);
+    return userItem;
   }
 }
