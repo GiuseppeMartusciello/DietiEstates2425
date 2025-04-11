@@ -21,11 +21,22 @@ export class ResearchService {
         return found;
     }
 
-    async getResearchByClientId(id: string): Promise<Research>{
-        const found = await this.researchRepository.findOneBy({ id });
+    async getResearchByClientId(userId: string): Promise<Research[]>{
+        const found = await this.researchRepository.find({
+            where: {
+              client: {
+                user: {
+                  id: userId,
+                },
+              },
+            },
+            relations: ['client', 'client.user'], // assicurati che queste relazioni siano caricate
+            order: { date: 'DESC' }, // opzionale
+          });
+        
 
         if(!found)
-            throw new NotFoundException(`Research id  "${id}" not found`);
+            throw new NotFoundException(`No research associated with id  "${userId}" not found`);
         
         return found;
     }

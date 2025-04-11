@@ -15,17 +15,16 @@ export class ResearchController {
         private clientService: ClientService
     ){}
 
+    @Get('my')
+    getResearchByClientId(@GetUser() user: User): Promise<Research[]>{
+        return this.researchService.getResearchByClientId(user.id);
+    }
+
     @Get('/:id')
     getResearchById(@Param('id') id: string): Promise<Research>{
         //const client = await this.clientService.getClientById(user.id);
         return this.researchService.getResearchById(id);
     }
-
-    @Get('client/:clientId')
-    getResearchByClientId(@Param('clientId') id: string): Promise<Research>{
-        return this.researchService.getResearchByClientId(id);
-    }
-
 
     @Post()
     async createResearch(
