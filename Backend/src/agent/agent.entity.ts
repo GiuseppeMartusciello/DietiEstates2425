@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { User } from '../auth/user.entity';
 import { Agency } from '../agency/agency.entity';
+import { Listing } from 'src/listing/Listing.entity';
 
 @Entity()
 export class Agent {
@@ -40,4 +41,7 @@ export class Agent {
     eager: true,
   })
   agency: Agency;
+
+  @OneToMany(() => Listing, (listing) => listing.agent)
+  listings: Listing[];
 }

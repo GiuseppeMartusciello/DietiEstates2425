@@ -9,6 +9,8 @@ import {
     IsOptional,
     IsInt,
   } from 'class-validator';
+import { Agency } from 'src/agency/agency.entity';
+import { Agent } from 'src/agent/agent.entity';
 import { ListingCategory } from 'src/common/types/listing-category';
   
   export class CreateListingDto {
@@ -42,8 +44,13 @@ import { ListingCategory } from 'src/common/types/listing-category';
     @IsString()
     @IsNotEmpty()
     energyClass: string;
+
+    @IsString()
+    @IsOptional()
+    position: string;
   
     @IsArray()
+    @IsOptional()
     @IsString({ each: true })
     nearbyPlaces: string[];
   
@@ -69,8 +76,8 @@ import { ListingCategory } from 'src/common/types/listing-category';
     @IsBoolean()
     hasGarage: boolean;
   
-    @IsUUID()
     @IsOptional()
-    agentId?: string; 
+    @IsUUID()
+    agentId: string; 
   }
   

@@ -30,21 +30,14 @@ export class GeoapifyService {
 
   async getNearbyIndicators(lat: number, lon: number): Promise<string[]> {
     try {
-      const categories = [
-        'education.school',         // scuole
-        'leisure.park',             // parchi
-        'public_transport.stop',    // trasporti pubblici
-      ];
-      console.log('[GeoapifyService] Query:', {
-        categories: categories.join(','),
-        filter: `circle:${lon},${lat},500`,
-        apiKey: this.apiKey,
-      });
+      const normalizedLat = Number(lat).toFixed(6);
+      const normalizedLon = Number(lon).toFixed(6);
+  
       const response = await axios.get('https://api.geoapify.com/v2/places', {
         params: {
-          categories: categories.join(','),
-          filter: `circle:${lon},${lat},500`, // raggio 500m
-          limit: 20,
+          categories: 'education.school,leisure.park,public_transport.bus',
+          filter: `circle:${normalizedLon},${normalizedLat},500`,
+          limit: 8,
           apiKey: this.apiKey,
         },
       });
@@ -56,7 +49,7 @@ export class GeoapifyService {
         const cat = feature.properties.categories || [];
         if (cat.includes('education')) foundCategories.add('Vicino a scuole');
         if (cat.includes('leisure')) foundCategories.add('Vicino a parchi');
-        if (cat.includes('public_transport')) foundCategories.add('Vicino a trasporto pubblico');
+        if (cat.includes('public_transport')) foundCategories.add('Vicino a trasporti pubblici');
       }
   
       return Array.from(foundCategories);
@@ -65,5 +58,6 @@ export class GeoapifyService {
       return [];
     }
   }
+  
   
 }
