@@ -61,6 +61,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     } else if (user.role === UserRoles.MANAGER) {
       const manager = await this.managerRepository.findOne({
         where: { userId: user.id },
+        relations: ['agency'],
       });
 
       if (!manager) throw new UnauthorizedException('Unathorized');
@@ -69,6 +70,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     } else if (user.role === UserRoles.AGENT) {
       const agent = await this.agentRepository.findOne({
         where: { userId: user.id },
+        relations: ['agency'],
       });
 
       if (!agent) throw new UnauthorizedException('Unathorized');
@@ -77,6 +79,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     } else if (user.role === UserRoles.SUPPORT_ADMIN) {
       const supportAdmin = await this.supportAdminRepository.findOne({
         where: { userId: user.id },
+        relations: ['agency'],
       });
 
       if (!supportAdmin) throw new UnauthorizedException('Unathorized');

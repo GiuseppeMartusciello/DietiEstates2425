@@ -19,7 +19,7 @@ import { CreateSupportAdminDto } from './dto/create-support-admin.dto';
 import { Agent } from 'src/agent/agent.entity';
 import { AgentService } from 'src/agent/agent.service';
 import { CreateAgentDto } from './dto/create-agent.dto';
-
+import { Agency } from 'src/agency/agency.entity';
 
 @Injectable()
 export class AgencyManagerService {
@@ -33,7 +33,9 @@ export class AgencyManagerService {
     @InjectRepository(Agent)
     private readonly agentRepository: Repository<Agent>,
 
-    private readonly agentService: AgentService,
+    //private readonly agentService: AgentService,
+    @InjectRepository(Agency)
+    private readonly agencyRepository: Repository<Agency>,
 
     @InjectRepository(SupportAdmin)
     private readonly supportAdminRepository: Repository<SupportAdmin>,
@@ -84,8 +86,7 @@ export class AgencyManagerService {
 
     if (found) throw new ConflictException();
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await this.hashPassword(password);
 
     const userSupportAdmin = await this.userRepository.create({
       name: name,
@@ -117,16 +118,51 @@ export class AgencyManagerService {
     };
   }
 
-  async createAgent(createAgentDto: CreateAgentDto) {
+  async createAgent(createAgentDto: CreateAgentDto, agencyId: string) {
+    const agency = await this.agencyRepository.findOne({
+      where: { id: agencyId },
+    });
+    if (!agency) {
+      throw new BadRequestException(
+        `The Agency with ID: ${agencyId} doesn't exist`,
+      );
+    }
 
-    const {licenseNumber, name, surname, email, password, birthDate, gender, phone,start_date,languages, agencyId} = createAgentDto;
-    
-    const found = await this.agentRepository.createQueryBuilder('agent')
+    const {
+      licenseNumber,
+      name,
+      surname,
+      email,
+      password,
+      birthDate,
+      gender,
+      phone,
+      start_date,
+      languages,
+      //agencyId,
+    } = createAgentDto;
+
+    const existingAgent = await this.agentRepository
+      .createQueryBuilder('agent')
       .where('agent.licenseNumber = :licenseNumber', { licenseNumber })
-    if (found) new ConflictException(`Agent with license "${licenseNumber}" already exists`);
+      .getOne();
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    if (existingAgent)
+      new ConflictException(
+        `Agent with license "${licenseNumber}" already exists`,
+      );
+
+    const existingUser = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email = :email OR user.phone = :phone', {
+        email,
+        phone,
+      })
+      .getOne();
+
+    if (existingUser) throw new ConflictException('User already exists');
+
+    const hashedPassword = await this.hashPassword(password);
 
     const userAgent = await this.userRepository.create({
       name: name,
@@ -134,7 +170,7 @@ export class AgencyManagerService {
       email: email,
       password: hashedPassword,
       phone: phone,
-      gender,
+      gender: gender,
       birthDate: birthDate,
       role: UserRoles.AGENT,
     });
@@ -145,8 +181,9 @@ export class AgencyManagerService {
       licenseNumber: licenseNumber,
       start_date: start_date,
       languages: languages,
-      user: userAgent, 
-      agency: { id: agencyId }, 
+      userId: userAgent.id,
+      //user: userAgent,
+      agency: agency,
     });
 
     await this.agentRepository.save(agent);
@@ -157,16 +194,29 @@ export class AgencyManagerService {
         email: userAgent.email,
         id: userAgent.id,
         name: userAgent.name,
+        licenseNumber: licenseNumber,
+        agency: {
+          id: agencyId,
+          name: agency.name,
+        },
       },
     };
-
   }
 
-  async deleteAgentById(idAgente: string) {
-    const found = await this.userRepository.findOneBy({ id: idAgente });
-    if (!found) throw new NotFoundException(`Agent with id "${idAgente}" not found`);
+  async deleteAgentById(agentId: string) {
+    const found = await this.userRepository.findOneBy({ id: agentId });
+    if (!found)
+      throw new NotFoundException(`Agent with id "${agentId}" not found`);
 
-    await this.userRepository.delete(idAgente); 
+    await this.userRepository.delete(agentId);
 
+    return {
+      message: 'Agent delete successfully',
+    };
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt();
+    return bcrypt.hash(password, salt);
   }
 }

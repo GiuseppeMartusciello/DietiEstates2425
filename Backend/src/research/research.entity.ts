@@ -19,7 +19,7 @@ export class Research {
   @Column()
   text: string;
 
-  @ManyToOne(() => Client, (client) => client.research)
+  @ManyToOne(() => Client, (client) => client.research, { onDelete: 'CASCADE' })
   @Exclude()
   client: Client;
 }

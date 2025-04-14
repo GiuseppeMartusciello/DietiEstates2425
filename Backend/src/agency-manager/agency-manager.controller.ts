@@ -1,6 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
+  Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UnauthorizedException,
@@ -17,6 +20,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { UserRoles } from 'src/common/types/user-roles';
 import { CreateSupportAdminDto } from './dto/create-support-admin.dto';
+import { CreateAgentDto } from './dto/create-agent.dto';
 
 @Controller('agency-manager')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -44,6 +48,23 @@ export class AgencyManagerController {
   }
 
   //inserire un nuovo agente (admin, support-admin)
+  @Post('agent')
+  @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  createAgent(
+    @GetUser() user: UserItem,
+    @Body() createAgentDto: CreateAgentDto,
+  ) {
+    const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
+    if (!agencyId) throw new UnauthorizedException('Nessuna agenzia associata');
+
+    return this.managerService.createAgent(createAgentDto, agencyId);
+  }
 
   //eliminare un agente
+
+  @Delete('agent/:id/delete')
+  @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  deleteAgent(@Param('id', new ParseUUIDPipe()) agentId: string) {
+    return this.managerService.deleteAgentById(agentId);
+  }
 }
