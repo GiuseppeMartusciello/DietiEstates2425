@@ -14,6 +14,7 @@ import { UserRoles } from 'src/common/types/user-roles';
 import { JwtPayload } from './dto/jwt-payload.dto';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.credentials.dto';
+import { Gender } from 'src/common/types/gender.enum';
 
 @Injectable()
 export class AuthService {
@@ -39,9 +40,13 @@ export class AuthService {
       address,
     } = authCredentialDto;
 
-    const found = await this.userRepository.findOne({
-      where: { email: email },
-    });
+    const found = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email = :email OR user.phone = :phone', {
+        email,
+        phone,
+      })
+      .getOne();
 
     if (found) throw new ConflictException('User already exists');
 
@@ -73,11 +78,11 @@ export class AuthService {
       role: user.role,
     };
 
-    const accessToken = await this.jwtService.sign(payload, {
+    const accessToken = this.jwtService.sign(payload, {
       expiresIn: '1h',
     });
 
-    return { accessToken };
+    return { accessToken, mustChangePassword: false };
   }
 
   async signIn(credentials: SignInDto): Promise<TokensDto> {
@@ -98,6 +103,8 @@ export class AuthService {
       expiresIn: '45m',
     });
 
-    return { accessToken };
+    console.log(user);
+
+    return { accessToken, mustChangePassword: user.isDeafaultPassword };
   }
 }

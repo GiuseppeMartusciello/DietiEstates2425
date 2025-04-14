@@ -74,7 +74,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (!agent) throw new UnauthorizedException('Unathorized');
 
       userItem.agent = agent;
-    } else {
+    } else if (user.role === UserRoles.SUPPORT_ADMIN) {
       const supportAdmin = await this.supportAdminRepository.findOne({
         where: { userId: user.id },
       });
@@ -82,9 +82,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (!supportAdmin) throw new UnauthorizedException('Unathorized');
 
       userItem.supportAdmin = supportAdmin;
-    }
+    } else if (user.role != UserRoles.ADMIN)
+      throw new UnauthorizedException('Invalid role');
 
-    console.log(userItem);
     return userItem;
   }
 }

@@ -4,6 +4,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { Agent } from '../agent/agent.entity';
 import { Listing } from 'src/listing/Listing.entity';
@@ -24,7 +25,7 @@ export class Agency {
   @Column()
   phone: string;
 
-  @Column()
+  @Column({ unique: true })
   vatNumber: string;
 
   @OneToMany(() => Agent, (agent) => agent.agency)

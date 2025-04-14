@@ -3,10 +3,12 @@ import { AgencyManagerController } from './agency-manager.controller';
 import { AgencyManagerService } from './agency-manager.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Manager } from './agency-manager.entity';
+import { SupportAdmin } from 'src/support-admin/support-admin.entity';
+import { User } from 'src/auth/user.entity';
 
 @Module({
   controllers: [AgencyManagerController],
   providers: [AgencyManagerService],
-  imports: [TypeOrmModule.forFeature([Manager])],
+  imports: [TypeOrmModule.forFeature([Manager, User, SupportAdmin])],
 })
 export class AgencyManagerModule {}

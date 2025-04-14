@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { UserRoles } from 'src/common/types/user-roles';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity()
 export class User {
@@ -13,7 +13,7 @@ export class User {
   @Column()
   surname: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
@@ -26,9 +26,12 @@ export class User {
   @Column()
   gender: string;
 
-  @Column()
+  @Column({ unique: true })
   phone: string;
 
   @Column({ type: 'enum', enum: UserRoles })
   role: UserRoles;
+
+  @Column({ type: 'boolean', default: false })
+  isDeafaultPassword: boolean;
 }
