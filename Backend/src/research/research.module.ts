@@ -10,10 +10,7 @@ import { ClientModule } from 'src/client/client.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Research]), AuthModule, ClientModule],
   controllers: [ResearchController],
-  providers: [
-    ResearchService,
-    ResearchRepository,
-  ],
+  providers: [ResearchService, ResearchRepository],
   exports: [ResearchRepository],
 })
 export class ResearchModule {}

@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { ListingCategory } from '../common/types/listing-category';
 import { Agency } from '../agency/agency.entity';
+import { Exclude } from 'class-transformer';
+import { Agent } from 'src/agent/agent.entity';
 
 @Entity()
 export class Listing {
@@ -12,6 +14,7 @@ export class Listing {
 
   @Column()
   comune: string;
+  
   @Column()
   city: string;
 
@@ -57,9 +60,19 @@ export class Listing {
   @Column()
   hasGarage: boolean;
 
+  @Exclude()
   @ManyToOne(() => Agency, (agency) => agency.listings, {
     onDelete: 'CASCADE',
     nullable: true,
+    eager: true
   })
   agency: Agency;
+
+  @Exclude()
+  @ManyToOne(() => Agent, (agent) => agent.listings, {
+    onDelete: 'CASCADE',
+    nullable: true,
+    eager: true
+  })
+  agent: Agent;
 }

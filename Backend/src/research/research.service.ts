@@ -1,50 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Research } from './research.entity';
-import { Repository } from 'typeorm';
 import { CreateResearchDto } from './create-research.dto';
 import { Client } from 'src/client/client.entity';
 import { ResearchRepository } from './research.repository';
 
 @Injectable()
 export class ResearchService {
-    constructor(private readonly researchRepository: ResearchRepository,
-    ){}
-    
+  constructor(private readonly researchRepository: ResearchRepository) {}
 
-    async getResearchById(id: string): Promise<Research>{
-        const found = await this.researchRepository.findOneBy({ id });
+  getResearchByClientId(userId: string): Promise<Research[]> {
+    return this.researchRepository.getResearchByClientId(userId);
+  }
 
-        if(!found)
-            throw new NotFoundException(`Research id  "${id}" not found`);
-        
-        return found;
+  async deleteResearch(id: string, client: Client): Promise<void> {
+    const result = await this.researchRepository.delete({ id, client });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
     }
+  }
 
-    async getResearchByClientId(userId: string): Promise<Research[]>{
-        const found = await this.researchRepository.find({
-            where: {
-              client: {
-                user: {
-                  id: userId,
-                },
-              },
-            },
-            relations: ['client', 'client.user'], // assicurati che queste relazioni siano caricate
-            order: { date: 'DESC' }, // opzionale
-          });
-        
-        
-        if(!found)
-            throw new NotFoundException(`No research associated with id  "${userId}" not found`);
-        
-        return found;
-    }
-    
-
-    createResearch(createResearchDto: CreateResearchDto, client: Client): Promise<Research> {
-        return this.researchRepository.createResearch(createResearchDto,client);
-    }
-
-
+  createResearch(
+    createResearchDto: CreateResearchDto,
+    client: Client,
+  ): Promise<Research> {
+    return this.researchRepository.createResearch(createResearchDto, client);
+  }
 }
