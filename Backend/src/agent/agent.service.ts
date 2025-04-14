@@ -18,4 +18,12 @@ export class AgentService {
   
       return found;
     }
+
+    async findAgentByLicense(licenseNumber): Promise<Agent> {
+      const found = await this.agentRepository.findOneBy({ licenseNumber });
+
+      if (!found) throw new NotFoundException(`Agent with license "${licenseNumber}" not found`);
+
+      return found;
+    }
 }
