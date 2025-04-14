@@ -15,7 +15,7 @@ import { ResearchModule } from './research/research.module';
 import { GeoapifyService } from './common/services/geopify.service';
 import { AdminModule } from './admin/admin.module';
 
-@Module({
+@Module({ 
   providers: [GeoapifyService],
   exports: [GeoapifyService],
   imports: [

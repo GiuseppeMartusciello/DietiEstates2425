@@ -15,8 +15,11 @@ import { AuthCredentialDto } from 'src/auth/dto/auth.credentials.dto';
 import { UserItem } from 'src/common/types/userItem';
 import { SupportAdmin } from 'src/support-admin/support-admin.entity';
 import { UserRoles } from 'src/common/types/user-roles';
-import { CreateSupportAdminByAdminDto } from './dto/create-support-admin-by-admin.dto';
 import { CreateSupportAdminDto } from './dto/create-support-admin.dto';
+import { Agent } from 'src/agent/agent.entity';
+import { AgentService } from 'src/agent/agent.service';
+import { CreateAgentDto } from './dto/create-agent.dto';
+
 
 @Injectable()
 export class AgencyManagerService {
@@ -26,6 +29,11 @@ export class AgencyManagerService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(Agent)
+    private readonly agentRepository: Repository<Agent>,
+
+    private readonly agentService: AgentService,
 
     @InjectRepository(SupportAdmin)
     private readonly supportAdminRepository: Repository<SupportAdmin>,
@@ -109,13 +117,56 @@ export class AgencyManagerService {
     };
   }
 
-  async createAgent(createAgentDto, agencyId) {
-    //controlo se esiste gia un agente che ha lo stesso numero di licenza
-    //crea la tupla dell'agente nella Tabella user
-    //crei la tupla nella tabella agent (userId, agency)
+  async createAgent(createAgentDto: CreateAgentDto) {
+
+    const {licenseNumber, name, surname, email, password, birthDate, gender, phone,start_date,languages, agencyId} = createAgentDto;
+    
+    const found = await this.agentRepository.createQueryBuilder('agent')
+      .where('agent.licenseNumber = :licenseNumber', { licenseNumber })
+    if (found) new ConflictException(`Agent with license "${licenseNumber}" already exists`);
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const userAgent = await this.userRepository.create({
+      name: name,
+      surname: surname,
+      email: email,
+      password: hashedPassword,
+      phone: phone,
+      gender,
+      birthDate: birthDate,
+      role: UserRoles.AGENT,
+    });
+
+    await this.userRepository.save(userAgent);
+
+    const agent = this.agentRepository.create({
+      licenseNumber: licenseNumber,
+      start_date: start_date,
+      languages: languages,
+      user: userAgent, 
+      agency: { id: agencyId }, 
+    });
+
+    await this.agentRepository.save(agent);
+
+    return {
+      message: 'Agent created successfully',
+      agent: {
+        email: userAgent.email,
+        id: userAgent.id,
+        name: userAgent.name,
+      },
+    };
+
   }
 
-  async deleteAgentById() {
-    // eliminare la tupla della user -> cancella da sola la tupla in Agent -> Annunci immobiliari pubblicati dall'agente
+  async deleteAgentById(idAgente: string) {
+    const found = await this.userRepository.findOneBy({ id: idAgente });
+    if (!found) throw new NotFoundException(`Agent with id "${idAgente}" not found`);
+
+    await this.userRepository.delete(idAgente); 
+
   }
 }
