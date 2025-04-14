@@ -18,7 +18,7 @@ export class Agent {
   @PrimaryColumn('uuid')
   userId: string;
 
-  @Column()
+  @Column({ unique: true })
   licenseNumber: string;
 
   @Column({ type: 'date' })

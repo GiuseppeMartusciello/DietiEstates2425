@@ -42,4 +42,8 @@ export class AgencyManagerController {
   ) {
     return this.managerService.createSupportAdmin(createSupportAdminDto, user);
   }
+
+  //inserire un nuovo agente (admin, support-admin)
+
+  //eliminare un agente
 }

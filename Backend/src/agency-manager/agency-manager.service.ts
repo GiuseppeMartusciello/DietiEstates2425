@@ -108,4 +108,14 @@ export class AgencyManagerService {
       },
     };
   }
+
+  async createAgent(createAgentDto, agencyId) {
+    //controlo se esiste gia un agente che ha lo stesso numero di licenza
+    //crea la tupla dell'agente nella Tabella user
+    //crei la tupla nella tabella agent (userId, agency)
+  }
+
+  async deleteAgentById() {
+    // eliminare la tupla della user -> cancella da sola la tupla in Agent -> Annunci immobiliari pubblicati dall'agente
+  }
 }
