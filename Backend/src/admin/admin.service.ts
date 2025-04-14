@@ -51,7 +51,8 @@ export class AdminService {
       where: { vatNumber: vatNumber },
     });
 
-    if (exists) throw new ConflictException();
+    if (exists)
+      throw new ConflictException(`This VatNumber ${vatNumber} already exists`);
 
     const agency = this.agencyRepository.create({
       name,
@@ -75,7 +76,10 @@ export class AdminService {
       })
       .getOne();
 
-    if (found) throw new ConflictException();
+    if (found)
+      throw new ConflictException(
+        `An user with email: ${managerEmail} or phone: ${managerPhone} already exists`,
+      );
 
     await this.agencyRepository.save(agency);
 
