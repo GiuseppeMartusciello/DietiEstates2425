@@ -61,7 +61,6 @@ export class AgencyManagerController {
   }
 
   //eliminare un agente
-
   @Delete('agent/:id/delete')
   @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   deleteAgent(@Param('id', new ParseUUIDPipe()) agentId: string) {

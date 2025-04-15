@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Manager } from './agency-manager.entity';
 import { CredentialDto } from './dto/credentials.dto';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { User } from 'src/auth/user.entity';
 import { AuthCredentialDto } from 'src/auth/dto/auth.credentials.dto';
 import { UserItem } from 'src/common/types/userItem';

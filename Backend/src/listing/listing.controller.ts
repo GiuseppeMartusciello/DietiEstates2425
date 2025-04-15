@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   UnauthorizedException,
   UseGuards,
@@ -21,6 +22,9 @@ import { CreateListingDto } from './dto/create-listing.dto';
 import { UserItem } from 'src/common/types/userItem';
 import { Listing } from './Listing.entity';
 import { AgentService } from 'src/agent/agent.service';
+import { ModifyListingDto } from './dto/modify-listing.dto';
+import { SearchListingDto } from './dto/search-listing.dto';
+import { Agent } from 'src/agent/agent.entity';
 
 @Controller('listing')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -30,26 +34,46 @@ export class ListingController {
     private readonly agentService: AgentService,
   ) {}
 
-  @Delete('/:id')
+  @Get('')
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  async deleteListing(
-    @Param('id', new ParseUUIDPipe()) id: string,
+  getAllListing(): Promise<Listing[]> {
+    return this.listingService.getAllListing();
+  }
+
+  @Get('/agent/:id')
+  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
+  async getListingByAgentId(
+    @Param('id', new ParseUUIDPipe()) agentId: string,
     @GetUser() user: UserItem,
-  ): Promise<void> {
-    const listing: Listing = await this.getListingById(id);
-    if (!listing)
-      throw new NotFoundException(`Listing with id ${id} not found `);
+  ): Promise<Listing[]> {
+    if (user.agent)
+      if (user.agent?.userId !== agentId)
+        //se la richiesta è effettuata da un agente il suo id deve corrispondere con la richiesta
+        throw new UnauthorizedException();
+      else return this.listingService.getListingByAgentId(user.id);
+    else {
+      const agent: Agent = await this.agentService.getAgentById(agentId);
+      if (!agent) throw new NotFoundException(`Agent with userId ${agentId} not found `);
+      if (
+        //se la richiesta è effettuata da un support_admin/manager la sua agenzia deve corrispondere con quella del agent richiesto
+        user.supportAdmin?.agency != agent.agency &&
+        user.manager?.agency != agent.agency
+      )
+        throw new UnauthorizedException();
 
-    if (user.agent && listing.agent.userId !== user.id)
-      throw new UnauthorizedException();
-
-    this.listingService.deleteListingById(id);
+      return this.listingService.getListingByAgentId(user.id);
+    }
   }
 
   @Get('/agency/:id')
+  @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   getListingByAgencyId(
     @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: UserItem,
   ): Promise<Listing[]> {
+    if (user.supportAdmin?.agency.id !== id && user.manager?.agency.id !== id)
+      throw new UnauthorizedException();
+
     return this.listingService.getListingByAgencyId(id);
   }
 
@@ -58,6 +82,34 @@ export class ListingController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<Listing> {
     return this.listingService.getListingById(id);
+  }
+
+  @Post('/search')  //Dovrebbe essere una Get, ma avendo un DTO complesso si utilizza la post lo stesso
+  searchListing(
+    @Body() searchListingDto: SearchListingDto,
+  ): Promise<Listing[]> {
+    return this.listingService.searchListing(searchListingDto);
+  }
+
+  @Patch('')
+  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
+  async modifyListing(
+    @Body() modifyListingDto: ModifyListingDto,
+    @GetUser() user: UserItem,
+  ): Promise<Listing> {
+    const listing: Listing = await this.listingService.getListingById(
+      modifyListingDto.listingId,
+    );
+
+    if (!listing)
+      throw new NotFoundException(
+        `Listing with id ${modifyListingDto.listingId} not found `,
+      );
+
+    if (user.agent && listing.agent.userId !== user.id)
+      throw new UnauthorizedException();
+
+    return this.listingService.changeListing(listing, modifyListingDto);
   }
 
   @Post()
@@ -78,9 +130,26 @@ export class ListingController {
     const agent = await this.agentService.getAgentById(
       createListingDto.agentId,
     );
+
     if (!agent)
       throw new NotFoundException(`Agent with userId ${agentId} not found `);
 
     return this.listingService.createListing(createListingDto, agent);
+  }
+
+  @Delete('/:id')
+  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
+  async deleteListing(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @GetUser() user: UserItem,
+  ): Promise<void> {
+    const listing: Listing = await this.getListingById(id);
+    if (!listing)
+      throw new NotFoundException(`Listing with id ${id} not found `);
+
+    if (user.agent && listing.agent.userId !== user.id)
+      throw new UnauthorizedException();
+
+    return this.listingService.deleteListingById(id);
   }
 }

@@ -13,7 +13,7 @@ export class Listing {
   address: string;
 
   @Column()
-  comune: string;
+  municipality: string;
   
   @Column()
   city: string;

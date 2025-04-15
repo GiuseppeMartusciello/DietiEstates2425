@@ -12,7 +12,7 @@ import { ReplOptions } from 'repl';
 import { User } from 'src/auth/user.entity';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { UserRoles } from 'src/common/types/user-roles';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { UserItem } from 'src/common/types/userItem';
 import { ConfigService } from '@nestjs/config';
 
