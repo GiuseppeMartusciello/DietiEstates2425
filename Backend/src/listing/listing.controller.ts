@@ -46,35 +46,18 @@ export class ListingController {
     @Param('id', new ParseUUIDPipe()) agentId: string,
     @GetUser() user: UserItem,
   ): Promise<Listing[]> {
-    if (user.agent)
-      if (user.agent?.userId !== agentId)
-        //se la richiesta è effettuata da un agente il suo id deve corrispondere con la richiesta
-        throw new UnauthorizedException();
-      else return this.listingService.getListingByAgentId(user.id);
-    else {
-      const agent: Agent = await this.agentService.getAgentById(agentId);
-      if (!agent) throw new NotFoundException(`Agent with userId ${agentId} not found `);
-      if (
-        //se la richiesta è effettuata da un support_admin/manager la sua agenzia deve corrispondere con quella del agent richiesto
-        user.supportAdmin?.agency != agent.agency &&
-        user.manager?.agency != agent.agency
-      )
-        throw new UnauthorizedException();
+    if (user.agent) agentId = user.id;
 
-      return this.listingService.getListingByAgentId(user.id);
-    }
+    const agencyId: string =this.getAgencyIdFromUser(user);
+    return this.listingService.getListingByAgentId(agentId, agencyId);
   }
 
-  @Get('/agency/:id')
+  @Get('/agency')
   @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  getListingByAgencyId(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @GetUser() user: UserItem,
-  ): Promise<Listing[]> {
-    if (user.supportAdmin?.agency.id !== id && user.manager?.agency.id !== id)
-      throw new UnauthorizedException();
+  getListingByAgencyId(@GetUser() user: UserItem): Promise<Listing[]> {
+    const agencyId = this.getAgencyIdFromUser(user);
 
-    return this.listingService.getListingByAgencyId(id);
+    return this.listingService.getListingByAgencyId(agencyId);
   }
 
   @Get('/:id')
@@ -84,7 +67,8 @@ export class ListingController {
     return this.listingService.getListingById(id);
   }
 
-  @Post('/search')  //Dovrebbe essere una Get, ma avendo un DTO complesso si utilizza la post lo stesso
+  //Dovrebbe poter essere fatta solo da clienti?
+  @Post('/search') //Dovrebbe essere una Get, ma avendo un DTO complesso si utilizza la post lo stesso
   searchListing(
     @Body() searchListingDto: SearchListingDto,
   ): Promise<Listing[]> {
@@ -106,10 +90,7 @@ export class ListingController {
         `Listing with id ${modifyListingDto.listingId} not found `,
       );
 
-    if (user.agent && listing.agent.userId !== user.id)
-      throw new UnauthorizedException();
-
-    //aggiungere controllo che siano della stessa agenzia
+    this.checkAuthorization(user, listing);
 
     return this.listingService.changeListing(listing, modifyListingDto);
   }
@@ -145,13 +126,31 @@ export class ListingController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: UserItem,
   ): Promise<void> {
-    const listing: Listing = await this.getListingById(id);
-    if (!listing)
-      throw new NotFoundException(`Listing with id ${id} not found `);
+    const agencyId = this.getAgencyIdFromUser(user);
+    if (user.agent)
+      return this.listingService.deleteListingById(id, agencyId, user.id);
 
-    if (user.agent && listing.agent.userId !== user.id)
+    return this.listingService.deleteListingById(id, agencyId);
+  }
+
+  checkAuthorization(user: UserItem, listing: Listing): void {
+    if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
 
-    return this.listingService.deleteListingById(id);
+    if (user.supportAdmin && user.supportAdmin.agency !== listing.agency)
+      throw new UnauthorizedException();
+
+    if (user.manager && user.manager.agency !== listing.agency)
+      throw new UnauthorizedException();
+  }
+
+  getAgencyIdFromUser(user: UserItem): string {
+    const agencyId =
+      user.agent?.agency.id ||
+      user.manager?.agency.id ||
+      user.supportAdmin?.agency.id;
+    if (!agencyId) throw new UnauthorizedException();
+
+    return agencyId;
   }
 }

@@ -100,6 +100,7 @@ export class ListingRepository extends Repository<Listing> {
   ): Promise<Listing> {
     const updatableFields: (keyof ModifyListingDto)[] = [
       'address',
+      'title',
       'municipality',
       'city',
       'postalCode',
@@ -134,6 +135,7 @@ export class ListingRepository extends Repository<Listing> {
   ): Promise<Listing> {
     const {
       address,
+      title,
       municipality,
       city,
       postalCode,
@@ -156,6 +158,7 @@ export class ListingRepository extends Repository<Listing> {
     const listing = this.create({
       address,
       municipality,
+      title,
       city,
       postalCode,
       province,

@@ -15,8 +15,7 @@ export class ListingService {
     private readonly geopifyService: GeoapifyService,
   ) {}
 
-
-  searchListing(searchListingDto: SearchListingDto): Promise<Listing[]>{
+  searchListing(searchListingDto: SearchListingDto): Promise<Listing[]> {
     return this.listingRepository.searchListings(searchListingDto);
   }
 
@@ -25,11 +24,15 @@ export class ListingService {
 
     return found;
   }
-  
-  async getListingByAgentId(agentId: string): Promise<Listing[]> {
+
+  async getListingByAgentId(
+    agentId: string,
+    agencyId: string,
+  ): Promise<Listing[]> {
     const found = await this.listingRepository.find({
       where: {
         agent: { userId: agentId } as Agent,
+        agency: { id: agencyId } as Agency,
       },
     });
 
@@ -53,7 +56,7 @@ export class ListingService {
   async getListingById(id: string): Promise<Listing> {
     const found = await this.listingRepository.findOneBy({ id: id });
 
-    if (!found) throw new NotFoundException(`Agent id  "${id}" not found`);
+    if (!found) throw new NotFoundException(`Listing id  "${id}" not found`);
 
     return found;
   }
@@ -66,8 +69,9 @@ export class ListingService {
       const { lat, lon } = await this.geopifyService.getCoordinatesFromAddress(
         `${modifyListingDto.address}, ${modifyListingDto.municipality}`,
       );
-      modifyListingDto.nearbyPlaces = await this.geopifyService.getNearbyIndicators(lat, lon);
-      
+      modifyListingDto.nearbyPlaces =
+        await this.geopifyService.getNearbyIndicators(lat, lon);
+
       modifyListingDto.position = `${lat},${lon}`;
     }
 
@@ -88,10 +92,19 @@ export class ListingService {
     return this.listingRepository.createListing(createListingDto, agent);
   }
 
-  async deleteListingById(id: string): Promise<void> {
-    const result = await this.listingRepository.delete(id);
+  async deleteListingById(
+    listingId: string,
+    agencyId: string,
+    agentId?: string,
+  ): Promise<void> {
+    const result = await this.listingRepository.delete({
+      id: listingId,
+      ...(agentId && { agent: { userId: agentId } as Agent }),
+      agency: { id: agencyId } as Agency,
+    });
+
     if (result.affected === 0) {
-      throw new NotFoundException(`Listing with ID "${id}" not found`);
+      throw new NotFoundException(`Listing with ID "${listingId}" not found`);
     }
   }
 }
