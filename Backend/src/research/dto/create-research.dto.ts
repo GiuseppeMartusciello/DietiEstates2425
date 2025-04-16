@@ -1,7 +1,8 @@
 import { IsOptional, IsString, IsNumber, IsDate, IsUUID, Validate } from 'class-validator';
 import { Type } from 'class-transformer';
-import { MunicipalityCoordinatesValidator } from '../../common/validators/municipality-coordinates.validator';
-// Ensure the path to the validator is correct
+import { MunicipalityCoordinatesValidator } from '../../common/validator/municipality-coordinates.validator';
+
+
 export class CreateResearchDto {
   @IsUUID()
   @IsOptional()

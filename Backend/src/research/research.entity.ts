@@ -8,10 +8,20 @@ import {
 import { Client } from '../client/client.entity';
 import { Exclude } from 'class-transformer';
 
+
 @Entity()
 export class Research {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({nullable: true})
+  municipality: string;
+
+  @Column({nullable: true})
+  coordinates: string;
+
+  @Column({nullable: true})
+  radius: number;
 
   @Column()
   date: Date;
