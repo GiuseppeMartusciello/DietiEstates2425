@@ -34,7 +34,6 @@ export class ResearchController {
         return this.researchService.deleteResearch(id,client);
     }
 
-
     @Post()
     @Roles(UserRoles.CLIENT)
     createResearch(

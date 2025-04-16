@@ -109,6 +109,8 @@ export class ListingController {
     if (user.agent && listing.agent.userId !== user.id)
       throw new UnauthorizedException();
 
+    //aggiungere controllo che siano della stessa agenzia
+
     return this.listingService.changeListing(listing, modifyListingDto);
   }
 
