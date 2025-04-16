@@ -15,6 +15,7 @@ import { UserRoles } from 'src/common/types/user-roles';
 import * as bcrypt from 'bcrypt';
 import { UserItem } from 'src/common/types/userItem';
 import { ConfigService } from '@nestjs/config';
+import { Provider } from 'src/common/types/provider.enum';
 
 @Injectable()
 export class AdminService {
@@ -93,6 +94,7 @@ export class AdminService {
       phone: managerPhone,
       role: UserRoles.MANAGER,
       isDeafaultPassword: true,
+      provider: Provider.LOCAL,
     });
 
     await this.userRepository.save(userManager);

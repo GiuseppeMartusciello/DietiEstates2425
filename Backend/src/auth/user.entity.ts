@@ -34,4 +34,7 @@ export class User {
 
   @Column({ type: 'boolean', default: false })
   isDeafaultPassword: boolean;
+
+  @Column()
+  provider: string;
 }

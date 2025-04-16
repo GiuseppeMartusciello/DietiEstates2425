@@ -4,7 +4,4 @@ export class TokensDto {
   @IsNotEmpty()
   @IsString()
   accessToken: string;
-
-  @IsBoolean()
-  mustChangePassword: boolean;
 }

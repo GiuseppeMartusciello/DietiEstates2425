@@ -18,7 +18,7 @@ export class Client {
   @PrimaryColumn('uuid')
   userId: string;
 
-  @Column()
+  @Column({ nullable: true })
   address: string;
 
   @Column({ type: 'boolean', default: true })

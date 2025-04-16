@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -15,6 +16,8 @@ import { JwtPayload } from './dto/jwt-payload.dto';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.credentials.dto';
 import { Gender } from 'src/common/types/gender.enum';
+import { Provider } from 'src/common/types/provider.enum';
+import { GoogleUser } from 'src/common/types/google-user';
 
 @Injectable()
 export class AuthService {
@@ -50,8 +53,7 @@ export class AuthService {
 
     if (found) throw new ConflictException('User already exists');
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await this.hashPassword(password);
 
     const user = this.userRepository.create({
       name,
@@ -62,6 +64,7 @@ export class AuthService {
       role: UserRoles.CLIENT,
       email,
       password: hashedPassword,
+      provider: Provider.LOCAL,
     });
 
     await this.userRepository.save(user);
@@ -78,11 +81,9 @@ export class AuthService {
       role: user.role,
     };
 
-    const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '1h',
-    });
+    const accessToken = await this.createToken(payload, '1h');
 
-    return { accessToken, mustChangePassword: false };
+    return { accessToken };
   }
 
   async signIn(credentials: SignInDto): Promise<TokensDto> {
@@ -97,14 +98,70 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.provider && user.provider !== Provider.LOCAL) {
+      throw new BadRequestException(
+        `This account is linked with ${user.provider}. Please use ${user.provider} login.`,
+      );
+    }
+
     const payload: JwtPayload = { userId: user.id, role: user.role };
 
-    const accessToken = await this.jwtService.sign(payload, {
-      expiresIn: '45m',
-    });
+    const accessToken = await this.createToken(payload, '45m');
 
     console.log(user);
 
-    return { accessToken, mustChangePassword: user.isDeafaultPassword };
+    return { accessToken };
+  }
+
+  async socialLogin(googleUser: GoogleUser) {
+    const user = await this.userRepository.findOne({
+      where: { email: googleUser.email },
+    });
+
+    if (user)
+      if (user.provider === Provider.GOOGLE)
+        return this.createToken(
+          { userId: user.id, role: UserRoles.CLIENT },
+          '45m',
+        );
+      else
+        throw new BadRequestException(
+          `User registered with different provider: ${user.provider}`,
+        );
+
+    const defaultPassword = await this.hashPassword('Password1234!');
+    const newUser = this.userRepository.create({
+      email: googleUser.email,
+      name: googleUser.name,
+      surname: googleUser.surname,
+      password: defaultPassword,
+      birthDate: new Date('1900-01-01'),
+      gender: Gender.OTHER,
+      phone: '0000000000',
+      role: UserRoles.CLIENT,
+      isDeafaultPassword: true,
+      provider: Provider.GOOGLE,
+    });
+
+    await this.userRepository.save(newUser);
+
+    const client = this.clientRepository.create({
+      userId: newUser.id,
+    });
+
+    await this.clientRepository.save(client);
+
+    return this.createToken({ userId: newUser.id, role: newUser.role }, '45m'); // JWT
+  }
+
+  private async createToken(payload: JwtPayload, expiresIn: string) {
+    return this.jwtService.sign(payload, {
+      expiresIn: expiresIn,
+    });
+  }
+
+  private async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt();
+    return bcrypt.hash(password, salt);
   }
 }

@@ -20,6 +20,7 @@ import { Agent } from 'src/agent/agent.entity';
 import { AgentService } from 'src/agent/agent.service';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { Agency } from 'src/agency/agency.entity';
+import { Provider } from 'src/common/types/provider.enum';
 
 @Injectable()
 export class AgencyManagerService {
@@ -53,8 +54,7 @@ export class AgencyManagerService {
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) throw new UnauthorizedException('Password attuale errata');
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    const hashedPassword = await this.hashPassword(newPassword);
 
     user.password = hashedPassword;
     user.isDeafaultPassword = false;
@@ -97,6 +97,7 @@ export class AgencyManagerService {
       gender: gender,
       phone: phone,
       role: UserRoles.SUPPORT_ADMIN,
+      provider: Provider.LOCAL,
     });
 
     await this.userRepository.save(userSupportAdmin);
@@ -173,6 +174,7 @@ export class AgencyManagerService {
       gender: gender,
       birthDate: birthDate,
       role: UserRoles.AGENT,
+      provider: Provider.LOCAL,
     });
 
     await this.userRepository.save(userAgent);
