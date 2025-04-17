@@ -53,9 +53,11 @@ export class ListingController {
       else return this.listingService.getListingByAgentId(user.id);
     else {
       const agent: Agent = await this.agentService.getAgentById(agentId);
-      if (!agent) throw new NotFoundException(`Agent with userId ${agentId} not found `);
+      if (!agent)
+        throw new NotFoundException(`Agent with userId ${agentId} not found `);
+
+      //se la richiesta è effettuata da un support_admin/manager la sua agenzia deve corrispondere con quella del agent richiesto
       if (
-        //se la richiesta è effettuata da un support_admin/manager la sua agenzia deve corrispondere con quella del agent richiesto
         user.supportAdmin?.agency != agent.agency &&
         user.manager?.agency != agent.agency
       )
@@ -84,7 +86,7 @@ export class ListingController {
     return this.listingService.getListingById(id);
   }
 
-  @Post('/search')  //Dovrebbe essere una Get, ma avendo un DTO complesso si utilizza la post lo stesso
+  @Post('/search') //Dovrebbe essere una Get, ma avendo un DTO complesso si utilizza la post lo stesso
   searchListing(
     @Body() searchListingDto: SearchListingDto,
   ): Promise<Listing[]> {
