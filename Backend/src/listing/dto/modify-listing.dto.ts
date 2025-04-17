@@ -5,7 +5,6 @@ import {
   IsBoolean,
   IsEnum,
   IsNumber,
-  IsUUID,
   IsOptional,
   IsInt,
 } from 'class-validator';
@@ -56,14 +55,13 @@ export class ModifyListingDto {
   @IsOptional()
   energyClass: string;
 
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  position: string;
-
-  @IsArray()
+  latitude: number;
+  
+  @IsNumber()
   @IsOptional()
-  @IsString({ each: true })
-  nearbyPlaces: string[];
+  longitude: number;
 
   @IsString()
   @IsNotEmpty()
@@ -93,7 +91,4 @@ export class ModifyListingDto {
   @IsBoolean()
   @IsOptional()
   hasGarage: boolean;
-
-  @IsUUID()
-  listingId: string;
 }

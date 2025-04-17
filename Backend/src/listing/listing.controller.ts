@@ -34,12 +34,6 @@ export class ListingController {
     private readonly agentService: AgentService,
   ) {}
 
-  @Get('')
-  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  getAllListing(): Promise<Listing[]> {
-    return this.listingService.getAllListing();
-  }
-
   @Get('/agent/:id')
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   async getListingByAgentId(
@@ -48,7 +42,7 @@ export class ListingController {
   ): Promise<Listing[]> {
     if (user.agent) agentId = user.id;
 
-    const agencyId: string =this.getAgencyIdFromUser(user);
+    const agencyId: string = this.getAgencyIdFromUser(user);
     return this.listingService.getListingByAgentId(agentId, agencyId);
   }
 
@@ -67,35 +61,39 @@ export class ListingController {
     return this.listingService.getListingById(id);
   }
 
-  //Dovrebbe poter essere fatta solo da clienti?
-  @Post('/search') //Dovrebbe essere una Get, ma avendo un DTO complesso si utilizza la post lo stesso
+  @Get()
+  @Roles(UserRoles.CLIENT)
+  getAllListing(): Promise<Listing[]> {
+    return this.listingService.getAllListing();
+  }
+
+  @Post('/search')
+  @Roles(UserRoles.CLIENT)
   searchListing(
     @Body() searchListingDto: SearchListingDto,
   ): Promise<Listing[]> {
     return this.listingService.searchListing(searchListingDto);
   }
 
-  @Patch('')
+  @Patch('/:id')
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   async modifyListing(
+    @Param('id', new ParseUUIDPipe()) listingId: string,
     @Body() modifyListingDto: ModifyListingDto,
     @GetUser() user: UserItem,
   ): Promise<Listing> {
-    const listing: Listing = await this.listingService.getListingById(
-      modifyListingDto.listingId,
-    );
+    const listing: Listing =
+      await this.listingService.getListingById(listingId);
 
     if (!listing)
-      throw new NotFoundException(
-        `Listing with id ${modifyListingDto.listingId} not found `,
-      );
+      throw new NotFoundException(`Listing with id ${listingId} not found `);
 
     this.checkAuthorization(user, listing);
 
     return this.listingService.changeListing(listing, modifyListingDto);
   }
 
-  @Post()
+  @Post('')
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   async createListing(
     @Body() createListingDto: CreateListingDto,

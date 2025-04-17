@@ -1,6 +1,5 @@
 1) togliere campo DefaultUser da user e metterlo a manager
 2) scegliere i luoghi vicini da selezionare
-3) un titolo per gli immobili (?)
 4) controllare gli enum in common che siano del tipo .enum
 
 
