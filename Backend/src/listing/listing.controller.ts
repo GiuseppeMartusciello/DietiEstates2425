@@ -40,33 +40,6 @@ export class ListingController {
     return this.listingService.getAllListing();
   }
 
-  @Get('/agent/:id')
-  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  async getListingByAgentId(
-    @Param('id', new ParseUUIDPipe()) agentId: string,
-    @GetUser() user: UserItem,
-  ): Promise<Listing[]> {
-    if (user.agent)
-      if (user.agent?.userId !== agentId)
-        //se la richiesta è effettuata da un agente il suo id deve corrispondere con la richiesta
-        throw new UnauthorizedException();
-      else return this.listingService.getListingByAgentId(user.id);
-    else {
-      const agent: Agent = await this.agentService.getAgentById(agentId);
-      if (!agent)
-        throw new NotFoundException(`Agent with userId ${agentId} not found `);
-
-      //se la richiesta è effettuata da un support_admin/manager la sua agenzia deve corrispondere con quella del agent richiesto
-      if (
-        user.supportAdmin?.agency != agent.agency &&
-        user.manager?.agency != agent.agency
-      )
-        throw new UnauthorizedException();
-
-      return this.listingService.getListingByAgentId(user.id);
-    }
-  }
-
   @Get('/agency')
   @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   getListingByAgencyId(@GetUser() user: UserItem): Promise<Listing[]> {
