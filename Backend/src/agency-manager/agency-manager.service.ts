@@ -57,7 +57,7 @@ export class AgencyManagerService {
     const hashedPassword = await this.hashPassword(newPassword);
 
     user.password = hashedPassword;
-    user.isDeafaultPassword = false;
+    user.lastPasswordChangeAt = new Date();
 
     await this.userRepository.save(user);
 

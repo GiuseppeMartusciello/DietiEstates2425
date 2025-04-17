@@ -21,21 +21,21 @@ export class User {
   @Exclude()
   password: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', nullable: true })
   birthDate: Date;
 
-  @Column()
+  @Column({ nullable: true })
   gender: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   phone: string;
 
   @Column({ type: 'enum', enum: UserRoles })
   role: UserRoles;
 
-  @Column({ type: 'boolean', default: false })
-  isDeafaultPassword: boolean;
+  @Column({ type: 'enum', enum: Provider })
+  provider: Provider;
 
-  @Column({ nullable: true })
-  provider: string;
+  @Column({ type: 'date', nullable: true })
+  lastPasswordChangeAt: Date;
 }

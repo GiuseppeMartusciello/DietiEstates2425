@@ -33,7 +33,7 @@ export class AgencyManagerController {
     @Body() credentials: CredentialDto,
     @GetUser() user: UserItem,
   ) {
-    if (!user.isDeafaultPassword) throw new UnauthorizedException();
+    if (!user.lastPasswordChangeAt) throw new UnauthorizedException();
 
     return this.managerService.changePassword(credentials, user.id);
   }

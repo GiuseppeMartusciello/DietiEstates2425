@@ -1,12 +1,9 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { TokensDto } from './dto/tokens.dto';
 import { AuthCredentialDto } from './dto/auth.credentials.dto';
 import { SignInDto } from './dto/signin.credentials.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './get-user.decorator';
-import { userInfo } from 'os';
-import { UserItem } from 'src/common/types/userItem';
 
 @Controller('auth')
 export class AuthController {

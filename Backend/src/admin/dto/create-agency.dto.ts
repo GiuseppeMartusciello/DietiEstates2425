@@ -40,14 +40,6 @@ export class CreateAgencyDto {
   @IsEmail()
   managerEmail: string;
 
-  @IsDate()
-  @Type(() => Date)
-  managerBirthDate: Date;
-
-  @IsNotEmpty()
-  @IsEnum(Gender)
-  managerGender: string;
-
   @IsNotEmpty()
   @IsPhoneNumber()
   managerPhone: string;

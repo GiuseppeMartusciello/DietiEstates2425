@@ -16,13 +16,13 @@ export class Agency {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
   legalAddress: string;
 
-  @Column()
+  @Column({ unique: true })
   phone: string;
 
   @Column({ unique: true })

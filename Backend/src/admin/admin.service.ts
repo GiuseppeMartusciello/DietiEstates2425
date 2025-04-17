@@ -5,17 +5,16 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Agency } from 'src/agency/agency.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateAgencyDto } from './dto/create-agency.dto';
 import { Manager } from 'src/agency-manager/agency-manager.entity';
-import { ReplOptions } from 'repl';
 import { User } from 'src/auth/user.entity';
-import { Roles } from 'src/common/decorator/roles.decorator';
 import { UserRoles } from 'src/common/types/user-roles';
 import * as bcrypt from 'bcrypt';
 import { UserItem } from 'src/common/types/userItem';
 import { ConfigService } from '@nestjs/config';
 import { Provider } from 'src/common/types/provider.enum';
+import { CreateAgencyResponse } from './types/create-agency-response';
 
 @Injectable()
 export class AdminService {
@@ -30,11 +29,13 @@ export class AdminService {
     private readonly userRepository: Repository<User>,
 
     private readonly configService: ConfigService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async createAgency(
     createAgencyDto: CreateAgencyDto,
-  ): Promise<{ agency: Agency; manager: UserItem }> {
+  ): Promise<CreateAgencyResponse> {
     const {
       name,
       legalAddress,
@@ -43,103 +44,125 @@ export class AdminService {
       managerName,
       managerSurname,
       managerEmail,
-      managerBirthDate,
-      managerGender,
       managerPhone,
     } = createAgencyDto;
 
-    const exists = await this.agencyRepository.findOne({
-      where: { vatNumber: vatNumber },
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    if (exists)
-      throw new ConflictException(`This VatNumber ${vatNumber} already exists`);
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const agency = this.agencyRepository.create({
-      name,
-      legalAddress,
-      phone,
-      vatNumber,
-    });
+    try {
+      const exists = await await queryRunner.manager.findOne(Agency, {
+        where: [{ name }, { phone }, { vatNumber }],
+      });
 
-    const salt = await bcrypt.genSalt();
-    const defaultPassword = this.configService.get<string>(
-      'DEFAULT_MANAGER_PASSWORD',
-      'Manager1234!',
-    );
-    const hashedPassword = await bcrypt.hash(defaultPassword, salt);
+      if (exists) throw new ConflictException('Agency already exists');
 
-    const found = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.email = :email OR user.phone = :phone', {
-        email: managerEmail,
-        phone: managerPhone,
-      })
-      .getOne();
+      const agency = queryRunner.manager.create(Agency, {
+        name,
+        legalAddress,
+        phone,
+        vatNumber,
+      });
 
-    if (found)
-      throw new ConflictException(
-        `An user with email: ${managerEmail} or phone: ${managerPhone} already exists`,
+      await queryRunner.manager.save(agency);
+
+      const defaultPassword = this.configService.get<string>(
+        'DEFAULT_MANAGER_PASSWORD',
+        'Manager1234!',
       );
+      const hashedPassword = await this.hashPassword(defaultPassword);
 
-    await this.agencyRepository.save(agency);
+      const userExist = await queryRunner.manager.findOne(User, {
+        where: [{ email: managerEmail }, { phone: managerPhone }],
+      });
 
-    const userManager = this.userRepository.create({
-      name: managerName,
-      surname: managerSurname,
-      email: managerEmail,
-      password: hashedPassword,
-      birthDate: managerBirthDate,
-      gender: managerGender,
-      phone: managerPhone,
-      role: UserRoles.MANAGER,
-      isDeafaultPassword: true,
-      provider: Provider.LOCAL,
-    });
+      if (userExist)
+        throw new ConflictException(
+          `An user with email: ${managerEmail} or phone: ${managerPhone} already exists`,
+        );
 
-    await this.userRepository.save(userManager);
+      const userManager = queryRunner.manager.create(User, {
+        name: managerName,
+        surname: managerSurname,
+        email: managerEmail,
+        password: hashedPassword,
+        phone: managerPhone,
+        role: UserRoles.MANAGER,
+        provider: Provider.LOCAL,
+      });
 
-    const manager = this.managerRepository.create({
-      userId: userManager.id,
-      agency: agency,
-    });
+      await queryRunner.manager.save(userManager);
 
-    await this.managerRepository.save(manager);
+      const manager = queryRunner.manager.create(Manager, {
+        userId: userManager.id,
+        agency: agency,
+      });
 
-    const user: UserItem = userManager;
-    user.manager = manager;
+      await queryRunner.manager.save(manager);
 
-    return {
-      agency: agency,
-      manager: user,
-    };
+      await queryRunner.commitTransaction();
+
+      const user: UserItem = userManager;
+      user.manager = manager;
+
+      return {
+        message: 'Agency created correctly',
+        agency: agency,
+        manager: user,
+      };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async removeAgencyById(agencyId: string) {
-    const agency = await this.agencyRepository.findOne({
-      where: { id: agencyId },
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    if (!agency) throw new NotFoundException('Agency not found');
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const manager = await this.managerRepository.findOne({
-      where: { agency: { id: agencyId } },
-      relations: ['user'],
-    });
+    try {
+      const agency = await queryRunner.manager.findOne(Agency, {
+        where: { id: agencyId },
+      });
 
-    if (!manager) throw new NotFoundException('Manager not found');
+      if (!agency) throw new NotFoundException('Agency not found');
 
-    const userManager = await this.userRepository.findOne({
-      where: { id: manager.userId },
-    });
+      const manager = await queryRunner.manager.findOne(Manager, {
+        where: { agency: { id: agencyId } },
+        relations: ['user'],
+      });
 
-    if (!userManager) throw new NotFoundException('User manager not found');
+      if (!manager) throw new NotFoundException('Manager not found');
 
-    await this.userRepository.delete(userManager.id);
+      const userManager = await queryRunner.manager.findOne(User, {
+        where: { id: manager.userId },
+      });
 
-    await this.agencyRepository.delete(agency.id);
-    return {
-      message: 'Agency delete successfully',
-    };
+      if (!userManager) throw new NotFoundException('User manager not found');
+
+      await queryRunner.manager.delete(Manager, manager.userId);
+      await queryRunner.manager.delete(User, userManager.id);
+      await queryRunner.manager.delete(Agency, agency.id);
+
+      return {
+        message: `Agency ${agency.name} deleted successfully`,
+      };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt();
+    return bcrypt.hash(password, salt);
   }
 }

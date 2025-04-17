@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { AuthCredentialDto } from './dto/auth.credentials.dto';
-import { TokensDto } from './dto/tokens.dto';
+import { AuthResponse } from './types/auth-response';
 import * as bcrypt from 'bcrypt';
 import { Client } from 'src/client/client.entity';
 import { UserRoles } from 'src/common/types/user-roles';
@@ -18,6 +18,7 @@ import { SignInDto } from './dto/signin.credentials.dto';
 import { Gender } from 'src/common/types/gender.enum';
 import { Provider } from 'src/common/types/provider.enum';
 import { GoogleUser } from 'src/common/types/google-user';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -31,16 +32,16 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(authCredentialDto: AuthCredentialDto): Promise<TokensDto> {
+  async signUp(authCredentialDto: AuthCredentialDto): Promise<AuthResponse> {
     const {
       name,
       surname,
       email,
       password,
-      birthDate,
-      gender,
       phone,
-      address,
+      // birthDate,
+      // gender,
+      // address,
     } = authCredentialDto;
 
     const found = await this.userRepository
@@ -58,20 +59,21 @@ export class AuthService {
     const user = this.userRepository.create({
       name,
       surname,
-      birthDate,
-      gender,
-      phone,
-      role: UserRoles.CLIENT,
       email,
       password: hashedPassword,
+      phone,
+      // birthDate,
+      // gender,
+      role: UserRoles.CLIENT,
       provider: Provider.LOCAL,
+      lastPasswordChangeAt: new Date(),
     });
 
     await this.userRepository.save(user);
 
     const client = this.clientRepository.create({
       userId: user.id,
-      address: address,
+      // address: address,
     });
 
     await this.clientRepository.save(client);
@@ -83,10 +85,10 @@ export class AuthService {
 
     const accessToken = await this.createToken(payload, '1h');
 
-    return { accessToken };
+    return { accessToken: accessToken, mustChangePassword: false };
   }
 
-  async signIn(credentials: SignInDto): Promise<TokensDto> {
+  async signIn(credentials: SignInDto): Promise<AuthResponse> {
     const { email, password } = credentials;
 
     const user = await this.userRepository.findOne({
@@ -110,36 +112,40 @@ export class AuthService {
 
     console.log(user);
 
-    return { accessToken };
+    return {
+      accessToken: accessToken,
+      mustChangePassword: !user.lastPasswordChangeAt,
+    };
   }
 
-  async socialLogin(googleUser: GoogleUser) {
+  async socialLogin(googleUser: GoogleUser): Promise<AuthResponse> {
+    console.log(googleUser);
     const user = await this.userRepository.findOne({
       where: { email: googleUser.email },
     });
 
     if (user)
-      if (user.provider === Provider.GOOGLE)
-        return this.createToken(
-          { userId: user.id, role: UserRoles.CLIENT },
+      if (user.provider === Provider.GOOGLE) {
+        const accessToken = await this.createToken(
+          { userId: user.id, role: user.role },
           '45m',
         );
-      else
+        return { accessToken, mustChangePassword: false };
+      } else
         throw new BadRequestException(
           `User registered with different provider: ${user.provider}`,
         );
 
-    const defaultPassword = await this.hashPassword('Password1234!');
+    const defaultPassword = await this.hashPassword(
+      crypto.randomBytes(16).toString('hex'),
+    );
     const newUser = this.userRepository.create({
       email: googleUser.email,
       name: googleUser.name,
       surname: googleUser.surname,
       password: defaultPassword,
-      birthDate: new Date('1900-01-01'),
-      gender: Gender.OTHER,
-      phone: '0000000000',
+      lastPasswordChangeAt: new Date(),
       role: UserRoles.CLIENT,
-      isDeafaultPassword: true,
       provider: Provider.GOOGLE,
     });
 
@@ -151,7 +157,11 @@ export class AuthService {
 
     await this.clientRepository.save(client);
 
-    return this.createToken({ userId: newUser.id, role: newUser.role }, '45m'); // JWT
+    const accessToken = await this.createToken(
+      { userId: newUser.id, role: newUser.role },
+      '45m',
+    );
+    return { accessToken, mustChangePassword: false };
   }
 
   private async createToken(payload: JwtPayload, expiresIn: string) {

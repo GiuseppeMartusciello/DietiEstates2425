@@ -26,19 +26,19 @@ export class AuthCredentialDto {
   @IsStrongPassword()
   password: string;
 
-  @IsDate()
-  @Type(() => Date)
-  birthDate: Date;
-
-  @IsNotEmpty()
-  @IsEnum(Gender)
-  gender: string;
-
   @IsNotEmpty()
   @IsPhoneNumber()
   phone: string;
 
-  @IsNotEmpty()
-  @IsString()
-  address: string;
+  // @IsDate()
+  // @Type(() => Date)
+  // birthDate: Date;
+
+  // @IsNotEmpty()
+  // @IsEnum(Gender)
+  // gender: string;
+
+  // @IsNotEmpty()
+  // @IsString()
+  // address: string;
 }
