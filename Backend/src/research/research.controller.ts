@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ResearchService } from './research.service';
 import { Research } from './research.entity';
-import { CreateResearchDto } from './create-research.dto';
+import { CreateResearchDto } from './dto/create-research.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
@@ -10,6 +10,8 @@ import { UserItem } from 'src/common/types/userItem';
 import { UserRoles } from 'src/common/types/user-roles';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { repeat } from 'rxjs';
+import { RepeatedSearchDto } from './dto/repeted-search.dto';
 
 @Controller('research')
 @UseGuards(AuthGuard('jwt'),RolesGuard)
@@ -45,6 +47,26 @@ export class ResearchController {
             throw new UnauthorizedException();
 
         return this.researchService.createResearch(createResearchDto,client);
+    }
+
+    @Get('last10')
+    @Roles(UserRoles.CLIENT)
+    getLast10ResearchByClientId(@GetUser() user: UserItem): Promise<Research[]> {
+        const client = user.client;
+        if(!client)
+            throw new UnauthorizedException();
+
+        return this.researchService.getLast10ResearchByClientId({id: client.userId});
+    }
+
+    @Patch('/:repeatedSearch')
+    @Roles(UserRoles.CLIENT)
+    updateResearch(@Body() repeatedSearch: RepeatedSearchDto,@GetUser() user: UserItem): Promise<void> {
+        const client = user.client;
+        if(!client)
+            throw new UnauthorizedException();
+
+        return this.researchService.updateResearch(repeatedSearch,client);
     }
     
 }

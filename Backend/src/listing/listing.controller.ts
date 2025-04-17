@@ -67,16 +67,12 @@ export class ListingController {
     }
   }
 
-  @Get('/agency/:id')
+  @Get('/agency')
   @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  getListingByAgencyId(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @GetUser() user: UserItem,
-  ): Promise<Listing[]> {
-    if (user.supportAdmin?.agency.id !== id && user.manager?.agency.id !== id)
-      throw new UnauthorizedException();
+  getListingByAgencyId(@GetUser() user: UserItem): Promise<Listing[]> {
+    const agencyId = this.getAgencyIdFromUser(user);
 
-    return this.listingService.getListingByAgencyId(id);
+    return this.listingService.getListingByAgencyId(agencyId);
   }
 
   @Get('/:id')
@@ -108,10 +104,7 @@ export class ListingController {
         `Listing with id ${modifyListingDto.listingId} not found `,
       );
 
-    if (user.agent && listing.agent.userId !== user.id)
-      throw new UnauthorizedException();
-
-    //aggiungere controllo che siano della stessa agenzia
+    this.checkAuthorization(user, listing);
 
     return this.listingService.changeListing(listing, modifyListingDto);
   }
@@ -147,13 +140,31 @@ export class ListingController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @GetUser() user: UserItem,
   ): Promise<void> {
-    const listing: Listing = await this.getListingById(id);
-    if (!listing)
-      throw new NotFoundException(`Listing with id ${id} not found `);
+    const agencyId = this.getAgencyIdFromUser(user);
+    if (user.agent)
+      return this.listingService.deleteListingById(id, agencyId, user.id);
 
-    if (user.agent && listing.agent.userId !== user.id)
+    return this.listingService.deleteListingById(id, agencyId);
+  }
+
+  checkAuthorization(user: UserItem, listing: Listing): void {
+    if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
 
-    return this.listingService.deleteListingById(id);
+    if (user.supportAdmin && user.supportAdmin.agency !== listing.agency)
+      throw new UnauthorizedException();
+
+    if (user.manager && user.manager.agency !== listing.agency)
+      throw new UnauthorizedException();
+  }
+
+  getAgencyIdFromUser(user: UserItem): string {
+    const agencyId =
+      user.agent?.agency.id ||
+      user.manager?.agency.id ||
+      user.supportAdmin?.agency.id;
+    if (!agencyId) throw new UnauthorizedException();
+
+    return agencyId;
   }
 }

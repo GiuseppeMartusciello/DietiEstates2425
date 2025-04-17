@@ -10,6 +10,9 @@ export class Listing {
   id: string;
 
   @Column()
+  title: string
+
+  @Column()
   address: string;
 
   @Column()

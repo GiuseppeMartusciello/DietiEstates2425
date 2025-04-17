@@ -20,6 +20,11 @@ export class ModifyListingDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
   municipality: string;
 
   @IsString()

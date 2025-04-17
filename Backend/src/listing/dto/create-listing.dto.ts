@@ -18,6 +18,10 @@ export class CreateListingDto {
 
   @IsString()
   @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
   municipality: string;
 
   @IsString()
