@@ -1,4 +1,5 @@
 import { Exclude } from 'class-transformer';
+import { Provider } from 'src/common/types/provider.enum';
 import { UserRoles } from 'src/common/types/user-roles';
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
@@ -35,6 +36,6 @@ export class User {
   @Column({ type: 'boolean', default: false })
   isDeafaultPassword: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   provider: string;
 }
