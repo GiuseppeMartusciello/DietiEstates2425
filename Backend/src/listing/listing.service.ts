@@ -15,16 +15,6 @@ export class ListingService {
     private readonly geopifyService: GeoapifyService,
   ) {}
 
-  searchListing(searchListingDto: SearchListingDto): Promise<Listing[]> {
-    return this.listingRepository.searchListings(searchListingDto);
-  }
-
-  async getAllListing(): Promise<Listing[]> {
-    const found = await this.listingRepository.find();
-
-    return found;
-  }
-
   async getListingByAgentId(
     agentId: string,
     agencyId: string,
@@ -61,19 +51,47 @@ export class ListingService {
     return found;
   }
 
+  async getAllListing(): Promise<Listing[]> {
+    const found = await this.listingRepository.find();
+
+    return found;
+  }
+
+  searchListing(searchListingDto: SearchListingDto): Promise<Listing[]> {
+    return this.listingRepository.searchListings(searchListingDto);
+  }
+
   async changeListing(
     listing: Listing,
     modifyListingDto: ModifyListingDto,
   ): Promise<Listing> {
-    if (listing.address !== modifyListingDto.address) {
+    if (  //se passo le coordinate voglio che i posti vicini vengano calcolati su quelle nuove quindi non mi baso sull'indirizzo
+      (modifyListingDto.latitude && modifyListingDto.latitude != listing.latitude) ||
+      (modifyListingDto.longitude && modifyListingDto.longitude != listing.longitude)
+    ) {
+      const nearbyPlaces = await this.geopifyService.getNearbyIndicators(modifyListingDto.latitude, modifyListingDto.longitude);
+      return this.listingRepository.modifyListing(listing, modifyListingDto,nearbyPlaces);
+    }
+      //se invece non passo le coordinate ma l'indirizzo allora ricalcolo le coordinate sulla base dell'indirizzo e
+      //aggiorno i posti vicini
+    else if (
+      modifyListingDto.address &&
+      listing.address !== modifyListingDto.address
+    ) {
       const { lat, lon } = await this.geopifyService.getCoordinatesFromAddress(
         `${modifyListingDto.address}, ${modifyListingDto.municipality}`,
       );
-      modifyListingDto.nearbyPlaces =
-        await this.geopifyService.getNearbyIndicators(lat, lon);
+      const nearbyPlaces = await this.geopifyService.getNearbyIndicators(
+        lat,
+        lon,
+      );
 
-      modifyListingDto.position = `${lat},${lon}`;
+      modifyListingDto.latitude = lat;
+      modifyListingDto.longitude = lon;
+
+      return this.listingRepository.modifyListing(listing, modifyListingDto,nearbyPlaces);
     }
+
 
     return this.listingRepository.modifyListing(listing, modifyListingDto);
   }
@@ -82,14 +100,29 @@ export class ListingService {
     createListingDto: CreateListingDto,
     agent: Agent,
   ): Promise<Listing> {
-    const { lat, lon } = await this.geopifyService.getCoordinatesFromAddress(
-      `${createListingDto.address}, ${createListingDto.municipality}`,
-    );
-    createListingDto.nearbyPlaces =
-      await this.geopifyService.getNearbyIndicators(lat, lon);
-    createListingDto.position = `${lat},${lon}`;
+    if (
+      //se non vengono passate le coordinate le recupero da geopify, in caso contrario uso quelle passate
+      createListingDto.latitude === undefined ||
+      createListingDto.longitude === undefined
+    ) {
+      const { lat, lon } = await this.geopifyService.getCoordinatesFromAddress(
+        `${createListingDto.address}, ${createListingDto.municipality}`,
+      );
+      createListingDto.latitude = lat;
+      createListingDto.longitude = lon;
+    }
 
-    return this.listingRepository.createListing(createListingDto, agent);
+    const nearbyPlaces = await this.geopifyService.getNearbyIndicators(
+      createListingDto.latitude,
+      createListingDto.longitude,
+    );
+
+    return this.listingRepository.createListing(
+      createListingDto,
+      agent.userId,
+      agent.agency.id,
+      nearbyPlaces,
+    );
   }
 
   async deleteListingById(

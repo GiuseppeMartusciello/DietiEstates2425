@@ -3,7 +3,6 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Listing } from './Listing.entity';
 import { CreateListingDto } from './dto/create-listing.dto';
-import { Agent } from 'src/agent/agent.entity';
 import { ModifyListingDto } from './dto/modify-listing.dto';
 import { SearchListingDto } from './dto/search-listing.dto';
 import { GeoapifyService } from 'src/common/services/geopify.service';
@@ -59,12 +58,14 @@ export class ListingRepository extends Repository<Listing> {
       //al momento controlla che siano uguali, sarebbe meglio controllare che sia >= ?
       query.andWhere('listing.energyClass = :energyClass', { energyClass });
 
-    if (hasElevator !== undefined && hasElevator) query.andWhere('listing.hasElevator = true');
+    if (hasElevator !== undefined && hasElevator)
+      query.andWhere('listing.hasElevator = true');
 
     if (hasAirConditioning !== undefined && hasAirConditioning)
       query.andWhere('listing.hasAirConditioning = true');
-    
-    if (hasGarage !== undefined && hasGarage) query.andWhere('listing.hasGarage = true');
+
+    if (hasGarage !== undefined && hasGarage)
+      query.andWhere('listing.hasGarage = true');
 
     if (searchType === SearchType.MUNICIPALITY) {
       query.andWhere('listing.municipality = :municipality', { municipality });
@@ -80,12 +81,11 @@ export class ListingRepository extends Repository<Listing> {
       radius !== undefined
     ) {
       return listings.filter((listing) => {
-        const [latStr, lonStr] = listing.position.split(',');
         const dist = this.geopifyService.calculateDistance(
           latitude,
           longitude,
-          parseFloat(latStr),
-          parseFloat(lonStr),
+          listing.latitude,
+          listing.longitude,
         );
         return dist <= radius;
       });
@@ -97,6 +97,7 @@ export class ListingRepository extends Repository<Listing> {
   async modifyListing(
     listing: Listing,
     modifyListingDto: ModifyListingDto,
+    nearbyPlaces?: string[],
   ): Promise<Listing> {
     const updatableFields: (keyof ModifyListingDto)[] = [
       'address',
@@ -108,8 +109,8 @@ export class ListingRepository extends Repository<Listing> {
       'size',
       'numberOfRooms',
       'energyClass',
-      'position',
-      'nearbyPlaces',
+      'latitude',
+      'longitude',
       'description',
       'price',
       'category',
@@ -125,13 +126,18 @@ export class ListingRepository extends Repository<Listing> {
       }
     });
 
+    if(nearbyPlaces && listing.nearbyPlaces != nearbyPlaces)
+      listing.nearbyPlaces= nearbyPlaces;
+
     await this.save(listing);
     return listing;
   }
 
   async createListing(
     createListingDto: CreateListingDto,
-    agent: Agent,
+    agentId: string,
+    agencyId: string,
+    nearbyPlaces: string[],
   ): Promise<Listing> {
     const {
       address,
@@ -141,10 +147,10 @@ export class ListingRepository extends Repository<Listing> {
       postalCode,
       province,
       size,
+      latitude,
+      longitude,
       numberOfRooms,
       energyClass,
-      position,
-      nearbyPlaces,
       description,
       price,
       category,
@@ -154,7 +160,8 @@ export class ListingRepository extends Repository<Listing> {
       hasGarage,
     } = createListingDto;
 
-    console.log('Indicatori: ', createListingDto.nearbyPlaces);
+    const position = `${latitude},${longitude}`;
+    console.log('Indicatori: ', nearbyPlaces);
     const listing = this.create({
       address,
       municipality,
@@ -163,7 +170,8 @@ export class ListingRepository extends Repository<Listing> {
       postalCode,
       province,
       size,
-      position,
+      latitude,
+      longitude,
       numberOfRooms,
       energyClass,
       nearbyPlaces,
@@ -174,8 +182,8 @@ export class ListingRepository extends Repository<Listing> {
       hasElevator,
       hasAirConditioning,
       hasGarage,
-      agency: agent.agency,
-      agent,
+      agency: { id: agencyId },
+      agent: { userId: agentId },
     });
 
     await this.save(listing);

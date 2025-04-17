@@ -30,8 +30,11 @@ export class Listing {
   @Column()
   size: string; //dimensione in metri quadri
 
-  @Column()
-  position: string; // coordinate
+  @Column('double precision')
+  latitude: number;
+
+  @Column('double precision')
+  longitude: number;
 
   @Column('int')
   numberOfRooms: number;

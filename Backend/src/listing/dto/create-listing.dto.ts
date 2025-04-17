@@ -47,14 +47,14 @@ export class CreateListingDto {
   @IsNotEmpty()
   energyClass: string;
 
-  @IsString()
-  @IsOptional()
-  position: string;
 
-  @IsArray()
+  @IsNumber()
   @IsOptional()
-  @IsString({ each: true })
-  nearbyPlaces: string[];
+  latitude: number;
+
+  @IsNumber()
+  @IsOptional()
+  longitude: number;
 
   @IsString()
   @IsNotEmpty()
