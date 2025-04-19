@@ -15,6 +15,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { ConfigService } from '@nestjs/config';
 import { Provider } from 'src/common/types/provider.enum';
 import { CreateAgencyResponse } from './types/create-agency-response';
+import { Agent } from 'src/agent/agent.entity';
 
 @Injectable()
 export class AdminService {
@@ -121,6 +122,8 @@ export class AdminService {
   }
 
   async removeAgencyById(agencyId: string) {
+    console.log('CE LA FAREMOOOOOO');
+
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -146,9 +149,25 @@ export class AdminService {
 
       if (!userManager) throw new NotFoundException('User manager not found');
 
-      await queryRunner.manager.delete(Manager, manager.userId);
-      await queryRunner.manager.delete(User, userManager.id);
-      await queryRunner.manager.delete(Agency, agency.id);
+      const agents = await queryRunner.manager.find(Agent, {
+        where: { agency: { id: agencyId } },
+      });
+
+      // Rimuovi tutti i relativi utenti degli agenti
+      for (const agent of agents) {
+        const user = await queryRunner.manager.findOne(User, {
+          where: { id: agent.userId },
+        });
+
+        if (user) {
+          await queryRunner.manager.remove(User, user);
+        }
+      }
+
+      await queryRunner.manager.remove(User, userManager);
+      await queryRunner.manager.remove(Agency, agency);
+
+      await queryRunner.commitTransaction();
 
       return {
         message: `Agency ${agency.name} deleted successfully`,
