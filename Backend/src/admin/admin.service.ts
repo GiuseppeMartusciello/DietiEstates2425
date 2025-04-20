@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Agency } from 'src/agency/agency.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityTarget, QueryRunner, Repository } from 'typeorm';
 import { CreateAgencyDto } from './dto/create-agency.dto';
 import { Manager } from 'src/agency-manager/agency-manager.entity';
 import { User } from 'src/auth/user.entity';
@@ -17,6 +17,11 @@ import { Provider } from 'src/common/types/provider.enum';
 import { CreateAgencyResponse } from './types/create-agency-response';
 import { Agent } from 'src/agent/agent.entity';
 import { SupportAdmin } from 'src/support-admin/support-admin.entity';
+
+interface HasAgency {
+  agency: { id: string };
+  userId: string;
+}
 
 @Injectable()
 export class AdminService {
@@ -123,63 +128,20 @@ export class AdminService {
   }
 
   async removeAgencyById(agencyId: string) {
-    console.log('CE LA FAREMOOOOOO');
-
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const agency = await queryRunner.manager.findOne(Agency, {
-        where: { id: agencyId },
-      });
+      const agency = await this.findAgencyOrThrow(queryRunner, agencyId);
+      const userManager = await this.findManagerUserOrThrow(
+        queryRunner,
+        agencyId,
+      );
 
-      if (!agency) throw new NotFoundException('Agency not found');
-
-      const manager = await queryRunner.manager.findOne(Manager, {
-        where: { agency: { id: agencyId } },
-        relations: ['user'],
-      });
-
-      if (!manager) throw new NotFoundException('Manager not found');
-
-      const userManager = await queryRunner.manager.findOne(User, {
-        where: { id: manager.userId },
-      });
-
-      if (!userManager) throw new NotFoundException('User manager not found');
-
-      const agents = await queryRunner.manager.find(Agent, {
-        where: { agency: { id: agencyId } },
-      });
-
-      // Rimuovi tutti i relativi utenti degli agenti
-      for (const agent of agents) {
-        const user = await queryRunner.manager.findOne(User, {
-          where: { id: agent.userId },
-        });
-
-        if (user) {
-          await queryRunner.manager.remove(User, user);
-        }
-      }
-
-      const supportAdmins = await queryRunner.manager.find(SupportAdmin, {
-        where: {
-          agency: { id: agencyId },
-        },
-      });
-
-      for (const supportAdmin of supportAdmins) {
-        const user = await queryRunner.manager.findOne(User, {
-          where: { id: supportAdmin.userId },
-        });
-
-        if (user) {
-          await queryRunner.manager.remove(User, user);
-        }
-      }
+      await this.removeRelatedUsers(queryRunner, Agent, agencyId);
+      await this.removeRelatedUsers(queryRunner, SupportAdmin, agencyId);
 
       await queryRunner.manager.remove(User, userManager);
       await queryRunner.manager.remove(Agency, agency);
@@ -194,6 +156,53 @@ export class AdminService {
       throw err;
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  private async findAgencyOrThrow(
+    queryRunner: QueryRunner,
+    agencyId: string,
+  ): Promise<Agency> {
+    const agency = await queryRunner.manager.findOne(Agency, {
+      where: { id: agencyId },
+    });
+    if (!agency) throw new NotFoundException('Agency not found');
+    return agency;
+  }
+
+  private async findManagerUserOrThrow(
+    queryRunner: QueryRunner,
+    agencyId: string,
+  ): Promise<User> {
+    const manager = await queryRunner.manager.findOne(Manager, {
+      where: { agency: { id: agencyId } },
+      relations: ['user'],
+    });
+
+    if (!manager) throw new NotFoundException('Manager not found');
+    if (!manager.user) throw new NotFoundException('User manager not found');
+
+    return manager.user;
+  }
+
+  private async removeRelatedUsers<T extends HasAgency>(
+    queryRunner: QueryRunner,
+    entity: EntityTarget<T>,
+    agencyId: string,
+  ) {
+    const related = await queryRunner.manager
+      .createQueryBuilder(entity, 'e')
+      .innerJoin('e.agency', 'agency')
+      .where('agency.id = :agencyId', { agencyId })
+      .getMany();
+
+    for (const item of related) {
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: item.userId },
+      });
+      if (user) {
+        await queryRunner.manager.remove(User, user);
+      }
     }
   }
 

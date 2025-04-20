@@ -33,9 +33,9 @@ export class User {
   @Column({ type: 'enum', enum: UserRoles })
   role: UserRoles;
 
-  @Column({ type: 'enum', enum: Provider })
+  @Column({ type: 'enum', enum: Provider, nullable: true })
   provider: Provider;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   lastPasswordChangeAt: Date;
 }

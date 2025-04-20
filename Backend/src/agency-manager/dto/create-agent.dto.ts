@@ -7,12 +7,15 @@ import {
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
-  IsUUID,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 import { Gender } from 'src/common/types/gender.enum';
 
 export class CreateAgentDto {
-  @IsUUID()
+  @IsString()
+  @MinLength(6)
+  @MaxLength(12)
   licenseNumber: string;
 
   @IsNotEmpty()
@@ -49,7 +52,4 @@ export class CreateAgentDto {
 
   @IsNotEmpty()
   languages: string[];
-
-  // @IsUUID()
-  // agencyId: string;
 }

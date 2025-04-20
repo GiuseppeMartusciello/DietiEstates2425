@@ -21,6 +21,8 @@ import { AgentService } from 'src/agent/agent.service';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { Agency } from 'src/agency/agency.entity';
 import { Provider } from 'src/common/types/provider.enum';
+import { CreateSupportAdminResponse } from './types/create-support-admin-response';
+import { CreateAgentResponse } from './types/create-agent-response';
 
 @Injectable()
 export class AgencyManagerService {
@@ -34,7 +36,6 @@ export class AgencyManagerService {
     @InjectRepository(Agent)
     private readonly agentRepository: Repository<Agent>,
 
-    //private readonly agentService: AgentService,
     @InjectRepository(Agency)
     private readonly agencyRepository: Repository<Agency>,
 
@@ -52,7 +53,7 @@ export class AgencyManagerService {
     if (!user) throw new NotFoundException('Manager not found');
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) throw new UnauthorizedException('Password attuale errata');
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     const hashedPassword = await this.hashPassword(newPassword);
 
@@ -67,14 +68,14 @@ export class AgencyManagerService {
   async createSupportAdmin(
     createSupportAdminDto: CreateSupportAdminDto,
     userManager: UserItem,
-  ) {
+  ): Promise<CreateSupportAdminResponse> {
     if (!userManager || !userManager.manager) throw new UnauthorizedException();
 
     const { name, surname, email, password, birthDate, gender, phone } =
       createSupportAdminDto;
 
     const agency = userManager.manager.agency;
-    if (!agency) throw new BadRequestException();
+    if (!agency) throw new BadRequestException(`Agency doesn't exists`);
 
     const found = await this.userRepository
       .createQueryBuilder('user')
@@ -84,7 +85,10 @@ export class AgencyManagerService {
       })
       .getOne();
 
-    if (found) throw new ConflictException();
+    if (found)
+      throw new ConflictException(
+        'User with this email or phone already exists',
+      );
 
     const hashedPassword = await this.hashPassword(password);
 
@@ -115,11 +119,18 @@ export class AgencyManagerService {
         email: userSupportAdmin.email,
         id: userSupportAdmin.id,
         name: userSupportAdmin.name,
+        agency: {
+          id: agency.id,
+          name: agency.name,
+        },
       },
     };
   }
 
-  async createAgent(createAgentDto: CreateAgentDto, agencyId: string) {
+  async createAgent(
+    createAgentDto: CreateAgentDto,
+    agencyId: string,
+  ): Promise<CreateAgentResponse> {
     const agency = await this.agencyRepository.findOne({
       where: { id: agencyId },
     });
@@ -140,7 +151,6 @@ export class AgencyManagerService {
       phone,
       start_date,
       languages,
-      //agencyId,
     } = createAgentDto;
 
     const existingAgent = await this.agentRepository
@@ -175,6 +185,7 @@ export class AgencyManagerService {
       birthDate: birthDate,
       role: UserRoles.AGENT,
       provider: Provider.LOCAL,
+      lastPasswordChangeAt: new Date(),
     });
 
     await this.userRepository.save(userAgent);
