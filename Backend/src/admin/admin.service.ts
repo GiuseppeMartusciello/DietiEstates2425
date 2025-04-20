@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { Provider } from 'src/common/types/provider.enum';
 import { CreateAgencyResponse } from './types/create-agency-response';
 import { Agent } from 'src/agent/agent.entity';
+import { SupportAdmin } from 'src/support-admin/support-admin.entity';
 
 @Injectable()
 export class AdminService {
@@ -157,6 +158,22 @@ export class AdminService {
       for (const agent of agents) {
         const user = await queryRunner.manager.findOne(User, {
           where: { id: agent.userId },
+        });
+
+        if (user) {
+          await queryRunner.manager.remove(User, user);
+        }
+      }
+
+      const supportAdmins = await queryRunner.manager.find(SupportAdmin, {
+        where: {
+          agency: { id: agencyId },
+        },
+      });
+
+      for (const supportAdmin of supportAdmins) {
+        const user = await queryRunner.manager.findOne(User, {
+          where: { id: supportAdmin.userId },
         });
 
         if (user) {
