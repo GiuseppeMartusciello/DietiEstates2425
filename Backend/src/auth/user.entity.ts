@@ -1,8 +1,14 @@
 import { Exclude } from 'class-transformer';
 import { Provider } from 'src/common/types/provider.enum';
 import { UserRoles } from 'src/common/types/user-roles';
-import { UserNotification } from 'src/notification/user.notification.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { UserNotification } from 'src/notification/user-notification.entity';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -40,7 +46,9 @@ export class User {
   @Column({ type: 'timestamp', nullable: true })
   lastPasswordChangeAt: Date;
 
-  @OneToMany(() => UserNotification, (userNotification) => userNotification.notification)
+  @OneToMany(
+    () => UserNotification,
+    (userNotification) => userNotification.notification,
+  )
   userNotifications: UserNotification[];
-
 }
