@@ -93,7 +93,7 @@ export class ListingController {
     return this.listingService.changeListing(listing, modifyListingDto);
   }
 
-  @Post('')
+  @Post()
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   async createListing(
     @Body() createListingDto: CreateListingDto,

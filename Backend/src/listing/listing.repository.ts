@@ -160,8 +160,6 @@ export class ListingRepository extends Repository<Listing> {
       hasGarage,
     } = createListingDto;
 
-    const position = `${latitude},${longitude}`;
-    console.log('Indicatori: ', nearbyPlaces);
     const listing = this.create({
       address,
       municipality,
