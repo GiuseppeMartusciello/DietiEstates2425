@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { In, Repository } from "typeorm";
+import {  Repository } from "typeorm";
 import { PropertyOffer } from "./property_offer.entity";
+import { Client } from "src/client/client.entity";
 
 @Injectable()
 export class OfferRepository extends Repository<PropertyOffer> {
@@ -11,4 +12,5 @@ export class OfferRepository extends Repository<PropertyOffer> {
       repository.queryRunner
     );
   }
+
 }

@@ -12,6 +12,7 @@ import { GetUser } from 'src/auth/get-user.decorator';
 import { Listing } from 'src/listing/Listing.entity';
 import { Client } from 'src/client/client.entity';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
+import { User } from 'src/auth/user.entity';
 @Controller('offer')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class OfferController {
@@ -36,7 +37,7 @@ export class OfferController {
     getOffersbyClientId(
         @GetUser() user: UserItem,
     ): Promise<Listing[]> {
-       return this.offerService.getListingOffersByClientId(user.id)
+       return this.offerService.getListingByClientId(user.id)
     }
 
 
@@ -119,7 +120,7 @@ export class OfferController {
     @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
     createExternalOffer(
         @GetUser() admin: UserItem,
-        @Body() dto: CreateExternalOfferDto
+        @Body() dto: CreateExternalOfferDto,
         @Param('id', new ParseUUIDPipe()) listingId: string,
     ): Promise<PropertyOffer> {
          return this.offerService.createExternalOffer(dto, admin,listingId);

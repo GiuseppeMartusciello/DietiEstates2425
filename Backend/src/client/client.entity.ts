@@ -44,6 +44,5 @@ export class Client {
   @OneToMany(() => Research, (research) => research.client)
   research: Research[];
 
-  @ManyToMany(() => Notification, (notification) => notification.clients)
-  notifications: Notification[];
+
 }

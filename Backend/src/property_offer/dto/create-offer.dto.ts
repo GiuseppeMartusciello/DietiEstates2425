@@ -1,15 +1,9 @@
-import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsUUID } from "class-validator";
-import { OfferState } from "../../common/types/offer-state";
+import { IsNotEmpty, IsNumber} from "class-validator";
 
 export class CreateOfferDto {
 
-  
   @IsNotEmpty()
   @IsNumber()
   price: number;
-
-  @IsNotEmpty()
-  @IsUUID()
-  propertyId: string;
 
 }

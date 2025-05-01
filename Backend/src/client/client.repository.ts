@@ -11,4 +11,16 @@ export class ClientRepository extends Repository<Client> {
       clientRepository.queryRunner,
     );
   }
+
+  async findClientByListingId(listingId: string): Promise<Client[]> {
+    const clients = await this.createQueryBuilder('client')
+      .innerJoinAndSelect('client.propertyOffers', 'propertyOffer')
+      .innerJoin('propertyOffer.listing', 'listing')
+      .where('listing.id = :listingId', { listingId })
+      .distinct(true)
+      .getMany();
+
+    return clients;
+  }
+
 }

@@ -3,18 +3,26 @@ import { Research } from './research.entity';
 import { CreateResearchDto } from './dto/create-research.dto';
 import { Client } from 'src/client/client.entity';
 import { ResearchRepository } from './research.repository';
-import { Last10ResearchDto } from './dto/last-10-research.dto';
-import { last } from 'rxjs';
-import { RepeatedSearchDto } from './dto/repeted-search.dto';
+
+
 
 @Injectable()
 export class ResearchService {
  
   constructor(private readonly researchRepository: ResearchRepository) {}
 
-  getResearchByClientId(userId: string): Promise<Research[]> {
-    return this.researchRepository.getResearchByClientId(userId);
+  async getResearchByClientId(userId: string): Promise<Research[]> {
+    const found = await this.researchRepository.find({
+      where: { client: { userId: userId } },
+      order: { date: 'DESC' },
+    });
+          
+  if(found.length === 0)
+      throw new NotFoundException(`No research associated with id  "${userId}" not found`);
+          
+    return found;
   }
+
 
   async deleteResearch(id: string, client: Client): Promise<void> {
     const result = await this.researchRepository.delete({ id, client });
@@ -24,18 +32,50 @@ export class ResearchService {
     }
   }
 
-  createResearch(
+  async createResearch(
     createResearchDto: CreateResearchDto,
     client: Client,
   ): Promise<Research> {
-    return this.researchRepository.createResearch(createResearchDto, client);
+
+    const { text, municipality, coordinates,radius} = createResearchDto;
+        const research = this.researchRepository.create({
+            municipality,
+            coordinates,
+            radius,
+            date: new Date(),
+            text: text,
+            client,
+        })
+
+        await this.researchRepository.save(research);
+        return research;
   }
 
-  getLast10ResearchByClientId(last10ResearchDto: Last10ResearchDto): Promise<Research[]> {
-    return this.researchRepository.getLast10ResearchByClientId(last10ResearchDto);
+
+  async getLast10ResearchByClientId(userId: string): Promise<Research[]> {
+
+    const found = await this.researchRepository.find({
+        where: { client: { userId: userId } },
+        order: { date: 'DESC' },
+        take: 10,
+    });
+
+    if (found.length === 0) {
+        throw new NotFoundException(`No research associated with id "${userId}" not found`);
+    }
+    return found;
   }
 
-  updateResearch(repeatedSearch: RepeatedSearchDto, client: Client): Promise<void> {
-    return this.researchRepository.updateResearch(repeatedSearch, client);
+  async updateResearch(researchId: string, client: Client): Promise<Research> {
+
+    const research =  await this.researchRepository.findOne({ where: { id:researchId , client } })
+    if(!research) {
+      throw new NotFoundException(`Research with ID "${researchId}" not found`);
+    }
+
+    research.date = new Date();
+    this.researchRepository.save(research);
+
+    return research;
   }
 }

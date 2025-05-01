@@ -187,4 +187,12 @@ export class ListingRepository extends Repository<Listing> {
     await this.save(listing);
     return listing;
   }
+
+  getListingByClientId(clientId: string): Promise<Listing[]> {
+    return this.createQueryBuilder('listing')
+      .innerJoinAndSelect('listing.propertyOffers', 'propertyOffer')
+      .where('propertyOffer.clientId = :clientId', { clientId })
+      .distinct(true)
+      .getMany();
+  }
 }
