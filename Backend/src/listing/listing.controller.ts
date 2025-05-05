@@ -10,7 +10,9 @@ import {
   Patch,
   Post,
   UnauthorizedException,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -24,7 +26,7 @@ import { Listing } from './Listing.entity';
 import { AgentService } from 'src/agent/agent.service';
 import { ModifyListingDto } from './dto/modify-listing.dto';
 import { SearchListingDto } from './dto/search-listing.dto';
-import { Agent } from 'src/agent/agent.entity';
+import { ListingImageUploadInterceptor } from 'src/common/interceptors/listing-image-upload.interceptor';
 
 @Controller('listing')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -62,7 +64,7 @@ export class ListingController {
   }
 
   @Get()
-  @Roles(UserRoles.CLIENT)
+  @Roles(UserRoles.CLIENT, UserRoles.AGENT)
   getAllListing(): Promise<Listing[]> {
     return this.listingService.getAllListing();
   }
@@ -82,11 +84,7 @@ export class ListingController {
     @Body() modifyListingDto: ModifyListingDto,
     @GetUser() user: UserItem,
   ): Promise<Listing> {
-    const listing: Listing =
-      await this.listingService.getListingById(listingId);
-
-    if (!listing)
-      throw new NotFoundException(`Listing with id ${listingId} not found `);
+    const listing: Listing = await this.checkAndRetrieveListing(listingId);
 
     this.checkAuthorization(user, listing);
 
@@ -131,6 +129,16 @@ export class ListingController {
     return this.listingService.deleteListingById(id, agencyId);
   }
 
+  async checkAndRetrieveListing(listingId: string): Promise<Listing> {
+    const listing: Listing =
+      await this.listingService.getListingById(listingId);
+
+    if (!listing)
+      throw new NotFoundException(`Listing with id ${listingId} not found `);
+
+    return listing;
+  }
+
   checkAuthorization(user: UserItem, listing: Listing): void {
     if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
@@ -150,5 +158,32 @@ export class ListingController {
     if (!agencyId) throw new UnauthorizedException();
 
     return agencyId;
+  }
+
+  @Post('/:id/images')
+  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
+  @ListingImageUploadInterceptor()
+  async uploadImages(
+    @Param('id', new ParseUUIDPipe()) listingId: string,
+    @GetUser() user: UserItem,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    const listing: Listing = await this.checkAndRetrieveListing(listingId);
+    this.checkAuthorization(user, listing);
+
+    return this.listingService.handleUploadedImages(listingId, files);
+  }
+
+  @Get('/:id/images')
+  async getListingImages(
+    @Param('id', new ParseUUIDPipe()) listingId: string,
+    @GetUser() user: UserItem,
+  ) {
+    if (!user.client) {
+      const listing: Listing = await this.checkAndRetrieveListing(listingId);
+      this.checkAuthorization(user, listing);
+    }
+
+    return this.listingService.getImagesForListing(listingId);
   }
 }

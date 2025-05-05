@@ -2,10 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger();
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Trasforma i payload in DTO automaticamente
