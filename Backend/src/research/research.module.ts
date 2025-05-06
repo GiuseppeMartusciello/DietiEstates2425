@@ -9,7 +9,7 @@ import { ClientModule } from 'src/client/client.module';
 import { Listing } from 'src/listing/Listing.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Research,Listing]), AuthModule, ClientModule],
+  imports: [TypeOrmModule.forFeature([Research]), AuthModule, ClientModule],
   controllers: [ResearchController],
   providers: [ResearchService, ResearchRepository],
   exports: [ResearchRepository],

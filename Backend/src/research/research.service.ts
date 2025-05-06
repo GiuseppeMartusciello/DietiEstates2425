@@ -41,13 +41,11 @@ export class ResearchService {
   }
 
 
-//crea una ricerca ed Effetta effettivamente la ricerca
-//restituisce gli immobili che soddisfano i criteri di ricerca
-//la parte della query sui listing non è testata e deve essere finita di ideata e implementata
+//crea una ricerca effettuata da un utente
   async createResearch(
     createResearchDto: CreateResearchDto,
     client: Client,
-  ): Promise<Listing[]> {
+  ): Promise<Research> {
 
     const { text, municipality,latitude,longitude,radius} = createResearchDto;
 
@@ -63,20 +61,8 @@ export class ResearchService {
 
       await this.researchRepository.save(newresearch);
       
-    
-      if(municipality === null) {
-        const listings = await this.listingRepository.find({
-          where: {longitude: longitude, latitude: latitude},
-        });  
-        return listings;
-      }
-      else {
-        const listings = await this.listingRepository.find({
-          where: { municipality: municipality },
-        });
-        return listings;
-      }
-      //const research = await this.listingRepository.find({}) bisogna effettivamente implementare la ricerca
+      return newresearch;
+
   }
 
 
@@ -95,6 +81,8 @@ export class ResearchService {
     }
     return found;
   }
+
+
 //Aggiorna la data di una ricerca quando viene effettuata una seconda volta
   async updateResearch(researchId: string, client: Client): Promise<Research> {
 

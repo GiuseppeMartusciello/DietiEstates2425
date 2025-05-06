@@ -42,7 +42,7 @@ export class ResearchController {
     createResearch(
         @Body() createResearchDto: CreateResearchDto,
         @GetUser() user: UserItem,
-    ): Promise<Listing[]> {
+    ): Promise<Research> {
         const client = user.client;
         if(!client)
             throw new UnauthorizedException();
