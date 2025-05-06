@@ -3,14 +3,22 @@ import { Research } from './research.entity';
 import { CreateResearchDto } from './dto/create-research.dto';
 import { Client } from 'src/client/client.entity';
 import { ResearchRepository } from './research.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Listing } from 'src/listing/Listing.entity';
+import { ListingRepository } from 'src/listing/listing.repository';
 
 
 
 @Injectable()
 export class ResearchService {
  
-  constructor(private readonly researchRepository: ResearchRepository) {}
+  constructor(
+    private readonly researchRepository: ResearchRepository,
 
+    @InjectRepository(Listing)
+    private readonly listingRepository: ListingRepository
+  ) {}
+//Restituisce le ricercehe fatte da un cliente
   async getResearchByClientId(userId: string): Promise<Research[]> {
     const found = await this.researchRepository.find({
       where: { client: { userId: userId } },
@@ -23,7 +31,7 @@ export class ResearchService {
     return found;
   }
 
-
+//elimina ricerca 
   async deleteResearch(id: string, client: Client): Promise<void> {
     const result = await this.researchRepository.delete({ id, client });
 
@@ -32,26 +40,48 @@ export class ResearchService {
     }
   }
 
+
+//crea una ricerca ed Effetta effettivamente la ricerca
+//restituisce gli immobili che soddisfano i criteri di ricerca
+//la parte della query sui listing non è testata e deve essere finita di ideata e implementata
   async createResearch(
     createResearchDto: CreateResearchDto,
     client: Client,
-  ): Promise<Research> {
+  ): Promise<Listing[]> {
 
-    const { text, municipality, coordinates,radius} = createResearchDto;
-        const research = this.researchRepository.create({
+    const { text, municipality,latitude,longitude,radius} = createResearchDto;
+
+      const newresearch = this.researchRepository.create({
             municipality,
-            coordinates,
+            latitude,
+            longitude,
             radius,
             date: new Date(),
             text: text,
             client,
         })
 
-        await this.researchRepository.save(research);
-        return research;
+      await this.researchRepository.save(newresearch);
+      
+    
+      if(municipality === null) {
+        const listings = await this.listingRepository.find({
+          where: {longitude: longitude, latitude: latitude},
+        });  
+        return listings;
+      }
+      else {
+        const listings = await this.listingRepository.find({
+          where: { municipality: municipality },
+        });
+        return listings;
+      }
+      //const research = await this.listingRepository.find({}) bisogna effettivamente implementare la ricerca
   }
 
 
+//restituisce le ultime 10 ricerche effettuate da un cliente
+//questo metodo è usato per la barra di ricerca
   async getLast10ResearchByClientId(userId: string): Promise<Research[]> {
 
     const found = await this.researchRepository.find({
@@ -65,7 +95,7 @@ export class ResearchService {
     }
     return found;
   }
-
+//Aggiorna la data di una ricerca quando viene effettuata una seconda volta
   async updateResearch(researchId: string, client: Client): Promise<Research> {
 
     const research =  await this.researchRepository.findOne({ where: { id:researchId , client } })

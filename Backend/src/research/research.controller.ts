@@ -11,6 +11,7 @@ import { UserRoles } from 'src/common/types/user-roles';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { repeat } from 'rxjs';
+import { Listing } from 'src/listing/Listing.entity';
 
 
 @Controller('research')
@@ -41,7 +42,7 @@ export class ResearchController {
     createResearch(
         @Body() createResearchDto: CreateResearchDto,
         @GetUser() user: UserItem,
-    ): Promise<Research> {
+    ): Promise<Listing[]> {
         const client = user.client;
         if(!client)
             throw new UnauthorizedException();

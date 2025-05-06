@@ -18,7 +18,10 @@ export class Research {
   municipality: string;
 
   @Column({nullable: true})
-  coordinates: string;
+  latitude: number;
+
+  @Column({nullable: true})
+  longitude: number;
 
   @Column({nullable: true})
   radius: number;

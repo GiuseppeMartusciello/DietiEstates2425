@@ -32,7 +32,14 @@ export class OfferService {
   // tutti gli immobili per cui il cliente ha fatto un offerta
   // essendo una query presonalizzata è stata inserirta nel repository del listing
   async getListingByClientId(userId: string): Promise<Listing[]> {
-    const uniqueListings = await this.getListingByClientId_2(userId);
+
+    const uniqueListings = await this.listingRepository
+    .createQueryBuilder('listing')
+    .innerJoinAndSelect('listing.propertyOffers', 'propertyOffer')
+    .where('propertyOffer.client.userId = :userId', { userId })
+    .distinct(true)
+    .getMany();
+
     if (!uniqueListings)
       throw new NotFoundException('No listings found for this client');
 
@@ -272,12 +279,4 @@ export class OfferService {
     return clients;
   }
 
-  private async getListingByClientId_2(clientId: string): Promise<Listing[]> {
-    return this.listingRepository
-      .createQueryBuilder('listing')
-      .innerJoinAndSelect('listing.propertyOffers', 'propertyOffer')
-      .where('propertyOffer.clientId = :clientId', { clientId })
-      .distinct(true)
-      .getMany();
-  }
 }
