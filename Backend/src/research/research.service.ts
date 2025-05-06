@@ -12,12 +12,10 @@ import { ListingRepository } from 'src/listing/listing.repository';
 @Injectable()
 export class ResearchService {
  
-  constructor(
-    private readonly researchRepository: ResearchRepository,
+  constructor(private readonly researchRepository: ResearchRepository,) {}
 
-    @InjectRepository(Listing)
-    private readonly listingRepository: ListingRepository
-  ) {}
+
+
 //Restituisce le ricercehe fatte da un cliente
   async getResearchByClientId(userId: string): Promise<Research[]> {
     const found = await this.researchRepository.find({
@@ -30,6 +28,7 @@ export class ResearchService {
           
     return found;
   }
+
 
 //elimina ricerca 
   async deleteResearch(id: string, client: Client): Promise<void> {
