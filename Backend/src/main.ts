@@ -6,6 +6,12 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger();
+
+  app.enableCors({
+    origin: 'http://localhost:5173', // Permetti le richieste da Vite
+    credentials: true, // Obbligatorio se usi cookie o header di auth
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Trasforma i payload in DTO automaticamente
