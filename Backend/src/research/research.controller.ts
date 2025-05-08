@@ -11,7 +11,8 @@ import { UserRoles } from 'src/common/types/user-roles';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { repeat } from 'rxjs';
-import { RepeatedSearchDto } from './dto/repeted-search.dto';
+import { Listing } from 'src/listing/Listing.entity';
+
 
 @Controller('research')
 @UseGuards(AuthGuard('jwt'),RolesGuard)
@@ -56,17 +57,20 @@ export class ResearchController {
         if(!client)
             throw new UnauthorizedException();
 
-        return this.researchService.getLast10ResearchByClientId({id: client.userId});
+        return this.researchService.getLast10ResearchByClientId(user.id);
     }
 
-    @Patch('/:repeatedSearch')
+    @Patch('/:id')
     @Roles(UserRoles.CLIENT)
-    updateResearch(@Body() repeatedSearch: RepeatedSearchDto,@GetUser() user: UserItem): Promise<void> {
+    updateResearch(
+        @GetUser() user: UserItem,
+        @Param('id') researchId: string,
+    ): Promise<Research> {
         const client = user.client;
         if(!client)
             throw new UnauthorizedException();
 
-        return this.researchService.updateResearch(repeatedSearch,client);
+        return this.researchService.updateResearch(researchId,client);
     }
     
 }

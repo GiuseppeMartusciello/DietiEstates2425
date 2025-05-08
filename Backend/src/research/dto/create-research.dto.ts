@@ -12,9 +12,13 @@ export class CreateResearchDto {
   @IsOptional()
   municipality?: string;
 
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  coordinates?: string;
+  latitude?: number;
+
+  @IsNumber()
+  @IsOptional()
+  longitude?: number;
 
   @IsNumber()
   @IsOptional()

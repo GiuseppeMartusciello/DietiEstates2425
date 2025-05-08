@@ -1,12 +1,15 @@
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
 
+//questo decoretor controlla:
+// che ci sia o "municipality" oppure "coordinates" e "radius"
+//dove coordinates è latitude e longitude
 @ValidatorConstraint({ name: 'MunicipalityCoordinatesValidator', async: false })
 export class MunicipalityCoordinatesValidator implements ValidatorConstraintInterface {
   validate(_: any, args: ValidationArguments) {
     const obj = args.object as any;
 
     const hasMunicipality = !!obj.municipality;
-    const hasCoordinates = !!obj.coordinates;
+    const hasCoordinates = !!obj.latitude && !!obj.longitude;
     const hasRadius = obj.radius !== null && obj.radius !== undefined;
 
     return (
@@ -16,6 +19,6 @@ export class MunicipalityCoordinatesValidator implements ValidatorConstraintInte
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `Se "municipality" è presente, allora anche "coordinates" e "radius" devono esserlo, e viceversa.`;
+    return ` Bad request: Either "municipality" either "coordinates" and "radius" must be provided, or none of them.`;
   }
 }

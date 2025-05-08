@@ -126,8 +126,8 @@ export class ListingRepository extends Repository<Listing> {
       }
     });
 
-    if(nearbyPlaces && listing.nearbyPlaces != nearbyPlaces)
-      listing.nearbyPlaces= nearbyPlaces;
+    if (nearbyPlaces && listing.nearbyPlaces != nearbyPlaces)
+      listing.nearbyPlaces = nearbyPlaces;
 
     await this.save(listing);
     return listing;

@@ -1,11 +1,14 @@
 import { Client } from 'src/client/client.entity';
 import { OfferState } from 'src/common/types/offer-state';
 import { Listing } from 'src/listing/Listing.entity';
+import { Notification } from '../notification/notification.entity';
+
 import {
   Column,
   Entity,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -35,7 +38,7 @@ export class PropertyOffer {
   @Column({ nullable: true }) 
   guestName?: string;
 
-  //ho dovuto mettere nullable true per poter far accettare dal sistema le richieste esterne
+  //si è dovuto mettere nullable true per poter far accettare dal sistema le richieste esterne
   //ovvero quando un admin aggiunge un offerta da un cliente esterno al sistema 
   @ManyToOne(() => Client, (client) => client.propertyOffers, {
     onDelete: 'CASCADE',
@@ -43,8 +46,11 @@ export class PropertyOffer {
   })
   client: Client;
   
-  @ManyToOne(() => Listing, (listing) => listing.id, {
+  @ManyToOne(() => Listing, (listing) => listing.propertyOffers, {
     onDelete: 'CASCADE',    
   })
   listing: Listing;
+
+  @OneToMany(() => Notification, (notification) => notification.propertyOffer)
+  notifications: Notification[]; //aggiunto per le notifiche  
 }

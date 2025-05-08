@@ -1,8 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { ListingCategory } from '../common/types/listing-category';
 import { Agency } from '../agency/agency.entity';
 import { Exclude } from 'class-transformer';
 import { Agent } from 'src/agent/agent.entity';
+import { PropertyOffer } from 'src/property_offer/property_offer.entity';
+import { Notification } from '../notification/notification.entity';
+
 
 @Entity()
 export class Listing {
@@ -81,4 +84,11 @@ export class Listing {
     eager: true
   })
   agent: Agent;
+
+  @OneToMany(() => PropertyOffer, (offer) => offer.listing)
+  propertyOffers: PropertyOffer[];
+
+  @OneToMany(() => Notification, (notification) => notification.listing)
+  notifications: Notification[];
+
 }
