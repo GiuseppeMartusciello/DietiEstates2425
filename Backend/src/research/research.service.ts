@@ -3,14 +3,20 @@ import { Research } from './research.entity';
 import { CreateResearchDto } from './dto/create-research.dto';
 import { Client } from 'src/client/client.entity';
 import { ResearchRepository } from './research.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Listing } from 'src/listing/Listing.entity';
+import { ListingRepository } from 'src/listing/listing.repository';
 
 
 
 @Injectable()
 export class ResearchService {
  
-  constructor(private readonly researchRepository: ResearchRepository) {}
+  constructor(private readonly researchRepository: ResearchRepository,) {}
 
+
+
+//Restituisce le ricercehe fatte da un cliente
   async getResearchByClientId(userId: string): Promise<Research[]> {
     const found = await this.researchRepository.find({
       where: { client: { userId: userId } },
@@ -24,6 +30,7 @@ export class ResearchService {
   }
 
 
+//elimina ricerca 
   async deleteResearch(id: string, client: Client): Promise<void> {
     const result = await this.researchRepository.delete({ id, client });
 
@@ -32,26 +39,34 @@ export class ResearchService {
     }
   }
 
+
+//crea una ricerca effettuata da un utente
   async createResearch(
     createResearchDto: CreateResearchDto,
     client: Client,
   ): Promise<Research> {
 
-    const { text, municipality, coordinates,radius} = createResearchDto;
-        const research = this.researchRepository.create({
+    const { text, municipality,latitude,longitude,radius} = createResearchDto;
+
+      const newresearch = this.researchRepository.create({
             municipality,
-            coordinates,
+            latitude,
+            longitude,
             radius,
             date: new Date(),
             text: text,
             client,
         })
 
-        await this.researchRepository.save(research);
-        return research;
+      await this.researchRepository.save(newresearch);
+      
+      return newresearch;
+
   }
 
 
+//restituisce le ultime 10 ricerche effettuate da un cliente
+//questo metodo è usato per la barra di ricerca
   async getLast10ResearchByClientId(userId: string): Promise<Research[]> {
 
     const found = await this.researchRepository.find({
@@ -66,6 +81,8 @@ export class ResearchService {
     return found;
   }
 
+
+//Aggiorna la data di una ricerca quando viene effettuata una seconda volta
   async updateResearch(researchId: string, client: Client): Promise<Research> {
 
     const research =  await this.researchRepository.findOne({ where: { id:researchId , client } })

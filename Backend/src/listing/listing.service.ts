@@ -7,6 +7,9 @@ import { GeoapifyService } from 'src/common/services/geopify.service';
 import { Agency } from 'src/agency/agency.entity';
 import { ModifyListingDto } from './dto/modify-listing.dto';
 import { SearchListingDto } from './dto/search-listing.dto';
+import * as pathModule from 'path';
+import * as fs from 'fs';
+
 
 @Injectable()
 export class ListingService {
@@ -139,5 +142,27 @@ export class ListingService {
     if (result.affected === 0) {
       throw new NotFoundException(`Listing with ID "${listingId}" not found`);
     }
+  }
+
+  async handleUploadedImages(listingId: string, files: Express.Multer.File[]) {
+    if (!files || files.length === 0) {
+      throw new NotFoundException('No images uploaded');
+    }
+
+    // Restituisco i path delle immagini relative
+    return files.map((file) => ({
+      filename: file.filename,
+      path: `/uploads/${listingId}/${file.filename}`,
+    }));
+  }
+
+  async getImagesForListing(listingId: string): Promise<string[]> {
+    const imageDir = pathModule.join(__dirname, '..', '..', 'uploads', listingId);
+
+    if (!fs.existsSync(imageDir)) {
+      throw new NotFoundException('No images found for this listing');
+    }
+  
+    return fs.readdirSync(imageDir).map((file) => `/uploads/${listingId}/${file}`);
   }
 }

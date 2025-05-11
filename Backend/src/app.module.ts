@@ -14,11 +14,17 @@ import { ClientModule } from './client/client.module';
 import { ResearchModule } from './research/research.module';
 import { GeoapifyService } from './common/services/geopify.service';
 import { AdminModule } from './admin/admin.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   providers: [GeoapifyService],
   exports: [GeoapifyService],
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     ConfigModule.forRoot({
       envFilePath: ['.env'],
       validationSchema: configValidationSchema,
