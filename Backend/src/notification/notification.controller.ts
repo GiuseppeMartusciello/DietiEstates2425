@@ -8,7 +8,7 @@ import { GetUser } from "src/auth/get-user.decorator";
 import { UserItem } from "src/common/types/userItem";
 import { Notification } from "./notification.entity";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
-import { PushNotificationService } from "./push-notification.service";
+import { PushNotificationService } from "./push-notifications/push-notification.service";
 
 @Controller("notification")
 @UseGuards(AuthGuard("jwt"),RolesGuard)

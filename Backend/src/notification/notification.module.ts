@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserNotification } from './user-notification.entity';
 import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
-import { PushNotificationService } from './push-notification.service';
+import { PushNotificationService } from './push-notifications/push-notification.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Client } from 'src/client/client.entity';
 
