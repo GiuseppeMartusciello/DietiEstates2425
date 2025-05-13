@@ -1,18 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Research } from './research.entity';
 import { CreateResearchDto } from './dto/create-research.dto';
 import { Client } from 'src/client/client.entity';
 import { ResearchRepository } from './research.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Listing } from 'src/listing/Listing.entity';
-import { ListingRepository } from 'src/listing/listing.repository';
+
 
 
 
 @Injectable()
 export class ResearchService {
  
-  constructor(private readonly researchRepository: ResearchRepository,) {}
+  constructor(
+    @Inject(ResearchRepository)
+    private readonly researchRepository: ResearchRepository) {}
 
 
 
