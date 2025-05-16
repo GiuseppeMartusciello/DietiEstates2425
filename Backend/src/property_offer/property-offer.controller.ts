@@ -21,7 +21,7 @@ import { GetUser } from 'src/auth/get-user.decorator';
 import { Listing } from 'src/listing/Listing.entity';
 import { Client } from 'src/client/client.entity';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
-import { User } from 'src/auth/user.entity';
+
 @Controller('offer')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class OfferController {
@@ -76,7 +76,6 @@ export class OfferController {
 
   //è pensato solo per poter modificare lo stato di una offerta
   @Patch('/:id')
-  @Roles()
   updateOffer(
     @Body() updateOfferdto: UpdateOfferDto,
     @GetUser() user: UserItem,

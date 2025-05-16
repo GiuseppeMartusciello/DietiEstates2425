@@ -12,8 +12,7 @@ export class AgentController {
   constructor(private agentService: AgentService) {}
 
   @Get('/:id')
-  @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
-  getClientById(@Param('id', new ParseUUIDPipe()) id: string): Promise<Agent> {
+  getAgentById(@Param('id', new ParseUUIDPipe()) id: string): Promise<Agent> {
     return this.agentService.getAgentById(id);
   }
 }

@@ -51,12 +51,6 @@ export class Notification {
 
   }
 
-  // si erano riscontrati dubbi riguardo alle relazioni che la classe notifica avrebbe dovuto avere
-  // con le classi di user, agent, admin, manager,
-  // in quando possibili creatori di notifiche
-  // si è deciso di non implementare queste relazioni in quanto non necessarie
-  // queste informazioni quando necesare possono essere recuperate da propertyOffer e listing
-
 
 
 

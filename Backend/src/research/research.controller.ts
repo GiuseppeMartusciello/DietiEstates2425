@@ -4,14 +4,11 @@ import { Research } from './research.entity';
 import { CreateResearchDto } from './dto/create-research.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from 'src/auth/user.entity';
-import { ClientService } from 'src/client/client.service';
 import { UserItem } from 'src/common/types/userItem';
 import { UserRoles } from 'src/common/types/user-roles';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { repeat } from 'rxjs';
-import { Listing } from 'src/listing/Listing.entity';
+
 
 
 @Controller('research')
