@@ -17,7 +17,7 @@ export class NotificationController {
   {}
 
     @Post("/listing/:listingId")
-    //@Roles(UserRoles.ADMIN, UserRoles.SUPPORT_ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.SUPPORT_ADMIN)
     createPromotionalNotification(
       @GetUser() user: UserItem,
       @Body() createNotificationDto: CreateNotificationDto,

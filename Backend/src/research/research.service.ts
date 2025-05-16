@@ -4,9 +4,6 @@ import { CreateResearchDto } from './dto/create-research.dto';
 import { Client } from 'src/client/client.entity';
 import { ResearchRepository } from './research.repository';
 
-
-
-
 @Injectable()
 export class ResearchService {
  
