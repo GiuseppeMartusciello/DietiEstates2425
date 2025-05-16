@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MeetingRoom
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.RealEstateAgent
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SolarPower
 import androidx.compose.material.icons.outlined.ViewInAr
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,12 +46,12 @@ import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.utility.formatNumberWithDots
 
 @Composable
-fun ListingCard(listing: Listing, onClick: () -> Unit) {
+fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Unit) {
     val imageUrl = listing.imageUrls.firstOrNull()
     val painter = if (imageUrl != null) {
         rememberAsyncImagePainter(imageUrl)
     } else {
-        painterResource(R.drawable.boh)
+        painterResource(R.drawable.boh) /* ToDo da cambiare */
     }
     Card(
         modifier = Modifier
@@ -83,8 +86,11 @@ fun ListingCard(listing: Listing, onClick: () -> Unit) {
                         FeatureItem(icon = Icons.Outlined.ViewInAr, value = "${listing.size}mq")
                         FeatureItem(icon = Icons.Outlined.MeetingRoom, value = listing.numberOfRooms)
                         FeatureItem(icon = Icons.Outlined.SolarPower, value = listing.energyClass.toString())
-                    }
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { onClickOptions()}) {
+                            Icon(Icons.Outlined.MoreVert, contentDescription = null)
 
+                        } }
 
                 }
             }
@@ -109,4 +115,34 @@ fun FeatureItem(icon: ImageVector, value: String) {
             )
 
     }
+}
+@Preview(showBackground = true)
+@Composable
+fun test(){
+    val testListing = Listing(
+        id = "1",
+        title = "Appartamento moderno con vista",
+        address = "Via delle Rose 15",
+        municipality = "San Giovanni",
+        postalCode = "00100",
+        province = "RM",
+        size = "85",
+        latitude = 41.9028,
+        longitude = 12.4964,
+        numberOfRooms = "3",
+        energyClass = 'B',
+        nearbyPlaces = arrayListOf("Scuola:200m", "Parco:150m", "Supermercato:100m"),
+        description = "Appartamento luminoso con ampio soggiorno, cucina abitabile, due camere da letto e bagno. Situato in zona tranquilla con tutti i servizi nelle vicinanze.",
+        price = 285000,
+        category = "Vendita",
+        floor = "2",
+        hasElevator = true,
+        hasAirConditioning = true,
+        hasGarage = false,
+        imageUrls = listOf()
+    )
+
+    //ListingCard(listing = testListing) {}
+        
+
 }
