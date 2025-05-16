@@ -33,8 +33,6 @@ export class AgencyManagerController {
     @Body() credentials: CredentialDto,
     @GetUser() user: UserItem,
   ) {
-    if (user.lastPasswordChangeAt) throw new UnauthorizedException();
-
     return this.managerService.changePassword(credentials, user.id);
   }
 
@@ -55,7 +53,7 @@ export class AgencyManagerController {
     @Body() createAgentDto: CreateAgentDto,
   ) {
     const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
-    if (!agencyId) throw new UnauthorizedException('Nessuna agenzia associata');
+    if (!agencyId) throw new UnauthorizedException('No agency associated');
 
     return this.managerService.createAgent(createAgentDto, agencyId);
   }

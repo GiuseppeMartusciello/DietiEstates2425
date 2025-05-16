@@ -135,7 +135,7 @@ export class OfferService {
         status == (OfferState.ACCEPTED || OfferState.DECLINED)
       ) {
         throw new UnauthorizedException(
-          'Client cannot accept or decline an offer',
+          'You cannot accept or reject your offers',
         );
       }
     } else {
@@ -144,7 +144,7 @@ export class OfferService {
         !madeByUser &&
         status == (OfferState.ACCEPTED || OfferState.DECLINED)
       ) {
-        throw new UnauthorizedException(' cannot accept or decline an offer');
+        throw new UnauthorizedException('You cannot accept or reject your offers');
       }
     }
     //l' offerta in ambo i casi puo essere annullata

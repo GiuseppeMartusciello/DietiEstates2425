@@ -18,6 +18,7 @@ export class ResearchService {
     @InjectRepository(Listing)
     private readonly listingRepository: ListingRepository
   ) {}
+  
 //Restituisce le ricercehe fatte da un cliente
   async getResearchByClientId(userId: string): Promise<Research[]> {
     const found = await this.researchRepository.find({
