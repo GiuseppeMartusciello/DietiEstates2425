@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -16,6 +17,8 @@ import { UserRoles } from 'src/common/types/user-roles';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotificationType } from 'src/common/types/notification.enum';
 
 @Injectable()
 export class OfferService {
@@ -27,6 +30,8 @@ export class OfferService {
 
     @InjectRepository(Client)
     private readonly clientRepository: Repository<Client>,
+
+    private readonly notificationService: NotificationService,
   ) {}
 
   // tutti gli immobili per cui il cliente ha fatto un offerta
@@ -46,6 +51,7 @@ export class OfferService {
     return uniqueListings;
   }
 
+  //viene creata un offerta per un immobile da parte del cliente
   async createOffer(
     createOfferDto: CreateOfferDto,
     listingId: string,
@@ -69,10 +75,28 @@ export class OfferService {
       listing: listing,
       client: { userId: user.id } as Client,
     });
+
     await this.offerRepository.save(offer);
+
+    //crea notifica specifica per una nuova offerta
+     const notifica = await this.notificationService.createSpecificNotificationOffer(
+      {
+       title: 'New offer',
+       description: 'New offer for your listing',
+       category: NotificationType.SPECIFIC,
+      },
+      offer);
+
+      if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
+
+    
+
+
     return offer;
   }
 
+ // viene creata un offerta per un immobile da parte dell agente
   async createOfferbyAgent(
     createOfferDto: CreateOfferDto,
     listingId: string,
@@ -100,9 +124,24 @@ export class OfferService {
       client: { userId: clientId } as Client,
     });
     await this.offerRepository.save(offer);
+
+    //crea notifica specifica per una nuova offerta
+    const notifica = await this.notificationService.createSpecificNotificationOffer(
+      {
+       title: 'New offer',
+       description: 'New offer for your listing',
+       category: NotificationType.SPECIFIC,
+      },
+      offer);
+
+     if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
+
     return offer;
   }
 
+
+//offerta viene aggiornata se viene rifiutata o accettata o annullata
   async updateOffer(
     offerId: string,
     updateOfferdto: UpdateOfferDto,
@@ -155,9 +194,25 @@ export class OfferService {
     offer.state = status;
     this.offerRepository.save(offer);
 
+
+    //crea notifica specifica 
+    //attenzione ! la notifica viene create l update è sull offerta ma la notifica è nuova
+    const notifica = await this.notificationService.createSpecificNotificationOffer(
+      {
+       title: 'Your offer has been updated',
+       description: 'check out the new status of your offer',
+       category: NotificationType.SPECIFIC,
+      },
+      offer);
+
+    if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
+
     return offer;
   }
 
+
+  // restituisce tutte le offerte per un agente
   async getOffersByAgentId(
     listingId: string,
     clientId: string,
@@ -252,6 +307,10 @@ export class OfferService {
     });
 
     await this.offerRepository.save(offer);
+
+    //la notifica in questo caso non viene creata poiche è stesso l agente che la crea, la notifica dovrebbe
+    //notificare lo stesso agente e non avrebbe senso
+
     return offer;
   }
 
