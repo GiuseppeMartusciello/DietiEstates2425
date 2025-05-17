@@ -27,9 +27,6 @@ import { CreateAgentResponse } from './types/create-agent-response';
 @Injectable()
 export class AgencyManagerService {
   constructor(
-    @InjectRepository(Manager)
-    private readonly managerRepository: Repository<Manager>,
-
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
@@ -68,13 +65,12 @@ export class AgencyManagerService {
   async createSupportAdmin(
     createSupportAdminDto: CreateSupportAdminDto,
     userManager: UserItem,
-  ): Promise<CreateSupportAdminResponse> {
-    if (!userManager || !userManager.manager) throw new UnauthorizedException();
+  ): Promise<SupportAdmin> {
 
     const { name, surname, email, password, birthDate, gender, phone } =
       createSupportAdminDto;
 
-    const agency = userManager.manager.agency;
+    const agency = userManager?.manager?.agency;
     if (!agency) throw new BadRequestException(`Agency doesn't exists`);
 
     const found = await this.userRepository
@@ -108,29 +104,18 @@ export class AgencyManagerService {
 
     const supportAdmin = this.supportAdminRepository.create({
       userId: userSupportAdmin.id,
-      agency: userManager.manager.agency,
+      agency: userManager?.manager?.agency,
     });
 
     await this.supportAdminRepository.save(supportAdmin);
 
-    return {
-      message: 'Support Admin created successfully',
-      supportAdmin: {
-        email: userSupportAdmin.email,
-        id: userSupportAdmin.id,
-        name: userSupportAdmin.name,
-        agency: {
-          id: agency.id,
-          name: agency.name,
-        },
-      },
-    };
+    return supportAdmin;
   }
 
   async createAgent(
     createAgentDto: CreateAgentDto,
     agencyId: string,
-  ): Promise<CreateAgentResponse> {
+  ): Promise<Agent> {
     const agency = await this.agencyRepository.findOne({
       where: { id: agencyId },
     });
@@ -159,7 +144,7 @@ export class AgencyManagerService {
       .getOne();
 
     if (existingAgent)
-      new ConflictException(
+      throw new ConflictException(
         `Agent with license "${licenseNumber}" already exists`,
       );
 
@@ -195,25 +180,12 @@ export class AgencyManagerService {
       start_date: start_date,
       languages: languages,
       userId: userAgent.id,
-      //user: userAgent,
       agency: agency,
     });
 
     await this.agentRepository.save(agent);
 
-    return {
-      message: 'Agent created successfully',
-      agent: {
-        email: userAgent.email,
-        id: userAgent.id,
-        name: userAgent.name,
-        licenseNumber: licenseNumber,
-        agency: {
-          id: agencyId,
-          name: agency.name,
-        },
-      },
-    };
+    return agent;
   }
 
   async deleteAgentById(agentId: string) {

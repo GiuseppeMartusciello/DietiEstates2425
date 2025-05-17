@@ -2,7 +2,6 @@ import {
   Column,
   Entity,
   ManyToOne,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Client } from '../client/client.entity';

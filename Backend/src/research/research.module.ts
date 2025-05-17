@@ -6,7 +6,7 @@ import { Research } from './research.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { ResearchRepository } from './research.repository';
 import { ClientModule } from 'src/client/client.module';
-import { Listing } from 'src/listing/Listing.entity';
+
 
 @Module({
   imports: [TypeOrmModule.forFeature([Research]), AuthModule, ClientModule],

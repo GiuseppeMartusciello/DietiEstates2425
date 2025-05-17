@@ -1,8 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Research } from './research.entity';
-import { CreateResearchDto } from './dto/create-research.dto';
-import { Client } from 'src/client/client.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ListingRepository } from './listing.repository';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { Listing } from './Listing.entity';
@@ -29,8 +29,6 @@ export class ListingService {
       },
     });
 
-    if (found.length === 0) throw new NotFoundException();
-
     return found;
   }
 
@@ -40,8 +38,6 @@ export class ListingService {
         agency: { id: agencyId } as Agency,
       },
     });
-
-    if (found.length === 0) throw new NotFoundException();
 
     return found;
   }
@@ -140,7 +136,7 @@ export class ListingService {
     });
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Listing with ID "${listingId}" not found`);
+      throw new BadRequestException(`Listing with ID "${listingId}" not found`);
     }
   }
 
@@ -165,4 +161,31 @@ export class ListingService {
   
     return fs.readdirSync(imageDir).map((file) => `/uploads/${listingId}/${file}`);
   }
+
+  async getAllListingImages(): Promise<Record<string, string[]>> {
+    const uploadsDir = pathModule.join(__dirname, '..', '..', 'uploads');
+    const results: Record<string, string[]> = {};
+  
+    if (!fs.existsSync(uploadsDir)) {
+      return results;
+    }
+  
+    const listingFolders = fs.readdirSync(uploadsDir);
+  
+    for (const listingId of listingFolders) {
+      const imageDir = pathModule.join(uploadsDir, listingId);
+  
+      if (fs.statSync(imageDir).isDirectory()) {
+        try {
+          const images = await this.getImagesForListing(listingId);
+          results[listingId] = images;
+        } catch (e) {
+          results[listingId] = [];
+        }
+      }
+    }
+  
+    return results;
+  }
+  
 }
