@@ -89,7 +89,6 @@ export class AuthService {
 
     return {
       accessToken: accessToken,
-      role: user.role,
       mustChangePassword: false,
     };
   }
@@ -120,7 +119,6 @@ export class AuthService {
 
     return {
       accessToken: accessToken,
-      role: user.role,
       mustChangePassword: !user.lastPasswordChangeAt,
     };
   }
@@ -161,7 +159,7 @@ export class AuthService {
           { userId: user.id, role: user.role },
           '45m',
         );
-        return { accessToken, role: user.role, mustChangePassword: false };
+        return { accessToken, mustChangePassword: false };
       } else
         throw new BadRequestException(
           `User registered with different provider: ${user.provider}`,
@@ -192,7 +190,7 @@ export class AuthService {
       { userId: newUser.id, role: newUser.role },
       '45m',
     );
-    return { accessToken, role: newUser.role, mustChangePassword: false };
+    return { accessToken, mustChangePassword: false };
   }
 
   private async createToken(payload: JwtPayload, expiresIn: string) {
