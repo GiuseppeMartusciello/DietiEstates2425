@@ -10,7 +10,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/signup')
-  signup(@Body() authCredentialDto: AuthCredentialDto, @Req() req: Request) {
+  signup(@Body() authCredentialDto: AuthCredentialDto) {
     return this.authService.signUp(authCredentialDto);
   }
 
@@ -27,5 +27,10 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleRedirect(@GetUser() user) {
     return this.authService.socialLogin(user);
+  }
+
+  @Post('/google-token')
+  async googleTokenLogin(@Body() body: { idToken: string }) {
+    return this.authService.verifyGoogleTokenAndLogin(body.idToken);
   }
 }

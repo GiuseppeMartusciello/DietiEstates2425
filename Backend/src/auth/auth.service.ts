@@ -19,6 +19,8 @@ import { Gender } from 'src/common/types/gender.enum';
 import { Provider } from 'src/common/types/provider.enum';
 import { GoogleUser } from 'src/common/types/google-user';
 import * as crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -85,7 +87,11 @@ export class AuthService {
 
     const accessToken = await this.createToken(payload, '1h');
 
-    return { accessToken: accessToken, mustChangePassword: false };
+    return {
+      accessToken: accessToken,
+      role: user.role,
+      mustChangePassword: false,
+    };
   }
 
   async signIn(credentials: SignInDto): Promise<AuthResponse> {
@@ -114,8 +120,33 @@ export class AuthService {
 
     return {
       accessToken: accessToken,
+      role: user.role,
       mustChangePassword: !user.lastPasswordChangeAt,
     };
+  }
+
+  async verifyGoogleTokenAndLogin(idToken: string): Promise<AuthResponse> {
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const email = payload?.email;
+    const name = payload?.given_name;
+    const surname = payload?.family_name;
+
+    if (!email) throw new UnauthorizedException('Email non trovata nel token');
+
+    const googleUser: GoogleUser = {
+      email,
+      name: name || '',
+      surname: surname || '',
+    };
+
+    return this.socialLogin(googleUser);
   }
 
   async socialLogin(googleUser: GoogleUser): Promise<AuthResponse> {
@@ -130,7 +161,7 @@ export class AuthService {
           { userId: user.id, role: user.role },
           '45m',
         );
-        return { accessToken, mustChangePassword: false };
+        return { accessToken, role: user.role, mustChangePassword: false };
       } else
         throw new BadRequestException(
           `User registered with different provider: ${user.provider}`,
@@ -161,7 +192,7 @@ export class AuthService {
       { userId: newUser.id, role: newUser.role },
       '45m',
     );
-    return { accessToken, mustChangePassword: false };
+    return { accessToken, role: newUser.role, mustChangePassword: false };
   }
 
   private async createToken(payload: JwtPayload, expiresIn: string) {
