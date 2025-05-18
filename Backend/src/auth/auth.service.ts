@@ -100,8 +100,9 @@ export class AuthService {
       where: { email },
     });
 
-    // 1. controllo che l'utenta esista e che le credenziali siano corrette
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    console.log('User: ', user);
+
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -109,6 +110,10 @@ export class AuthService {
       throw new BadRequestException(
         `This account is linked with ${user.provider}. Please use ${user.provider} login.`,
       );
+    }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload: JwtPayload = { userId: user.id, role: user.role };
