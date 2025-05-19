@@ -26,10 +26,6 @@ export class CreateListingDto {
 
   @IsString()
   @IsNotEmpty()
-  city: string;
-
-  @IsString()
-  @IsNotEmpty()
   postalCode: string;
 
   @IsString()
@@ -46,15 +42,6 @@ export class CreateListingDto {
   @IsString()
   @IsNotEmpty()
   energyClass: string;
-
-
-  @IsNumber()
-  @IsOptional()
-  latitude: number;
-
-  @IsNumber()
-  @IsOptional()
-  longitude: number;
 
   @IsString()
   @IsNotEmpty()

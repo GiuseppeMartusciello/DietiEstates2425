@@ -20,9 +20,6 @@ export class Listing {
 
   @Column()
   municipality: string;
-  
-  @Column()
-  city: string;
 
   @Column()
   postalCode: string;
