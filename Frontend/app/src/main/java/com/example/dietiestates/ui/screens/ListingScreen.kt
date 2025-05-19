@@ -1,11 +1,14 @@
 package com.example.dietiestates.ui.screens
 
 
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -37,12 +40,14 @@ import androidx.compose.material.icons.outlined.Elevator
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Forest
 import androidx.compose.material.icons.outlined.MeetingRoom
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.RealEstateAgent
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.SolarPower
 import androidx.compose.material.icons.outlined.Stairs
 import androidx.compose.material.icons.outlined.ViewInAr
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -59,6 +64,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.dietiestates.R
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ImageGalleryPager
@@ -97,7 +105,14 @@ fun ListingScreen(navController: NavController) {
 
     when {
         state.loading -> {
-            // Mostra spinner o contenuto vuoto
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                    CircularProgressIndicator(color = Color.White)
+            }
         }
 
         state.listing == null -> {
@@ -124,6 +139,7 @@ fun ListingScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
+                            .padding(bottom = 100.dp)
                     ) {
                         Box() {
                             ImageGalleryPager(images = viewModel.imageUrls)
@@ -262,6 +278,7 @@ fun ListingScreen(navController: NavController) {
                                 color = Color.Black
                             )
                             Spacer(modifier = Modifier.height(15.dp))
+                            /* ToDo bottone mostrato solo se supero le 7 righe */
                             CustomButton(
                                 onClick = { navController.navigate("listingviewdescriptionscreen/${listing.description}") },
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -280,7 +297,7 @@ fun ListingScreen(navController: NavController) {
                                 style = LocalAppTypography.current.sectionTitle
                             )
                             Text(
-                                text = "Corso vittorio emanuele...",
+                                text = listing.address,
                                 fontFamily = RobotoSerif,
                                 fontWeight = FontWeight.Light,
                                 fontSize = 15.sp,
@@ -295,15 +312,57 @@ fun ListingScreen(navController: NavController) {
                                 style = LocalAppTypography.current.sectionTitle,
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
-                            val list: List<String> = listOf("parchi:25", "scuole:30")
-                            NearbyPlacesBlock(nearbyPlaces = list)
-                        }//Terzo blocco, mappa
+                            NearbyPlacesBlock(nearbyPlaces = listing.nearbyPlaces)
+                        }//Quarto blocco, mappa
 
                         Divisore() //------//
 
                         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
-                            /* ToDo quando ci saranno le api per agente */
-                        }//Quarto blocco, Agente
+                            Text(
+                                text = "Inserzionista",
+                                style = LocalAppTypography.current.sectionTitle
+                            )
+                            Spacer(modifier = Modifier.height(30.dp))
+                            Column (modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
+
+                                Text( /* ToDo aggiornare text con il reale valore */
+                                    text = "Stefano Rossi, 35",
+                                    style = LocalAppTypography.current.featureTitle,
+                                    fontSize = 20.sp,
+                                    lineHeight = 12.sp,
+                                )
+                                Text( /* ToDo aggiornare text con il reale valore */
+                                    text = "10 anni di esperienza",
+                                    fontFamily = Roboto,
+                                    fontWeight = FontWeight.ExtraLight,
+                                    fontSize = 14.sp,
+                                    lineHeight = 10.sp,
+                                    color = Color.Black
+                                )
+                                Image( /* ToDo aggiornare text con il reale valore */
+                                    painter = painterResource(R.drawable.person),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .height(70.dp)
+                                        .width(70.dp)
+                                        .padding(5.dp),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Text(  /* ToDo aggiornare text con il reale valore */
+                                    text = "Tecnocasa S.R.L",
+                                    style = LocalAppTypography.current.featureTitle,
+                                    fontSize = 14.sp
+                                )
+                                Text( /* ToDo aggiornare text con il reale valore */
+                                    text = "Sede Legale Via blblblbl, Milano",
+                                    fontFamily = Roboto,
+                                    fontWeight = FontWeight.ExtraLight,
+                                    fontSize = 12.sp,
+                                    lineHeight = 10.sp,
+                                    color = Color.Black
+                                )
+                            }
+                        }//Quinto blocco, Agente
                         Spacer(modifier = Modifier.height(20.dp))
 
                     }
@@ -323,7 +382,8 @@ fun NearbyPlacesBlock(nearbyPlaces: List<String>) {
     Column(modifier = Modifier.padding(end = 30.dp)) {
         nearbyPlaces.chunked(2).forEach { rowItems ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 10.dp, end= 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 rowItems.forEach { item ->
@@ -362,7 +422,7 @@ fun Divisore() {
 }
 
 @Composable
-fun BottomBar(price: String, modifier: Modifier = Modifier) {
+private fun BottomBar(price: String, modifier: Modifier = Modifier) {
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Surface(
@@ -473,6 +533,7 @@ fun FullTextScreen(navController: NavController, text: String) {
         }
     }
 }
+
 
 
 
