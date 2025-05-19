@@ -37,7 +37,7 @@ export class ListingController {
   async getAllListingImages(): Promise<Record<string, string[]>> {
     return this.listingService.getAllListingImages();
   }
-  
+
   @Get('/agent/:id') //ridurre a gestMyListings per agent
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   async getListingByAgentId(
@@ -189,4 +189,16 @@ export class ListingController {
     return this.listingService.getImagesForListing(listingId);
   }
 
+  @Delete('/:id/images/:filename')
+  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
+  async deleteImage(
+    @Param('id', new ParseUUIDPipe()) listingId: string,
+    @GetUser() user: UserItem,
+    @Param('filename') filename: string,
+  ) {
+    const listing: Listing = await this.findListingOrThrow(listingId);
+    this.checkAuthorization(user, listing);
+
+    return this.listingService.deleteListingImage(listingId, filename);
+  }
 }

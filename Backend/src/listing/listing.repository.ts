@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Double, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Listing } from './Listing.entity';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -98,19 +98,18 @@ export class ListingRepository extends Repository<Listing> {
     listing: Listing,
     modifyListingDto: ModifyListingDto,
     nearbyPlaces?: string[],
+    latitude?: number,
+    longitude?: number,
   ): Promise<Listing> {
     const updatableFields: (keyof ModifyListingDto)[] = [
       'address',
       'title',
       'municipality',
-      'city',
       'postalCode',
       'province',
       'size',
       'numberOfRooms',
       'energyClass',
-      'latitude',
-      'longitude',
       'description',
       'price',
       'category',
@@ -126,6 +125,10 @@ export class ListingRepository extends Repository<Listing> {
       }
     });
 
+    if (latitude !== undefined) listing.latitude = latitude;
+
+    if (longitude !== undefined) listing.longitude = longitude;
+
     if (nearbyPlaces && listing.nearbyPlaces != nearbyPlaces)
       listing.nearbyPlaces = nearbyPlaces;
 
@@ -138,17 +141,16 @@ export class ListingRepository extends Repository<Listing> {
     agentId: string,
     agencyId: string,
     nearbyPlaces: string[],
+    latitude?: number,
+    longitude?: number,
   ): Promise<Listing> {
     const {
       address,
       title,
       municipality,
-      city,
       postalCode,
       province,
       size,
-      latitude,
-      longitude,
       numberOfRooms,
       energyClass,
       description,
@@ -164,7 +166,6 @@ export class ListingRepository extends Repository<Listing> {
       address,
       municipality,
       title,
-      city,
       postalCode,
       province,
       size,
