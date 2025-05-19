@@ -19,7 +19,7 @@ class ListingRepository(private val api: ListingApi) {
         val listingsResponse = api.getListings()
         val imagesResponse = api.getAllListingImages()
 
-        if (listingsResponse.isSuccessful && imagesResponse.isSuccessful) {
+        if (listingsResponse.isSuccessful /*&& imagesResponse.isSuccessful*/) {
             val baseListings = listingsResponse.body() ?: emptyList()
             val imageMap = imagesResponse.body() ?: emptyMap()
 

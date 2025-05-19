@@ -27,7 +27,7 @@ export class AuthCredentialDto {
   password: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber()
+  @IsPhoneNumber('IT')
   phone: string;
 
   // @IsDate()

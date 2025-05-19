@@ -40,33 +40,10 @@ export class AgencyManagerService {
     private readonly supportAdminRepository: Repository<SupportAdmin>,
   ) {}
 
-  async changePassword(credentials: CredentialDto, userId: string) {
-    const { currentPassword, newPassword } = credentials;
-
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-
-    if (!user) throw new NotFoundException('Manager not found');
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
-
-    const hashedPassword = await this.hashPassword(newPassword);
-
-    user.password = hashedPassword;
-    user.lastPasswordChangeAt = new Date();
-
-    await this.userRepository.save(user);
-
-    return { message: 'Password updated successfully' };
-  }
-
   async createSupportAdmin(
     createSupportAdminDto: CreateSupportAdminDto,
     userManager: UserItem,
   ): Promise<SupportAdmin> {
-
     const { name, surname, email, password, birthDate, gender, phone } =
       createSupportAdminDto;
 

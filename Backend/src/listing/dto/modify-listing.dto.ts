@@ -29,11 +29,6 @@ export class ModifyListingDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  city: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
   postalCode: string;
 
   @IsString()
@@ -54,14 +49,6 @@ export class ModifyListingDto {
   @IsNotEmpty()
   @IsOptional()
   energyClass: string;
-
-  @IsNumber()
-  @IsOptional()
-  latitude: number;
-  
-  @IsNumber()
-  @IsOptional()
-  longitude: number;
 
   @IsString()
   @IsNotEmpty()

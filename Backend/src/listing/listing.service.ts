@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ListingRepository } from './listing.repository';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { Listing } from './Listing.entity';
@@ -6,10 +10,9 @@ import { Agent } from 'src/agent/agent.entity';
 import { GeoapifyService } from 'src/common/services/geopify.service';
 import { Agency } from 'src/agency/agency.entity';
 import { ModifyListingDto } from './dto/modify-listing.dto';
-import { SearchListingDto } from './dto/search-listing.dto';
+import { ResearchListingDto } from '../research/dto/create-research.dto';
 import * as pathModule from 'path';
 import * as fs from 'fs';
-
 
 @Injectable()
 export class ListingService {
@@ -56,7 +59,7 @@ export class ListingService {
     return found;
   }
 
-  searchListing(searchListingDto: SearchListingDto): Promise<Listing[]> {
+  searchListing(searchListingDto: ResearchListingDto): Promise<Listing[]> {
     return this.listingRepository.searchListings(searchListingDto);
   }
 
@@ -64,16 +67,8 @@ export class ListingService {
     listing: Listing,
     modifyListingDto: ModifyListingDto,
   ): Promise<Listing> {
-    if (  //se passo le coordinate voglio che i posti vicini vengano calcolati su quelle nuove quindi non mi baso sull'indirizzo
-      (modifyListingDto.latitude && modifyListingDto.latitude != listing.latitude) ||
-      (modifyListingDto.longitude && modifyListingDto.longitude != listing.longitude)
-    ) {
-      const nearbyPlaces = await this.geopifyService.getNearbyIndicators(modifyListingDto.latitude, modifyListingDto.longitude);
-      return this.listingRepository.modifyListing(listing, modifyListingDto,nearbyPlaces);
-    }
-      //se invece non passo le coordinate ma l'indirizzo allora ricalcolo le coordinate sulla base dell'indirizzo e
-      //aggiorno i posti vicini
-    else if (
+    //se ricevo l'indirizzo ed è diverso allora ricalcolo le coordinate e aggiorno i posti vicini
+    if (
       modifyListingDto.address &&
       listing.address !== modifyListingDto.address
     ) {
@@ -85,12 +80,14 @@ export class ListingService {
         lon,
       );
 
-      modifyListingDto.latitude = lat;
-      modifyListingDto.longitude = lon;
-
-      return this.listingRepository.modifyListing(listing, modifyListingDto,nearbyPlaces);
+      return this.listingRepository.modifyListing(
+        listing,
+        modifyListingDto,
+        nearbyPlaces,
+        lat,
+        lon,
+      );
     }
-
 
     return this.listingRepository.modifyListing(listing, modifyListingDto);
   }
@@ -99,21 +96,13 @@ export class ListingService {
     createListingDto: CreateListingDto,
     agent: Agent,
   ): Promise<Listing> {
-    if (
-      //se non vengono passate le coordinate le recupero da geopify, in caso contrario uso quelle passate
-      createListingDto.latitude === undefined ||
-      createListingDto.longitude === undefined
-    ) {
-      const { lat, lon } = await this.geopifyService.getCoordinatesFromAddress(
-        `${createListingDto.address}, ${createListingDto.municipality}`,
-      );
-      createListingDto.latitude = lat;
-      createListingDto.longitude = lon;
-    }
+    const { lat, lon } = await this.geopifyService.getCoordinatesFromAddress(
+      `${createListingDto.address}, ${createListingDto.municipality}`,
+    );
 
     const nearbyPlaces = await this.geopifyService.getNearbyIndicators(
-      createListingDto.latitude,
-      createListingDto.longitude,
+      lat,
+      lon,
     );
 
     return this.listingRepository.createListing(
@@ -121,6 +110,8 @@ export class ListingService {
       agent.userId,
       agent.agency.id,
       nearbyPlaces,
+      lat,
+      lon,
     );
   }
 
@@ -153,28 +144,36 @@ export class ListingService {
   }
 
   async getImagesForListing(listingId: string): Promise<string[]> {
-    const imageDir = pathModule.join(__dirname, '..', '..', 'uploads', listingId);
+    const imageDir = pathModule.join(
+      __dirname,
+      '..',
+      '..',
+      'uploads',
+      listingId,
+    );
 
     if (!fs.existsSync(imageDir)) {
-      throw new NotFoundException('No images found for this listing');
+      return [];
     }
-  
-    return fs.readdirSync(imageDir).map((file) => `/uploads/${listingId}/${file}`);
+
+    return fs
+      .readdirSync(imageDir)
+      .map((file) => `/uploads/${listingId}/${file}`);
   }
 
   async getAllListingImages(): Promise<Record<string, string[]>> {
     const uploadsDir = pathModule.join(__dirname, '..', '..', 'uploads');
     const results: Record<string, string[]> = {};
-  
+
     if (!fs.existsSync(uploadsDir)) {
       return results;
     }
-  
+
     const listingFolders = fs.readdirSync(uploadsDir);
-  
+
     for (const listingId of listingFolders) {
       const imageDir = pathModule.join(uploadsDir, listingId);
-  
+
       if (fs.statSync(imageDir).isDirectory()) {
         try {
           const images = await this.getImagesForListing(listingId);
@@ -184,8 +183,29 @@ export class ListingService {
         }
       }
     }
-  
+
     return results;
   }
-  
+
+  async deleteListingImage(
+    listingId: string,
+    imageFilename: string,
+  ): Promise<{ success: boolean }> {
+    const filePath = pathModule.join(
+      __dirname,
+      '..',
+      '..',
+      'uploads',
+      listingId,
+      imageFilename,
+    );
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('Immagine non trovata');
+    }
+
+    fs.unlinkSync(filePath);
+
+    return { success: true };
+  }
 }
