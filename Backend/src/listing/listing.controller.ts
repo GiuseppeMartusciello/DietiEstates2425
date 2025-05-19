@@ -4,7 +4,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -12,7 +11,6 @@ import {
   UnauthorizedException,
   UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -25,7 +23,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { Listing } from './Listing.entity';
 import { AgentService } from 'src/agent/agent.service';
 import { ModifyListingDto } from './dto/modify-listing.dto';
-import { SearchListingDto } from './dto/search-listing.dto';
+import { ResearchListingDto } from '../research/dto/create-research.dto'
 import { ListingImageUploadInterceptor } from 'src/common/interceptors/listing-image-upload.interceptor';
 
 @Controller('listing')
@@ -76,7 +74,7 @@ export class ListingController {
   @Post('/search')
   @Roles(UserRoles.CLIENT)
   searchListing(
-    @Body() searchListingDto: SearchListingDto,
+    @Body() searchListingDto: ResearchListingDto,
   ): Promise<Listing[]> {
     return this.listingService.searchListing(searchListingDto);
   }

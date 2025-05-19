@@ -25,15 +25,6 @@ import { CreateAgentDto } from './dto/create-agent.dto';
 export class AgencyManagerController {
   constructor(private readonly managerService: AgencyManagerService) {}
 
-  @Patch('/change-credentials')
-  @Roles(UserRoles.MANAGER)
-  changePassword(
-    @Body() credentials: CredentialDto,
-    @GetUser() user: UserItem,
-  ) {
-    return this.managerService.changePassword(credentials, user.id);
-  }
-
   @Post('support-admin')
   @Roles(UserRoles.MANAGER)
   createSupportAdmin(

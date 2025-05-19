@@ -13,13 +13,12 @@ import {
 
 @Entity()
 export class PropertyOffer {
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   price: number;
-  
+
   @Column({ type: 'timestamp' })
   date: Date;
 
@@ -33,22 +32,22 @@ export class PropertyOffer {
   @Column({ nullable: true })
   guestEmail?: string;
 
-  @Column({ nullable: true }) 
+  @Column({ nullable: true })
   guestName?: string;
 
   //si è dovuto mettere nullable true per poter far accettare dal sistema le richieste esterne
-  //ovvero quando un admin aggiunge un offerta da un cliente esterno al sistema 
+  //ovvero quando un admin aggiunge un offerta da un cliente esterno al sistema
   @ManyToOne(() => Client, (client) => client.propertyOffers, {
     onDelete: 'CASCADE',
     nullable: true,
   })
   client: Client;
-  
+
   @ManyToOne(() => Listing, (listing) => listing.propertyOffers, {
-    onDelete: 'CASCADE',    
+    onDelete: 'CASCADE',
   })
   listing: Listing;
 
   @OneToMany(() => Notification, (notification) => notification.propertyOffer)
-  notifications: Notification[]; //aggiunto per le notifiche  
+  notifications: Notification[]; //aggiunto per le notifiche
 }
