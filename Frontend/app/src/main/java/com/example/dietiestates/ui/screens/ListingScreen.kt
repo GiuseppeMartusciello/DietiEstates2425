@@ -1,6 +1,7 @@
 package com.example.dietiestates.ui.screens
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.outlined.SolarPower
 import androidx.compose.material.icons.outlined.Stairs
 import androidx.compose.material.icons.outlined.ViewInAr
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -103,7 +105,14 @@ fun ListingScreen(navController: NavController) {
 
     when {
         state.loading -> {
-            // Mostra spinner o contenuto vuoto
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                    CircularProgressIndicator(color = Color.White)
+            }
         }
 
         state.listing == null -> {

@@ -1,10 +1,10 @@
 package com.example.dietiestates.ui.screens.components
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,44 +14,49 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MeetingRoom
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.RealEstateAgent
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SolarPower
 import androidx.compose.material.icons.outlined.ViewInAr
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.Listing
-import com.example.dietiestates.ui.theme.AppTypography
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.utility.formatNumberWithDots
 
 @Composable
-fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Unit) {
+fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Unit, onClickDelete: () -> Unit) {
     val imageUrl = listing.imageUrls.firstOrNull()
     val painter = if (imageUrl != null) {
         rememberAsyncImagePainter(imageUrl)
     } else {
-        painterResource(R.drawable.boh) /* ToDo da cambiare */
+        painterResource(R.drawable.no_image)
     }
     Card(
         modifier = Modifier
@@ -61,7 +66,7 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
         elevation = CardDefaults.cardElevation(4.dp)
 
     ) {
-        Column (modifier = Modifier.background(Color(0xFFF3F3F3))) {
+        Column(modifier = Modifier.background(Color(0xFFF3F3F3))) {
             Image(
                 painter = painter,
                 contentDescription = listing.title,
@@ -71,26 +76,46 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
                 contentScale = ContentScale.Crop
             )
 
-            Column (modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)) {
                 Text(listing.title, style = LocalAppTypography.current.listingTitle)
-                Text(text = listing.address, style = LocalAppTypography.current.listingAddress, fontSize = 14.sp)
+                Text(
+                    text = listing.address,
+                    style = LocalAppTypography.current.listingAddress,
+                    fontSize = 14.sp
+                )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Column (modifier = Modifier.padding(0.dp)){
-                    Text(text = "€ ${formatNumberWithDots(listing.price)}", style = LocalAppTypography.current.listingPrice)
+                Column(modifier = Modifier.padding(0.dp)) {
+                    Text(
+                        text = "€ ${formatNumberWithDots(listing.price)}",
+                        style = LocalAppTypography.current.listingPrice
+                    )
                     HorizontalDivider(
                         thickness = 1.dp,
-                        color = Color(0xFFBDBDBD))
-                    Row(modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        color = Color(0xFFBDBDBD)
+                    )
+                    Row(
+                        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         FeatureItem(icon = Icons.Outlined.RealEstateAgent, value = listing.category)
                         FeatureItem(icon = Icons.Outlined.ViewInAr, value = "${listing.size}mq")
-                        FeatureItem(icon = Icons.Outlined.MeetingRoom, value = listing.numberOfRooms)
-                        FeatureItem(icon = Icons.Outlined.SolarPower, value = listing.energyClass.toString())
+                        FeatureItem(
+                            icon = Icons.Outlined.MeetingRoom,
+                            value = listing.numberOfRooms
+                        )
+                        FeatureItem(
+                            icon = Icons.Outlined.SolarPower,
+                            value = listing.energyClass.toString()
+                        )
                         Spacer(modifier = Modifier.weight(1f))
-                        IconButton(onClick = { onClickOptions()}) {
-                            Icon(Icons.Outlined.MoreVert, contentDescription = null)
+                        EditDeleteMenu(
+                            onEditClick = { onClickOptions() },
+                            onDeleteClick = { onClickDelete() }
+                        )
 
-                        } }
+                    }
 
                 }
             }
@@ -110,39 +135,59 @@ fun FeatureItem(icon: ImageVector, value: String) {
                 .size(26.dp)
         )
         Spacer(modifier = Modifier.width(3.dp))
-            Text(
-                value, style = LocalAppTypography.current.featureValue
-            )
+        Text(
+            value, style = LocalAppTypography.current.featureValue
+        )
 
     }
 }
-@Preview(showBackground = true)
+
 @Composable
-fun test(){
-    val testListing = Listing(
-        id = "1",
-        title = "Appartamento moderno con vista",
-        address = "Via delle Rose 15",
-        municipality = "San Giovanni",
-        postalCode = "00100",
-        province = "RM",
-        size = "85",
-        latitude = 41.9028,
-        longitude = 12.4964,
-        numberOfRooms = "3",
-        energyClass = 'B',
-        nearbyPlaces = arrayListOf("Scuola:200m", "Parco:150m", "Supermercato:100m"),
-        description = "Appartamento luminoso con ampio soggiorno, cucina abitabile, due camere da letto e bagno. Situato in zona tranquilla con tutti i servizi nelle vicinanze.",
-        price = 285000,
-        category = "Vendita",
-        floor = "2",
-        hasElevator = true,
-        hasAirConditioning = true,
-        hasGarage = false,
-        imageUrls = listOf()
-    )
+fun EditDeleteMenu(
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
 
-    //ListingCard(listing = testListing) {}
-        
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Menu"
+            )
+        }
 
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Modifica") },
+                onClick = {
+                    expanded = false
+                    onEditClick()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Modifica"
+                    )
+                }
+            )
+
+            DropdownMenuItem(
+                text = { Text("Elimina") },
+                onClick = {
+                    expanded = false
+                    onDeleteClick()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Elimina"
+                    )
+                }
+            )
+        }
+    }
 }

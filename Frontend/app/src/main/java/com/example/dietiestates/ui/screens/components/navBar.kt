@@ -104,7 +104,7 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
             }
         }
         FloatingActionButton(
-            onClick = { /* Azione */ },
+            onClick = { navController.navigate("createlistingscreen") },
             containerColor = Color(0xFF3F51B5),
             contentColor = Color.White,
             shape = CircleShape,

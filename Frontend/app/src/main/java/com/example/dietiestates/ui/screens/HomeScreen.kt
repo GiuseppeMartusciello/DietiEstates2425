@@ -2,6 +2,7 @@ package com.example.dietiestates.ui.screens
 
 import android.app.Activity
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,12 +34,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +65,11 @@ fun HomeScreen(navController: NavController) {
     val viewState by homeViewModel.listingState
     val systemUiController = rememberSystemUiController()
 
+    //Per aggiornare in caso di modifica di un listing
+    val currentBackStackEntry = navController.currentBackStackEntry
+    val savedStateHandle = currentBackStackEntry?.savedStateHandle
+    val context = LocalContext.current
+
     SideEffect {
         systemUiController.setStatusBarColor(
             Color(0xFF3F51B5),
@@ -69,6 +77,15 @@ fun HomeScreen(navController: NavController) {
         ) // o false se immagine scura
     }
 
+    //Aggiorna al ritorno della modifica di un listing
+    LaunchedEffect(Unit) {
+        savedStateHandle?.getLiveData<Boolean>("listingModified")?.observeForever { modified ->
+            if (modified == true) {
+                homeViewModel.fetchListings() // 🔄 ricarica la lista dei listing
+                savedStateHandle.set("listingModified", false) // reset
+            }
+        }
+    }
 
     Scaffold(topBar = {
         Column(
@@ -146,7 +163,18 @@ fun HomeScreen(navController: NavController) {
                             ListingCard(
                                 listing = listing,
                                 onClick = { navController.navigate("listingscreen/${listing.id}") },
-                                onClickOptions = { navController.navigate("modifylistingscreen/${listing.id}") })
+                                onClickOptions = {
+                                    navController.navigate("modifylistingscreen/${listing.id}")
+                                },
+                                onClickDelete ={ homeViewModel.deleteListing(    listingId = listing.id,
+                                    onSuccess = {
+                                        Toast.makeText(context, "Annuncio eliminato ✅", Toast.LENGTH_SHORT).show()
+
+                                    },
+                                    onError = { message ->
+                                        Toast.makeText(context, "Errore eliminazione ❌: $message", Toast.LENGTH_SHORT).show()
+                                    })}
+                            )
                         }
                     }
                 }

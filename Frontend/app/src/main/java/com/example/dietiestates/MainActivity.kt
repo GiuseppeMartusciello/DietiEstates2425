@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.dietiestates.ui.screens.CreateListingScreen
 import com.example.dietiestates.ui.screens.FullTextScreen
 import com.example.dietiestates.ui.screens.HomeScreen
 import com.example.dietiestates.ui.screens.ListingScreen
@@ -71,15 +72,15 @@ fun MyApp() {
             route = "listingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) { backStackEntry ->
-            //val listingId = backStackEntry.arguments?.getString("listingId") ?: ""
             ListingScreen(navController)
         }
         composable(
             route = "modifylistingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) { backStackEntry ->
-            //val listingId = backStackEntry.arguments?.getString("listingId") ?: ""
+
             ModifyListingScreen(navController)
+
         }
         composable(
             route = "listingviewdescriptionscreen/{text}",
@@ -87,6 +88,9 @@ fun MyApp() {
         ) { backStackEntry ->
             val text = backStackEntry.arguments?.getString("text") ?: ""
             FullTextScreen(navController, text = text)
+        }
+        composable(route = "createlistingscreen") {
+            CreateListingScreen(navController)
         }
         composable(route = "home") {
             HomeScreen(navController)

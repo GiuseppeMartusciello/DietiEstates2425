@@ -1,88 +1,123 @@
 package com.example.dietiestates.ui.screens
 
-import androidx.compose.foundation.border
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.dietiestates.data.model.Listing
+import com.example.dietiestates.data.model.ModifyOrCreateListingDto
+import com.example.dietiestates.ui.screens.components.BottomBar
 import com.example.dietiestates.ui.screens.components.CustomButton
-import com.example.dietiestates.ui.theme.AppTypography
+import com.example.dietiestates.ui.screens.components.ImageGalleryPager
+import com.example.dietiestates.ui.screens.components.LabeledCheckBoxField
+import com.example.dietiestates.ui.screens.components.LabeledNumberField
+import com.example.dietiestates.ui.screens.components.LabeledTextField
+import com.example.dietiestates.ui.screens.components.RemotePhotoEditor
+import com.example.dietiestates.ui.screens.components.dropDownMenu
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.RobotoSlab
+import com.example.dietiestates.ui.viewModel.EditOperation
 import com.example.dietiestates.ui.viewModel.ListingViewModel
-import com.example.dietiestates.utility.formatNumberWithDots
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-data class ListingState(
-    val loading: Boolean = true,
-    val listing: Listing? = null,
-    val error: String? = null
-)
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModifyListingScreen(navController: NavController) {
     val viewModel: ListingViewModel = viewModel()
     val listing = viewModel.listingState.value.listing
-    val state = viewModel.listingState.value
+    val state = viewModel.listingState.value  //Stato del caricamento del listing
+    val editState = viewModel.editListingState.value //Stato della modifica/aggiornamento del listing
+
     val scrollState = rememberScrollState()
     val systemUiController = rememberSystemUiController()
+    var showPhotoEditor by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
+    val form = viewModel.formState
+    val errors = viewModel.formErrors
     SideEffect {
         systemUiController.setStatusBarColor(
             Color.Transparent,
             darkIcons = true
-        ) // o false se immagine scura
+        )
+    }
+    LaunchedEffect(editState) {
+        when {
+            editState.success -> {
+                val message = when (editState.operation) {
+                    EditOperation.UPDATE -> "✅ Modifica salvata"
+                    EditOperation.DELETE_IMAGE -> "🗑️ Immagine eliminata"
+                    EditOperation.UPLOAD_IMAGE -> "📤 Caricamento avvenuto con successo"
+                    else -> "✅ Operazione completata"
+                }
+
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                if (editState.operation === EditOperation.UPDATE) {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("listingModified", true)
+                    navController.popBackStack()
+                    navController.navigateUp()
+                }
+
+            }
+
+            editState.error != null -> {
+                val errorMessage = when (editState.operation) {
+                    EditOperation.UPDATE -> "❌ Errore durante la modifica"
+                    EditOperation.DELETE_IMAGE -> "❌ Errore eliminazione immagine"
+                    EditOperation.UPLOAD_IMAGE -> "❌ Errore upload immagine"
+                    else -> "❌ Errore generico"
+                }
+
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    LaunchedEffect(listing) {
+        if (listing != null) {
+            viewModel.loadListingForEdit(listing)
+        }
     }
 
     when {
@@ -109,339 +144,225 @@ fun ModifyListingScreen(navController: NavController) {
         else -> {
             // Contenuto normale con listing
             if (listing != null) {
-                val systemUiController = rememberSystemUiController()
-                var title by remember { mutableStateOf(listing.title) }
-                var address by remember { mutableStateOf(listing.address) }
-                var municipality by remember { mutableStateOf(listing.municipality) }
-                var postalCode by remember { mutableStateOf(listing.postalCode) }
-                var province by remember { mutableStateOf(listing.province) }
-                var size by remember { mutableStateOf(listing.size) }
-                var numberOfRooms by remember { mutableStateOf(listing.numberOfRooms) }
-                var energyClassText by remember { mutableStateOf(listing.energyClass.toString()) }
-                val energyClass: Char = energyClassText.firstOrNull() ?: ' '
-
-                var description by remember { mutableStateOf(listing.description) }
-                var priceText by remember { mutableStateOf(listing.price.toString()) }
-                val price: Long = priceText.toLongOrNull() ?: 0L
-                var category by remember { mutableStateOf(listing.category) }
-                var floor by remember { mutableStateOf(listing.floor) }
-                var hasElevator by remember { mutableStateOf(listing.hasElevator) }
-                var hasAirConditioning by remember { mutableStateOf(listing.hasAirConditioning) }
-                var hasGarage by remember { mutableStateOf(listing.hasGarage) }
-
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column( //Colonna che controlla la possibilità di scrollare
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(start = 10.dp,end = 10.dp, top = 50.dp, bottom = 100.dp)
+                            .padding(bottom = 100.dp)
                     ) {
-                        Text(
-                            text = "Modifica Informazioni",
-                            style = LocalAppTypography.current.sectionTitle,
-                            modifier = Modifier.padding(vertical = 6.dp),
-                        )
+                        Column() {
+                            ImageGalleryPager(images = viewModel.imageUrls)
 
-                        LabeledTextField(
-                            label = "Titolo",
-                            value = title,
-                            onValueChange = { title = it })
-                        LabeledTextField(
-                            label = "Indirizzo",
-                            value = address,
-                            onValueChange = { address = it })
-                        LabeledTextField(
-                            label = "Comune",
-                            value = municipality,
-                            onValueChange = { municipality = it })
-                        LabeledNumberField(
-                            label = "Codice Postale",
-                            value = postalCode,
-                            onValueChange = { postalCode = it })
-                        LabeledTextField(
-                            label = "Provincia",
-                            value = province,
-                            onValueChange = { province = it })
-                        LabeledNumberField(
-                            label = "Dimensione",
-                            value = size,
-                            onValueChange = { size = it })
-                        dropDownMenu(
-                            label = "Stanze",
-                            value = numberOfRooms,
-                            options = (1..20).map { it.toString() },
-                            onValueChange = { numberOfRooms = it })
-
-                        dropDownMenu(
-                            label = "Classe Energetica",
-                            value = energyClassText,
-                            options = listOf("A", "B", "C", "D", "E"),
-                            onValueChange = { energyClassText = it })
-                        LabeledNumberField(
-                            label = "Prezzo",
-                            value = priceText,
-                            onValueChange = { priceText = it })
-                        dropDownMenu(
-                            label = "Categoria",
-                            value = category,
-                            options = listOf("Vendita", "Affitto"),
-                            onValueChange = { category = it })
-                        dropDownMenu(
-                            label = "Piani",
-                            value = floor,
-                            options = (1..20).map { it.toString() },
-                            onValueChange = { floor = it })
-
-                        Row(
-                            modifier = Modifier
-                                .padding(15.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Ascensore",
-                                modifier = Modifier.weight(1f)
-                            )
-                            Checkbox(
-                                checked = hasElevator,
-                                onCheckedChange = { hasElevator = it }
+                            CustomButton(
+                                onClick = { showPhotoEditor = true },
+                                style = "white",
+                                text = "Modifica",
+                                icon = Icons.Outlined.Edit,
+                                modifier = Modifier
+                                    .align(
+                                        Alignment.End
+                                    )
+                                    .padding(end = 10.dp)
                             )
                         }
-                        LabeledTextField(
-                            label = "Aria Condizionata",
-                            value = address,
-                            onValueChange = { title = it })
-                        LabeledTextField(
-                            label = "Garage",
-                            value = address,
-                            onValueChange = { title = it })
+                        if (showPhotoEditor) {
+                            ModalBottomSheet(onDismissRequest = { showPhotoEditor = false }) {
+                                RemotePhotoEditor(
+                                    imageUrls = viewModel.imageUrls,
+                                    listingId = listing.id,
+                                    modifier = Modifier.fillMaxHeight(0.3f),
+                                )
+                            }
+                        }
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp)
+                        ) {
 
-                        LabeledTextField(
-                            label = "Descrizione",
-                            value = description,
-                            onValueChange = { description = it })
+                            LabeledTextField(
+                                label = "Titolo",
+                                value = form.title,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(title = it) } },
+                                isError = errors.title != null,
+                                maxChars = 80
+                            )
+                            LabeledTextField(
+                                label = "Indirizzo",
+                                value = form.address,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(address = it) } },
+                                isError = errors.address != null,
+                                maxChars = 80
+                            )
+                            LabeledTextField(
+                                label = "Comune",
+                                value = form.municipality,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(municipality = it) } },
+                                isError = errors.municipality != null,
+                                maxChars = 30
+                            )
+                            LabeledNumberField(
+                                label = "Codice Postale",
+                                value = form.postalCode,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(postalCode = it) } },
+                                maxChars = 5,
+                                isError = errors.postalCode != null,
+                                modifier = Modifier.width(70.dp),
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .padding(vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Provincia",
+                                    style = LocalAppTypography.current.featureTitle,
+                                    fontSize = 16.sp,
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Column(horizontalAlignment = Alignment.End) {
+                                    TextField(
+                                        value = form.province,
+                                        onValueChange = {
+                                            if (it.length <= 2) {
+                                                viewModel.onFieldChange { current -> current.copy(province = it) }
+                                            }
+                                        },
+                                        textStyle = TextStyle(
+                                            fontFamily = RobotoSlab,
+                                            fontWeight = FontWeight.Light,
+                                            fontSize = 12.sp
+                                        ),
+                                        colors = TextFieldDefaults.colors(
+                                            unfocusedContainerColor = Color.Transparent,
+                                            focusedContainerColor = Color.Transparent,
+                                            disabledContainerColor = Color.Transparent
+                                        ),
+                                        isError = errors.province != null,
+                                        modifier = Modifier
+                                            .height(48.dp)
+                                            .width(70.dp)
+                                    )
+                                    Text(
+                                        text = "${form.province.length} / 2",
+                                        fontSize = 12.sp,
+                                        color = if (form.province.length >= 2) Color.Red else Color.Gray,
+                                    )
+                                }
 
+                            }
+                            LabeledNumberField(
+                                label = "Dimensione",
+                                value = form.size,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(size = it) } },
+                                maxChars = 5,
+                                isError = errors.size != null,
+                                modifier = Modifier.width(70.dp)
+                            )
+                            dropDownMenu(
+                                label = "Stanze",
+                                value = form.numberOfRooms,
+                                options = (0..20).map { it.toString() },
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(numberOfRooms = it) } },
+                            )
+                            dropDownMenu(
+                                label = "Classe Energetica",
+                                value = form.energyClass,
+                                options = listOf("A", "B", "C", "D", "E"),
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(energyClass = it) } },
+                            )
+                            LabeledNumberField(
+                                label = "Prezzo",
+                                value = form.price,
+                                maxChars = 15,
+                                isError = errors.price != null,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(price = it) } },
+                            )
+                            dropDownMenu(
+                                label = "Categoria",
+                                value = form.category,
+                                options = listOf("Vendita", "Affitto"),
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(category = it) } },
+                                modifier = Modifier.width(130.dp)
+                            )
+                            dropDownMenu(
+                                label = "Piani",
+                                value = form.floor,
+                                options = (0..20).map { it.toString() },
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(floor = it) } },
+                            )
+                            LabeledCheckBoxField(
+                                label = "Ascensore",
+                                value = form.hasElevator,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(hasElevator = it) } }
+                            )
+                            LabeledCheckBoxField(
+                                label = "Aria Condizionata",
+                                value = form.hasAirConditioning,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(hasAirConditioning = it) } }
+                            )
+                            LabeledCheckBoxField(
+                                label = "Garage",
+                                value = form.hasGarage,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(hasGarage = it) } }
+                            )
 
+                            Text(
+                                text = "Descrizione",
+                                style = LocalAppTypography.current.featureTitle,
+                                fontSize = 16.sp,
+                                modifier = Modifier
+                                    .padding(vertical = 10.dp),
+                            )
+                            TextField(
+                                value = form.description,
+                                onValueChange = { viewModel.onFieldChange { current -> current.copy(description = it) } },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 120.dp),
+                                textStyle = TextStyle(
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp
+                                ),
+                                isError = errors.description != null,
+                                singleLine = false,
+                                maxLines = 10
+                            )
+
+                        }
                     }
                     BottomBar(
-                        formatNumberWithDots(listing.price),
+                        navController,
+                        onClick = {
+                            val dto = viewModel.validateAndBuildDto()
+                            if (dto != null)
+                                viewModel.updateListing(
+                                    listingId = listing.id,
+                                    dto = dto,
+                                )
+
+                        },
                         modifier = Modifier.align(Alignment.BottomCenter)
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun dropDownMenu(
-    label: String,
-    value: String,
-    options: List<String>,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .padding(15.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = LocalAppTypography.current.featureTitle,
-            fontSize = 16.sp
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        SimpleDropdownSelector(
-            options = options,
-            selectedOption = value,
-            onOptionSelected = { onValueChange(it) }
-        )
-    }
-}
-
-@Composable
-fun LabeledTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .padding(15.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = LocalAppTypography.current.featureTitle,
-            fontSize = 16.sp
-        )
-        Spacer(modifier = Modifier.width(30.dp))
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            textStyle = TextStyle(
-                fontFamily = RobotoSlab,
-                fontWeight = FontWeight.Light,
-                fontSize = 12.sp
-            ),
-            modifier = Modifier
-                .height(48.dp)
-        )
-    }
-}
-
-@Composable
-fun LabeledNumberField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(15.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = LocalAppTypography.current.featureTitle,
-            fontSize = 16.sp
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-        TextField(
-            value = value,
-            onValueChange = { input ->
-                if (input.all { it.isDigit() }) {
-                    onValueChange(input)
-                }
-            },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            textStyle = TextStyle(
-                fontFamily = RobotoSlab,
-                fontWeight = FontWeight.Light,
-                fontSize = 12.sp
-            ),
-            modifier = Modifier
-                .height(48.dp)
-                .width(120.dp)
-        )
-    }
-}
-
-
-@Composable
-private fun BottomBar(price: String, modifier: Modifier = Modifier) {
-    val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
-    Surface(
-        modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-            .padding(bottom = navBarPadding)
-            .border(1.dp, Color(0xFF9E9E9E), RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
-        color = Color.White,
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-
-            CustomButton(
-                text = "Annulla",
-                style = "white",
-                onClick = { /*TODO*/ },
-                modifier = Modifier.width(140.dp)
-            )
-
-            CustomButton(
-                text = "Salva",
-                icon = Icons.Outlined.AttachMoney,
-                style = "white",
-                onClick = { /*TODO*/ },
-                modifier = Modifier.width(140.dp)
-            )
-
-        }
-
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun <T> SimpleDropdownSelector(
-    options: List<T>,
-    selectedOption: T,
-    onOptionSelected: (T) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = modifier
-    ) {
-        OutlinedTextField(
-            value = selectedOption.toString(),
-            onValueChange = {},
-            readOnly = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier = Modifier
-                .menuAnchor()
-                .width(80.dp)
-                .height(50.dp)
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option.toString()) },
-                    onClick = {
-                        onOptionSelected(option)
-                        expanded = false
+                    if (editState.isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.5f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator(color = Color.White)
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Attendi mentre aggiorniamo l'appartamento",
+                                    color = Color.White
+                                )
+                            }
+                        }
                     }
-                )
+                }
             }
         }
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun prova() {
-    val navController = rememberNavController()
-    val testListing = Listing(
-        id = "1",
-        title = "Appartamento moderno con vista",
-        address = "Via delle Rose 15",
-        municipality = "San Giovanni",
-        postalCode = "00100",
-        province = "RM",
-        size = "85",
-        latitude = 41.9028,
-        longitude = 12.4964,
-        numberOfRooms = "3",
-        energyClass = 'B',
-        nearbyPlaces = arrayListOf("Scuola:200m", "Parco:150m", "Supermercato:100m"),
-        description = "Appartamento luminoso con ampio soggiorno, cucina abitabile, due camere da letto e bagno. Situato in zona tranquilla con tutti i servizi nelle vicinanze.",
-        price = 285000,
-        category = "Vendita",
-        floor = "2",
-        hasElevator = true,
-        hasAirConditioning = true,
-        hasGarage = false,
-        imageUrls = listOf()
-    )
-    //ModifyListingScreen(navController, testListing)
 }

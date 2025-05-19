@@ -11,11 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.example.dietiestates.R
 import com.google.accompanist.pager.*
 
-@OptIn(ExperimentalPagerApi::class)
+
 @Composable
 fun ImageGalleryPager(images: List<String>) {
     val pagerState = rememberPagerState()
@@ -25,26 +27,37 @@ fun ImageGalleryPager(images: List<String>) {
             .fillMaxWidth()
             .height(300.dp)
     ) {
-        HorizontalPager(
-            count = images.size,
-            state = pagerState,
-            modifier = Modifier.weight(1f)
-        ) { page ->
+        if (images.isNullOrEmpty())
             Image(
-                painter = rememberAsyncImagePainter(images[page]),
+                painter = painterResource(R.drawable.no_image),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxWidth()
+                    .weight(1f),
                 contentScale = ContentScale.Crop
             )
-        }
+        else {
+            HorizontalPager(
+                count = images.size,
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                Image(
+                    painter = rememberAsyncImagePainter(images[page]),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
-        // Indicatore tipo 1 / N
-        HorizontalPagerIndicator(
-            pagerState = pagerState,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(8.dp)
-        )
+            // Indicatore tipo 1 / N
+            HorizontalPagerIndicator(
+                pagerState = pagerState,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(8.dp)
+            )
+        }
     }
 }
