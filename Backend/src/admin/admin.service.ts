@@ -60,7 +60,7 @@ export class AdminService {
     await queryRunner.startTransaction();
 
     try {
-      const exists = await await queryRunner.manager.findOne(Agency, {
+      const exists = await queryRunner.manager.findOne(Agency, {
         where: [{ name }, { phone }, { vatNumber }],
       });
 

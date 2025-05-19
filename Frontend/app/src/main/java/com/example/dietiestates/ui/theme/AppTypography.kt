@@ -45,8 +45,7 @@ val CustomTypography = AppTypography(
         fontSize = 22.sp,
         lineHeight = 21.sp,
         color = Color.Black
-    )
-    ,
+    ),
     listingAddress = TextStyle(
         fontFamily = Roboto,
         fontWeight = FontWeight.Light,

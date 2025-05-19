@@ -16,10 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
@@ -60,7 +63,10 @@ fun HomeScreen(navController: NavController) {
     val systemUiController = rememberSystemUiController()
 
     SideEffect {
-        systemUiController.setStatusBarColor(Color(0xFF3F51B5), darkIcons = true) // o false se immagine scura
+        systemUiController.setStatusBarColor(
+            Color(0xFF3F51B5),
+            darkIcons = true
+        ) // o false se immagine scura
     }
 
 
@@ -89,17 +95,17 @@ fun HomeScreen(navController: NavController) {
         NavBar(
             navController = navController, items = listOf(
                 NavItem(
-                    "Home",
-                    Icons.Outlined.Home, "home"
-                ),NavItem(
-                    "Cerca",
-                    Icons.Outlined.Search, "notification"
+                    "home",
+                    Icons.Outlined.Home, Icons.Filled.Home
                 ), NavItem(
-                    "Notifiche",
-                    Icons.Outlined.Notifications, "notification"
+                    "cerca",
+                    Icons.Outlined.Search, Icons.Filled.Search
                 ), NavItem(
-                    "Logout",
-                    Icons.Outlined.Logout, "logout"
+                    "notifiche",
+                    Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
+                ), NavItem(
+                    "logout",
+                    Icons.Outlined.Person, Icons.Filled.Person,
                 )
             )
         )
@@ -110,8 +116,17 @@ fun HomeScreen(navController: NavController) {
             }
 
             viewState.error != null -> {
-                Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Outlined.Error, contentDescription = null, tint = Color.Red, modifier = Modifier.size(70.dp))
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Outlined.Error,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.size(70.dp)
+                    )
                     Text(text = "Errore nel caricamento degli immobili", fontSize = 22.sp)
                 }
             }
@@ -128,9 +143,10 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier.wrapContentHeight()
                     ) {
                         items(viewState.list) { listing ->
-                            ListingCard(listing = listing, onClick = {
-                                navController.navigate("listingscreen/${listing.id}")
-                            })
+                            ListingCard(
+                                listing = listing,
+                                onClick = { navController.navigate("listingscreen/${listing.id}") },
+                                onClickOptions = { navController.navigate("modifylistingscreen/${listing.id}") })
                         }
                     }
                 }
