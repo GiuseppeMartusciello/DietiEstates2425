@@ -10,11 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -26,12 +22,11 @@ import com.example.dietiestates.ui.screens.FullTextScreen
 import com.example.dietiestates.ui.screens.HomeScreen
 import com.example.dietiestates.ui.screens.ListingScreen
 import com.example.dietiestates.ui.screens.LoginScreen
-import com.example.dietiestates.ui.screens.ModifyListingScreen
 import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.AuthViewModel
-import com.example.dietiestates.ui.viewModel.HomeViewModel
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +57,7 @@ fun MyApp() {
     val authViewModel: AuthViewModel = viewModel()
     authViewModel.checkLogin()
     val startDestination = if (authViewModel.isLoggedIn.value) "home" else "loginscreen"
+    Log.d("traccia",startDestination)
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(route = "loginscreen") {
@@ -71,15 +67,8 @@ fun MyApp() {
             route = "listingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) { backStackEntry ->
-            //val listingId = backStackEntry.arguments?.getString("listingId") ?: ""
+            val listingId = backStackEntry.arguments?.getString("listingId") ?: ""
             ListingScreen(navController)
-        }
-        composable(
-            route = "modifylistingscreen/{listingId}",
-            arguments = listOf(navArgument("listingId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            //val listingId = backStackEntry.arguments?.getString("listingId") ?: ""
-            ModifyListingScreen(navController)
         }
         composable(
             route = "listingviewdescriptionscreen/{text}",

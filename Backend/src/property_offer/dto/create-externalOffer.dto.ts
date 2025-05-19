@@ -1,17 +1,14 @@
-import { IsEmail, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateExternalOfferDto {
+  @IsNumber()
+  price: number;
 
-  
-    @IsNumber()
-    price: number;
-  
-    @IsOptional()
-    @IsEmail()
-    guestEmail?: string;
-  
-    @IsOptional()
-    @IsString()
-    guestName?: string;
-  }
+  @IsOptional()
+  @IsEmail()
+  guestEmail?: string;
 
+  @IsOptional()
+  @IsString()
+  guestName?: string;
+}
