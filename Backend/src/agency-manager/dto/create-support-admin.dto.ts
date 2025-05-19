@@ -23,9 +23,6 @@ export class CreateSupportAdminDto {
   @IsEmail()
   email: string;
 
-  @IsStrongPassword()
-  password: string;
-
   @IsDate()
   @Type(() => Date)
   birthDate: Date;

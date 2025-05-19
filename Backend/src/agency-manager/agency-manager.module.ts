@@ -7,10 +7,11 @@ import { SupportAdmin } from 'src/support-admin/support-admin.entity';
 import { User } from 'src/auth/user.entity';
 import { Agency } from 'src/agency/agency.entity';
 import { Agent } from 'src/agent/agent.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   controllers: [AgencyManagerController],
-  providers: [AgencyManagerService],
+  providers: [AgencyManagerService, ConfigService],
   imports: [
     TypeOrmModule.forFeature([Manager, User, SupportAdmin, Agency, Agent]),
   ],
