@@ -99,7 +99,7 @@ fun HomeScreen(navController: NavController) {
                     Icons.Outlined.Notifications, "notification"
                 ), NavItem(
                     "Logout",
-                    Icons.Outlined.Logout, "logout"
+                    Icons.Outlined.Logout, "loginscreen"
                 )
             )
         )

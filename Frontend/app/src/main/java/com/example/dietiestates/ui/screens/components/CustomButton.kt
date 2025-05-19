@@ -1,6 +1,8 @@
 package com.example.dietiestates.ui.screens.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +40,7 @@ fun CustomButton(
     onClick: () -> Unit,
     text: String? = null,
     icon: ImageVector? = null,
+    @DrawableRes imageRes: Int? = null,
     modifier: Modifier = Modifier,
     style: String,
     enabled: Boolean = true
@@ -60,6 +64,13 @@ fun CustomButton(
     ) {
         if (icon != null) {
             Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(28.dp))
+        }
+        if (imageRes != null ) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
         }
         if (text != null) {
             if (icon != null) Spacer(modifier = Modifier.width(4.dp))

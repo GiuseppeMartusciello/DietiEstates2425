@@ -22,10 +22,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.dietiestates.ui.screens.ChangePassword
 import com.example.dietiestates.ui.screens.FullTextScreen
 import com.example.dietiestates.ui.screens.HomeScreen
 import com.example.dietiestates.ui.screens.ListingScreen
 import com.example.dietiestates.ui.screens.LoginScreen
+import com.example.dietiestates.ui.screens.RegisterScreen
 import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
@@ -67,6 +69,17 @@ fun MyApp() {
         composable(route = "loginscreen") {
             LoginScreen(navController)
         }
+        composable(
+            route ="registerscreen"
+            ) {
+            RegisterScreen(navController = navController)
+        }
+        composable(
+            route = "changepasswordscreen",
+        ){
+            ChangePassword(navController= navController)
+        }
+
         composable(
             route = "listingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })

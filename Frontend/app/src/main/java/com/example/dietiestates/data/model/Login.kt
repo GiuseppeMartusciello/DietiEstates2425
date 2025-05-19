@@ -6,5 +6,18 @@ data class LoginRequest(
 )
 
 data class LoginResponse(
-    val accessToken: String
+    val accessToken: String,
+    val mustChangePassword: Boolean
 )
+
+data class AuthResult(
+    val success: Boolean,
+    val mustChangePassword: Boolean = false,
+    val errorMessage: String? = null
+)
+
+enum class PostLoginNavigation {
+    HOME,
+    CHANGE_PASSWORD,
+
+}
