@@ -10,7 +10,7 @@ import { CredentialDto } from 'src/agency-manager/dto/credentials.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class userService {
+export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
