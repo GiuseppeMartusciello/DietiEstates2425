@@ -2,6 +2,7 @@ package com.example.dietiestates.ui.screens
 
 import android.app.Activity
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,10 +17,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
@@ -30,12 +34,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,10 +65,27 @@ fun HomeScreen(navController: NavController) {
     val viewState by homeViewModel.listingState
     val systemUiController = rememberSystemUiController()
 
+    //Per aggiornare in caso di modifica di un listing
+    val currentBackStackEntry = navController.currentBackStackEntry
+    val savedStateHandle = currentBackStackEntry?.savedStateHandle
+    val context = LocalContext.current
+
     SideEffect {
-        systemUiController.setStatusBarColor(Color(0xFF3F51B5), darkIcons = true) // o false se immagine scura
+        systemUiController.setStatusBarColor(
+            Color(0xFF3F51B5),
+            darkIcons = true
+        ) // o false se immagine scura
     }
 
+    //Aggiorna al ritorno della modifica di un listing
+    LaunchedEffect(Unit) {
+        savedStateHandle?.getLiveData<Boolean>("listingModified")?.observeForever { modified ->
+            if (modified == true) {
+                homeViewModel.fetchListings() // 🔄 ricarica la lista dei listing
+                savedStateHandle.set("listingModified", false) // reset
+            }
+        }
+    }
 
     Scaffold(topBar = {
         Column(
@@ -89,17 +112,17 @@ fun HomeScreen(navController: NavController) {
         NavBar(
             navController = navController, items = listOf(
                 NavItem(
-                    "Home",
-                    Icons.Outlined.Home, "home"
-                ),NavItem(
-                    "Cerca",
-                    Icons.Outlined.Search, "notification"
+                    "home",
+                    Icons.Outlined.Home, Icons.Filled.Home
                 ), NavItem(
-                    "Notifiche",
-                    Icons.Outlined.Notifications, "notification"
+                    "cerca",
+                    Icons.Outlined.Search, Icons.Filled.Search
                 ), NavItem(
-                    "Logout",
-                    Icons.Outlined.Logout, "loginscreen"
+                    "notifiche",
+                    Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
+                ), NavItem(
+                    "logout",
+                    Icons.Outlined.Person, Icons.Filled.Person,
                 )
             )
         )
@@ -110,8 +133,17 @@ fun HomeScreen(navController: NavController) {
             }
 
             viewState.error != null -> {
-                Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Outlined.Error, contentDescription = null, tint = Color.Red, modifier = Modifier.size(70.dp))
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Outlined.Error,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.size(70.dp)
+                    )
                     Text(text = "Errore nel caricamento degli immobili", fontSize = 22.sp)
                 }
             }
@@ -128,9 +160,21 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier.wrapContentHeight()
                     ) {
                         items(viewState.list) { listing ->
-                            ListingCard(listing = listing, onClick = {
-                                navController.navigate("listingscreen/${listing.id}")
-                            })
+                            ListingCard(
+                                listing = listing,
+                                onClick = { navController.navigate("listingscreen/${listing.id}") },
+                                onClickOptions = {
+                                    navController.navigate("modifylistingscreen/${listing.id}")
+                                },
+                                onClickDelete ={ homeViewModel.deleteListing(    listingId = listing.id,
+                                    onSuccess = {
+                                        Toast.makeText(context, "Annuncio eliminato ✅", Toast.LENGTH_SHORT).show()
+
+                                    },
+                                    onError = { message ->
+                                        Toast.makeText(context, "Errore eliminazione ❌: $message", Toast.LENGTH_SHORT).show()
+                                    })}
+                            )
                         }
                     }
                 }

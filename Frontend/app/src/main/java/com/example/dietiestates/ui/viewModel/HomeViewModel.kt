@@ -19,7 +19,7 @@ class HomeViewModel : ViewModel() {
     val listingState : State<ListingState> = _listingState
 
     init {
-        fetchListing()
+        fetchListings()
     }
 
     data class ListingState(
@@ -28,7 +28,7 @@ class HomeViewModel : ViewModel() {
         val error: String? = null
     )
 
-    private fun fetchListing(){
+    fun fetchListings(){
         viewModelScope.launch {
             try{
                 val listings = AppContainer.listingRepository.getListings()
@@ -45,4 +45,21 @@ class HomeViewModel : ViewModel() {
             }
         }
     }
+
+    fun deleteListing(
+        listingId: String,
+        onSuccess: () -> Unit,
+        onError: (String?) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                AppContainer.listingRepository.deleteListing(listingId)
+                fetchListings()
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message)
+            }
+        }
+    }
+
 }

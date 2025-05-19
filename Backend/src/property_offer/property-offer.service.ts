@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,10 +13,12 @@ import { CreateOfferDto } from './dto/create-offer.dto';
 import { UserItem } from 'src/common/types/userItem';
 import { ListingRepository } from 'src/listing/listing.repository';
 import { UpdateOfferDto } from './dto/update-offer.dto';
-import { UserRoles } from 'src/common/types/user-roles';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotificationType } from 'src/common/types/notification.enum';
+
 
 @Injectable()
 export class OfferService {
@@ -27,25 +30,24 @@ export class OfferService {
 
     @InjectRepository(Client)
     private readonly clientRepository: Repository<Client>,
+
+    private readonly notificationService: NotificationService,
   ) {}
 
   // tutti gli immobili per cui il cliente ha fatto un offerta
   // essendo una query presonalizzata è stata inserirta nel repository del listing
   async getListingByClientId(userId: string): Promise<Listing[]> {
-
     const uniqueListings = await this.listingRepository
-    .createQueryBuilder('listing')
-    .innerJoinAndSelect('listing.propertyOffers', 'propertyOffer')
-    .where('propertyOffer.client.userId = :userId', { userId })
-    .distinct(true)
-    .getMany();
-
-    if (!uniqueListings)
-      throw new NotFoundException('No listings found for this client');
+      .createQueryBuilder('listing')
+      .innerJoinAndSelect('listing.propertyOffers', 'propertyOffer')
+      .where('propertyOffer.client.userId = :userId', { userId })
+      .distinct(true)
+      .getMany();
 
     return uniqueListings;
   }
 
+  //viene creata un offerta per un immobile da parte del cliente
   async createOffer(
     createOfferDto: CreateOfferDto,
     listingId: string,
@@ -61,7 +63,7 @@ export class OfferService {
     if (listing.price < price)
       throw new BadRequestException('Price exceeds listing price');
 
-    const offer = await this.offerRepository.create({
+    const offer = this.offerRepository.create({
       price: price,
       date: new Date(),
       state: OfferState.PENDING,
@@ -69,10 +71,27 @@ export class OfferService {
       listing: listing,
       client: { userId: user.id } as Client,
     });
+
     await this.offerRepository.save(offer);
+
+    //crea notifica specifica per una nuova offerta
+    const notifica =
+      await this.notificationService.createSpecificNotificationOffer(
+        {
+          title: 'New offer',
+          description: 'New offer for your listing',
+          category: NotificationType.SPECIFIC,
+        },
+        offer,
+      );
+
+    if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
+
     return offer;
   }
 
+  // viene creata un offerta per un immobile da parte dell agente
   async createOfferbyAgent(
     createOfferDto: CreateOfferDto,
     listingId: string,
@@ -91,7 +110,7 @@ export class OfferService {
     if (listing.price < price)
       throw new BadRequestException('Price exceeds listing price');
 
-    const offer = await this.offerRepository.create({
+    const offer = this.offerRepository.create({
       price: price,
       date: new Date(),
       state: OfferState.PENDING,
@@ -100,23 +119,47 @@ export class OfferService {
       client: { userId: clientId } as Client,
     });
     await this.offerRepository.save(offer);
+
+    //crea notifica specifica per una nuova offerta
+    const notifica =
+      await this.notificationService.createSpecificNotificationOffer(
+        {
+          title: 'New offer',
+          description: 'New offer for your listing',
+          category: NotificationType.SPECIFIC,
+        },
+        offer,
+      );
+
+    if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
+
     return offer;
   }
 
+  //offerta viene aggiornata se viene rifiutata o accettata o annullata
   async updateOffer(
     offerId: string,
     updateOfferdto: UpdateOfferDto,
     user: UserItem,
   ): Promise<PropertyOffer> {
+
     const { status } = updateOfferdto;
 
     // cerco l oggetto offerta tramite l id dell offerta
     const offer = await this.offerRepository.findOne({
       where: { id: offerId },
     });
-    if (!offer) throw new NotFoundException('Offer not found');
 
-    if (user.role === UserRoles.AGENT) {
+    //controllo se l offerta esiste e se è in stato PENDING
+    if (!offer) throw new NotFoundException('Offer not found');
+    else if (offer.state !== OfferState.PENDING)
+      throw new BadRequestException('Offer already processed');
+
+
+    //se non è un cliente
+    //si recupera l immobile tramite l offerta e poi si controllano se i permessi sono validi
+    if (!user.client) {
       const listing = await this.listingRepository.findOne({
         where: { id: offer.listing.id },
       });
@@ -127,16 +170,13 @@ export class OfferService {
 
     const madeByUser = offer.madeByUser;
 
-    //controllo i permessi di cambio di status dell offerta
-    if (user.role === UserRoles.CLIENT) {
+    if (user.client) {
       //se l offerta è stata fatta da un cliente non può accetare o rifiutare la propria offerta
       if (
         madeByUser &&
         status == (OfferState.ACCEPTED || OfferState.DECLINED)
       ) {
-        throw new UnauthorizedException(
-          'Client cannot accept or decline an offer',
-        );
+        throw new UnauthorizedException('Client cannot accept or decline an offer',);
       }
     } else {
       //se l offerta è stata fatta da un agente non può accetare o rifiutare la propria del cliente
@@ -149,15 +189,29 @@ export class OfferService {
     }
     //l' offerta in ambo i casi puo essere annullata
 
-    //faccio l update
-    // dopo aver preso l offerta come ogetto semplicemente cambiando la proprieta dell oggetto
-    // e salvando l oggetto offerta
+    //update
     offer.state = status;
-    this.offerRepository.save(offer);
+    await this.offerRepository.save(offer);
+
+    //crea notifica specifica
+    //attenzione ! la notifica viene create l update è sull offerta ma la notifica è nuova
+    const notifica =
+      await this.notificationService.createSpecificNotificationOffer(
+        {
+          title: 'Your offer has been' + status + '!',
+          description: 'check out the your offer',
+          category: NotificationType.SPECIFIC,
+        },
+        offer,
+      );
+
+    if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
 
     return offer;
   }
 
+  // restituisce tutte le offerte per un agente
   async getOffersByAgentId(
     listingId: string,
     clientId: string,
@@ -179,10 +233,6 @@ export class OfferService {
       order: { date: 'ASC' },
     });
 
-    if (!offers) {
-      throw new Error('No offers found for this agent and client');
-    }
-
     return offers;
   }
 
@@ -200,17 +250,15 @@ export class OfferService {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
     const uniqueClients = await this.findClientByListingId(listingId);
-    if (!uniqueClients)
-      throw new NotFoundException('No clients found for this listing');
 
     return uniqueClients;
   }
 
-  getAllOffersByListingId(
+  async getAllOffersByListingId(
     listingId: string,
     id: string,
   ): Promise<PropertyOffer[]> {
-    const offers = this.offerRepository.find({
+    const offers = await this.offerRepository.find({
       where: {
         client: { userId: id } as Client,
         listing: { id: listingId },
@@ -218,9 +266,6 @@ export class OfferService {
       relations: ['client', 'listing'],
       order: { date: 'ASC' },
     });
-    if (!offers) {
-      throw new Error('No offers found for this agent and client');
-    }
 
     return offers;
   }
@@ -252,6 +297,10 @@ export class OfferService {
     });
 
     await this.offerRepository.save(offer);
+
+    //la notifica in questo caso non viene creata poiche è stesso l agente che la crea, la notifica dovrebbe
+    //notificare lo stesso agente e non avrebbe senso
+
     return offer;
   }
 
@@ -266,6 +315,7 @@ export class OfferService {
       throw new UnauthorizedException();
   }
 
+
   // PRIVATE HELPERS
   private async findClientByListingId(listingId: string): Promise<Client[]> {
     const clients = await this.clientRepository
@@ -276,7 +326,8 @@ export class OfferService {
       .distinct(true)
       .getMany();
 
+      if(!clients) return [] as Client[];
+
     return clients;
   }
-
 }

@@ -19,6 +19,8 @@ import { Gender } from 'src/common/types/gender.enum';
 import { Provider } from 'src/common/types/provider.enum';
 import { GoogleUser } from 'src/common/types/google-user';
 import * as crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -85,7 +87,10 @@ export class AuthService {
 
     const accessToken = await this.createToken(payload, '1h');
 
-    return { accessToken: accessToken, mustChangePassword: false };
+    return {
+      accessToken: accessToken,
+      mustChangePassword: false,
+    };
   }
 
   async signIn(credentials: SignInDto): Promise<AuthResponse> {
@@ -95,8 +100,9 @@ export class AuthService {
       where: { email },
     });
 
-    // 1. controllo che l'utenta esista e che le credenziali siano corrette
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    console.log('User: ', user);
+
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -104,6 +110,10 @@ export class AuthService {
       throw new BadRequestException(
         `This account is linked with ${user.provider}. Please use ${user.provider} login.`,
       );
+    }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload: JwtPayload = { userId: user.id, role: user.role };
@@ -116,6 +126,30 @@ export class AuthService {
       accessToken: accessToken,
       mustChangePassword: !user.lastPasswordChangeAt,
     };
+  }
+
+  async verifyGoogleTokenAndLogin(idToken: string): Promise<AuthResponse> {
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const email = payload?.email;
+    const name = payload?.given_name;
+    const surname = payload?.family_name;
+
+    if (!email) throw new UnauthorizedException('Email non trovata nel token');
+
+    const googleUser: GoogleUser = {
+      email,
+      name: name || '',
+      surname: surname || '',
+    };
+
+    return this.socialLogin(googleUser);
   }
 
   async socialLogin(googleUser: GoogleUser): Promise<AuthResponse> {

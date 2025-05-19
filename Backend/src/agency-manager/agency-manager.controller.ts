@@ -12,8 +12,6 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { AgencyManagerService } from './agency-manager.service';
-import { AuthCredentialDto } from 'src/auth/dto/auth.credentials.dto';
-import { SignInDto } from 'src/auth/dto/signin.credentials.dto';
 import { CredentialDto } from './dto/credentials.dto';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { UserItem } from 'src/common/types/userItem';
@@ -26,17 +24,6 @@ import { CreateAgentDto } from './dto/create-agent.dto';
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AgencyManagerController {
   constructor(private readonly managerService: AgencyManagerService) {}
-
-  @Patch('/change-credentials')
-  @Roles(UserRoles.MANAGER)
-  changePassword(
-    @Body() credentials: CredentialDto,
-    @GetUser() user: UserItem,
-  ) {
-    if (user.lastPasswordChangeAt) throw new UnauthorizedException();
-
-    return this.managerService.changePassword(credentials, user.id);
-  }
 
   @Post('support-admin')
   @Roles(UserRoles.MANAGER)
@@ -55,7 +42,7 @@ export class AgencyManagerController {
     @Body() createAgentDto: CreateAgentDto,
   ) {
     const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
-    if (!agencyId) throw new UnauthorizedException('Nessuna agenzia associata');
+    if (!agencyId) throw new UnauthorizedException('No agency associated');
 
     return this.managerService.createAgent(createAgentDto, agencyId);
   }

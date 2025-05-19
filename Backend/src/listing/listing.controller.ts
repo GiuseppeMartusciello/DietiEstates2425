@@ -4,7 +4,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -12,7 +11,6 @@ import {
   UnauthorizedException,
   UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -25,7 +23,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { Listing } from './Listing.entity';
 import { AgentService } from 'src/agent/agent.service';
 import { ModifyListingDto } from './dto/modify-listing.dto';
-import { SearchListingDto } from './dto/search-listing.dto';
+import { ResearchListingDto } from '../research/dto/create-research.dto'
 import { ListingImageUploadInterceptor } from 'src/common/interceptors/listing-image-upload.interceptor';
 
 @Controller('listing')
@@ -35,8 +33,12 @@ export class ListingController {
     private readonly listingService: ListingService,
     private readonly agentService: AgentService,
   ) {}
+  @Get('/all-images')
+  async getAllListingImages(): Promise<Record<string, string[]>> {
+    return this.listingService.getAllListingImages();
+  }
 
-  @Get('/agent/:id')
+  @Get('/agent/:id') //ridurre a gestMyListings per agent
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   async getListingByAgentId(
     @Param('id', new ParseUUIDPipe()) agentId: string,
@@ -64,7 +66,7 @@ export class ListingController {
   }
 
   @Get()
-  @Roles(UserRoles.CLIENT, UserRoles.AGENT)
+  @Roles(UserRoles.CLIENT, UserRoles.AGENT) //UserRoles.AGENT da rimuovere in futuro
   getAllListing(): Promise<Listing[]> {
     return this.listingService.getAllListing();
   }
@@ -72,7 +74,7 @@ export class ListingController {
   @Post('/search')
   @Roles(UserRoles.CLIENT)
   searchListing(
-    @Body() searchListingDto: SearchListingDto,
+    @Body() searchListingDto: ResearchListingDto,
   ): Promise<Listing[]> {
     return this.listingService.searchListing(searchListingDto);
   }
@@ -84,7 +86,7 @@ export class ListingController {
     @Body() modifyListingDto: ModifyListingDto,
     @GetUser() user: UserItem,
   ): Promise<Listing> {
-    const listing: Listing = await this.checkAndRetrieveListing(listingId);
+    const listing: Listing = await this.findListingOrThrow(listingId);
 
     this.checkAuthorization(user, listing);
 
@@ -111,7 +113,7 @@ export class ListingController {
     );
 
     if (!agent)
-      throw new NotFoundException(`Agent with userId ${agentId} not found `);
+      throw new BadRequestException(`Agent with userId ${agentId} not found `);
 
     return this.listingService.createListing(createListingDto, agent);
   }
@@ -129,12 +131,12 @@ export class ListingController {
     return this.listingService.deleteListingById(id, agencyId);
   }
 
-  async checkAndRetrieveListing(listingId: string): Promise<Listing> {
+  async findListingOrThrow(listingId: string): Promise<Listing> {
     const listing: Listing =
       await this.listingService.getListingById(listingId);
 
     if (!listing)
-      throw new NotFoundException(`Listing with id ${listingId} not found `);
+      throw new BadRequestException(`Listing with id ${listingId} not found `);
 
     return listing;
   }
@@ -168,7 +170,7 @@ export class ListingController {
     @GetUser() user: UserItem,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    const listing: Listing = await this.checkAndRetrieveListing(listingId);
+    const listing: Listing = await this.findListingOrThrow(listingId);
     this.checkAuthorization(user, listing);
 
     return this.listingService.handleUploadedImages(listingId, files);
@@ -180,10 +182,23 @@ export class ListingController {
     @GetUser() user: UserItem,
   ) {
     if (!user.client) {
-      const listing: Listing = await this.checkAndRetrieveListing(listingId);
+      const listing: Listing = await this.findListingOrThrow(listingId);
       this.checkAuthorization(user, listing);
     }
 
     return this.listingService.getImagesForListing(listingId);
+  }
+
+  @Delete('/:id/images/:filename')
+  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
+  async deleteImage(
+    @Param('id', new ParseUUIDPipe()) listingId: string,
+    @GetUser() user: UserItem,
+    @Param('filename') filename: string,
+  ) {
+    const listing: Listing = await this.findListingOrThrow(listingId);
+    this.checkAuthorization(user, listing);
+
+    return this.listingService.deleteListingImage(listingId, filename);
   }
 }

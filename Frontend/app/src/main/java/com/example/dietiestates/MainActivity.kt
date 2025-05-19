@@ -23,11 +23,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.dietiestates.ui.screens.ChangePassword
+import com.example.dietiestates.ui.screens.CreateListingScreen
 import com.example.dietiestates.ui.screens.FullTextScreen
 import com.example.dietiestates.ui.screens.HomeScreen
 import com.example.dietiestates.ui.screens.ListingScreen
 import com.example.dietiestates.ui.screens.LoginScreen
 import com.example.dietiestates.ui.screens.RegisterScreen
+import com.example.dietiestates.ui.screens.ModifyListingScreen
 import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
@@ -84,8 +86,15 @@ fun MyApp() {
             route = "listingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val listingId = backStackEntry.arguments?.getString("listingId") ?: ""
             ListingScreen(navController)
+        }
+        composable(
+            route = "modifylistingscreen/{listingId}",
+            arguments = listOf(navArgument("listingId") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            ModifyListingScreen(navController)
+
         }
         composable(
             route = "listingviewdescriptionscreen/{text}",
@@ -93,6 +102,9 @@ fun MyApp() {
         ) { backStackEntry ->
             val text = backStackEntry.arguments?.getString("text") ?: ""
             FullTextScreen(navController, text = text)
+        }
+        composable(route = "createlistingscreen") {
+            CreateListingScreen(navController)
         }
         composable(route = "home") {
             HomeScreen(navController)

@@ -1,35 +1,69 @@
-import { IsOptional, IsString, IsNumber, IsDate, IsUUID, Validate } from 'class-validator';
-import { Type } from 'class-transformer';
-import { MunicipalityCoordinatesValidator } from '../../common/validator/municipality-coordinates.validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsInt,
+  IsEnum,
+  Validate,
+} from 'class-validator';
+import { ListingCategory } from 'src/common/types/listing-category';
+import { SearchType } from 'src/common/types/searchType.enum';
+import { MunicipalityCoordinatesValidator } from 'src/common/validator/municipality-coordinates.validator';
 
+export class ResearchListingDto {
 
-export class CreateResearchDto {
-  @IsUUID()
+  @IsEnum(SearchType)
+  searchType: SearchType;
+
   @IsOptional()
-  id?: string;
-
   @IsString()
-  @IsOptional()
-  municipality?: string;
+  municipality: string;
 
-  @IsNumber()
   @IsOptional()
   latitude?: number;
 
-  @IsNumber()
   @IsOptional()
   longitude?: number;
 
-  @IsNumber()
   @IsOptional()
-  radius?: number;
+  @IsInt()
+  radius?: number; 
 
-  @IsDate()
-  @Type(() => Date)
-  date: Date;
+  @IsOptional()
+  @IsInt()
+  minPrice?: number;
 
+  @IsOptional()
+  @IsInt()
+  maxPrice?: number;
+
+  @IsOptional()
+  @IsInt()
+  numberOfRooms?: number;
+
+  @IsOptional()
+  @IsEnum(ListingCategory)
+  category?: ListingCategory;
+
+  @IsOptional()
+  @IsInt()
+  minSize?: string; //dimensione in metri quadri
+
+  @IsOptional()
   @IsString()
-  text: string;
+  energyClass?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  hasElevator?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  hasAirConditioning?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  hasGarage?: boolean;
 
   @Validate(MunicipalityCoordinatesValidator)
   dummyPropertyForCustomValidation: any; // workaround per attivare la validazione sulla classe

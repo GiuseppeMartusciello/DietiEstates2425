@@ -43,16 +43,29 @@ export class GeoapifyService {
       });
   
       const features = response.data.features;
-      const foundCategories = new Set<string>();
-  
+      const minDistances: Record<string, number> = {};
+      
       for (const feature of features) {
         const cat = feature.properties.categories || [];
-        if (cat.includes('education')) foundCategories.add('Vicino a scuole');
-        if (cat.includes('leisure')) foundCategories.add('Vicino a parchi');
-        if (cat.includes('public_transport')) foundCategories.add('Vicino a trasporti pubblici');
+        const featureLat = feature.properties.lat;
+        const featureLon = feature.properties.lon;
+
+        const distance = this.calculateDistance(lat, lon, featureLat, featureLon);
+
+        if (cat.includes('education'))
+          minDistances['scuole'] = Math.min(minDistances['scuole'] ?? Infinity, distance);
+          
+        if (cat.includes('leisure'))         
+          minDistances['parchi'] = Math.min(minDistances['parchi'] ?? Infinity, distance);
+
+        if (cat.includes('public_transport'))
+          minDistances['trasporti'] = Math.min(minDistances['trasporti'] ?? Infinity, distance);
+        
       }
   
-      return Array.from(foundCategories);
+      return Object.entries(minDistances).map(
+        ([label, distance]) => `${label}:${Math.round(distance)}`
+      );
     } catch (error) {
       console.error('[GeoapifyService][POI] Error:', error.message);
       return [];

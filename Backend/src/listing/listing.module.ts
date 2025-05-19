@@ -12,5 +12,6 @@ import { GeoapifyService } from 'src/common/services/geopify.service';
   imports: [TypeOrmModule.forFeature([Listing]), AuthModule, AgentModule],
   controllers: [ListingController],
   providers: [ListingService, ListingRepository, GeoapifyService],
+  exports: [ListingService, ListingRepository],
 })
 export class ListingModule {}
