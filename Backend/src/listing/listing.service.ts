@@ -6,7 +6,7 @@ import { Agent } from 'src/agent/agent.entity';
 import { GeoapifyService } from 'src/common/services/geopify.service';
 import { Agency } from 'src/agency/agency.entity';
 import { ModifyListingDto } from './dto/modify-listing.dto';
-import { SearchListingDto } from './dto/search-listing.dto';
+import { ResearchListingDto } from '../research/dto/create-research.dto';
 import * as pathModule from 'path';
 import * as fs from 'fs';
 
@@ -56,7 +56,7 @@ export class ListingService {
     return found;
   }
 
-  searchListing(searchListingDto: SearchListingDto): Promise<Listing[]> {
+  searchListing(searchListingDto: ResearchListingDto): Promise<Listing[]> {
     return this.listingRepository.searchListings(searchListingDto);
   }
 

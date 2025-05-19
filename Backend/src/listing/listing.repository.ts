@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Listing } from './Listing.entity';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { ModifyListingDto } from './dto/modify-listing.dto';
-import { SearchListingDto } from './dto/search-listing.dto';
 import { GeoapifyService } from 'src/common/services/geopify.service';
 import { SearchType } from 'src/common/types/searchType.enum';
+import { ResearchListingDto } from 'src/research/dto/create-research.dto';
 
 @Injectable()
 export class ListingRepository extends Repository<Listing> {
@@ -17,7 +17,7 @@ export class ListingRepository extends Repository<Listing> {
     super(repository.target, repository.manager, repository.queryRunner);
   }
 
-  async searchListings(serchListingDto: SearchListingDto): Promise<Listing[]> {
+  async searchListings(serchListingDto: ResearchListingDto): Promise<Listing[]> {
     const {
       searchType,
       municipality,

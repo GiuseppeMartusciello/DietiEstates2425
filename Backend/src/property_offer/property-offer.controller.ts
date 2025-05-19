@@ -28,7 +28,7 @@ export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
   // questo restituisce tutte le offerte fatte da un cliente per uno specifico immobile
-  @Get('/listing/:listingId')
+  @Get('/:listingId')
   @Roles(UserRoles.CLIENT)
   getallOffersByListingId(
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
@@ -37,21 +37,9 @@ export class OfferController {
     return this.offerService.getAllOffersByListingId(listingId, user.id);
   }
 
-  //questo metodo restituisce tutti i listining per cui il cliente ha fatto un offerta
-  @Get('/listing-client')
-  @Roles(UserRoles.CLIENT)
-  getOffersbyClientId(@GetUser() user: UserItem): Promise<Listing[]> {
-    return this.offerService.getListingByClientId(user.id);
-  }
-
-
-  // si vuole gestire delle specie di chat
-  // quindi serve anche un metodo che prenda tutti gli utenti che hanno fatto un offerta
-  // per un  immobile gestito dal manager o dall agente
-  // ho immaginato la cosa del tipo l agente clicca sull immobile e vede gli utenti che hanno fatto un offerta
-  //questo è il caso in cui l agente va nella sezione 'chat'
-  //?restituire un oggetto del tipo immobile e un altro campo che contiene client?
-  @Get('/listing/:listingId')
+  
+  // questo metodo restituisce tutte i clienti che hannpo fatto un offerta per uno specifico immobile lato agent
+  @Get(':listingId')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   async getClientsListiningId(
     @GetUser() agent: UserItem,
@@ -60,7 +48,6 @@ export class OfferController {
     return this.offerService.getClientsByListinigId(listingId, agent);
   }
 
-  
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto
   // serve sia l id dell utente sia l id della proprieta
   //questo è il caso in cui l agente clicca su una chat e vede lo storico di offerte con un cliente
@@ -73,6 +60,14 @@ export class OfferController {
   ): Promise<PropertyOffer[]> {
     return this.offerService.getOffersByAgentId(listingId, clientId, agent);
   }
+
+  //questo metodo restituisce tutti i listining per cui il cliente ha fatto un offerta
+  @Get()
+  @Roles(UserRoles.CLIENT)
+  getOffersbyClientId(@GetUser() user: UserItem): Promise<Listing[]> {
+    return this.offerService.getListingByClientId(user.id);
+  }
+
 
   //è pensato solo per poter modificare lo stato di una offerta
   @Patch('/:id')
@@ -119,7 +114,7 @@ export class OfferController {
 
   // UN OFFERTA ESTERNA DALLA PIATTAFORMA
   @Post('/listing/:id/external')
-  @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
+  @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER, UserRoles.AGENT)
   createExternalOffer(
     @GetUser() admin: UserItem,
     @Body() dto: CreateExternalOfferDto,

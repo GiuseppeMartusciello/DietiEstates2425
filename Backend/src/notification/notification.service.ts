@@ -1,5 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-
+import { Injectable, } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './notification.entity';
@@ -24,6 +23,9 @@ export class NotificationService {
   ) {}
 
   //viene creata una notifica promozionale per un immobile
+
+  //todo cercare un modo per non inivare a tutti gli utenti dell applicazione ma solo a quelli che hanno cercato una zona
+  //to do creare un metodo per eliminare una notifica
   async createPromotionalNotification(
     user: UserItem,
     createNotificationDto: CreateNotificationDto,
@@ -65,13 +67,11 @@ export class NotificationService {
     createNotificationDto: CreateNotificationDto,
     propertyOffer: PropertyOffer,
   ): Promise<Notification> {
-    const { title, description, category } = createNotificationDto;
+
 
     const result = this.notificationRepository.create({
-      title: title,
-      description: description,
+      ...createNotificationDto,
       date: new Date(),
-      category: category,
       propertyOffer: propertyOffer,
     });
 
@@ -90,9 +90,7 @@ export class NotificationService {
       notification: { id: savedNotification.id },
       isRead: false,
     });
-
     //viene salvata la notifica creata
-
     //viene creata l entita userNotification
     await this.userNotificationRepository.save(userNotification);
 
@@ -101,7 +99,10 @@ export class NotificationService {
 
   //restituisce tutte le notifiche non lette per un utente
   //viene utilizzato una qery builder personalizzata
-  async getNotification(userId: string): Promise<Notification[]> {
+  //todo togliere get da davanti ai nomi
+  //meglio ritornare una lista vuota di notifica
+
+  async getNotifications(userId: string): Promise<Notification[]> {
     const notifications = await this.notificationRepository
       .createQueryBuilder('notification')
       .innerJoin('notification.userNotifications', 'userNotification')
@@ -111,14 +112,10 @@ export class NotificationService {
       .orderBy('notification.date', 'DESC')
       .getMany();
 
-    if (!notifications || notifications.length === 0) {
-      throw new NotFoundException('Nessuna notifica trovata');
-    }
-
     return notifications;
   }
 
-  async getNotificationById(notificationId: any): Promise<Notification> {
+  async getNotificationById(notificationId: string): Promise<Notification> {
     const notification = await this.notificationRepository.findOneOrFail({
       where: { id: notificationId },
     });
@@ -137,46 +134,4 @@ export class NotificationService {
       { isRead: true },
     );
   }
-
-  //viene creata una notifica specifica per un immobile
-  // TODO: da capire bene questa cosa; ovvero vogliamo che le notifiche si generino autamticamente alla creazione di un immobile?
-  // se si serve questo metodo
-  // se no basta il metodo createPromotionalNotification nella quale un admin crea una notifica per un immobile
-  // la principale differeenza è che nel secondo caso la notfica viene inviata a tutti i clienti che hanno attivato la notifica attivata
-  // nel primo si potebbe andare a cercare gli utenti che hanno cercato un immobile in una determianta zona
-  /*  async createSpecificNotificationListing(createNotificationDto: CreateNotificationDto,listing: Listing ): Promise<Notification> {
-
-    const { title, description, category } = createNotificationDto;
-
-    const result = this.notificationRepository.create({
-      title: title,
-      description: description,
-      date: new Date(),
-      category: category,
-      listing: listing, 
-    });
-
-    //se l offerta è stata fatta da un cliente viene notificato l agente
-    //l agente vien recuperato da propertyOffer e listing
-    //se l offerta è stata fatta da un agente viene notificato il cliente
-    //il cliente viene recuperato da propertyOffer 
-
-
-  
-
-    const userNotification = await this.userNotificationRepository.create({
-      user: {id: user.userId} as User,
-      notification: result,
-      isRead: false,
-    });
-
-    //viene salvata la notifica creata
-    const check =await this.notificationRepository.save(result)
-    
-    //viene creata l entita userNotification
-    await this.userNotificationRepository.save(userNotification);
-
-    return check;
-  } 
-  */
 }

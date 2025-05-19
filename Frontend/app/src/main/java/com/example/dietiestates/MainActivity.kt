@@ -10,11 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -30,7 +26,7 @@ import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.AuthViewModel
-import com.example.dietiestates.ui.viewModel.HomeViewModel
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
