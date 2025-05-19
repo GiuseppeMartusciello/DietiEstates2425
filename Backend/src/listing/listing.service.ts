@@ -153,7 +153,7 @@ export class ListingService {
     );
 
     if (!fs.existsSync(imageDir)) {
-      throw new NotFoundException('No images found for this listing');
+      return [];
     }
 
     return fs
