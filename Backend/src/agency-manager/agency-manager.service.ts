@@ -23,6 +23,7 @@ import { Agency } from 'src/agency/agency.entity';
 import { Provider } from 'src/common/types/provider.enum';
 import { CreateSupportAdminResponse } from './types/create-support-admin-response';
 import { CreateAgentResponse } from './types/create-agent-response';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AgencyManagerService {
@@ -38,13 +39,15 @@ export class AgencyManagerService {
 
     @InjectRepository(SupportAdmin)
     private readonly supportAdminRepository: Repository<SupportAdmin>,
+
+    private readonly configService: ConfigService,
   ) {}
 
   async createSupportAdmin(
     createSupportAdminDto: CreateSupportAdminDto,
     userManager: UserItem,
   ): Promise<SupportAdmin> {
-    const { name, surname, email, password, birthDate, gender, phone } =
+    const { name, surname, email, birthDate, gender, phone } =
       createSupportAdminDto;
 
     const agency = userManager?.manager?.agency;
@@ -63,7 +66,11 @@ export class AgencyManagerService {
         'User with this email or phone already exists',
       );
 
-    const hashedPassword = await this.hashPassword(password);
+    const defaultPassword = this.configService.get<string>(
+      'DEFAULT_PASSWORD',
+      'Manager1234!',
+    );
+    const hashedPassword = await this.hashPassword(defaultPassword);
 
     const userSupportAdmin = await this.userRepository.create({
       name: name,
@@ -107,7 +114,6 @@ export class AgencyManagerService {
       name,
       surname,
       email,
-      password,
       birthDate,
       gender,
       phone,
@@ -135,7 +141,11 @@ export class AgencyManagerService {
 
     if (existingUser) throw new ConflictException('User already exists');
 
-    const hashedPassword = await this.hashPassword(password);
+    const defaultPassword = this.configService.get<string>(
+      'DEFAULT_PASSWORD',
+      'Manager1234!',
+    );
+    const hashedPassword = await this.hashPassword(defaultPassword);
 
     const userAgent = await this.userRepository.create({
       name: name,
@@ -147,7 +157,6 @@ export class AgencyManagerService {
       birthDate: birthDate,
       role: UserRoles.AGENT,
       provider: Provider.LOCAL,
-      lastPasswordChangeAt: new Date(),
     });
 
     await this.userRepository.save(userAgent);

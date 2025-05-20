@@ -30,10 +30,6 @@ export class CreateAgentDto {
   @IsEmail()
   email: string;
 
-  @IsNotEmpty()
-  @IsStrongPassword()
-  password: string;
-
   @IsDate()
   @Type(() => Date)
   birthDate: Date;
