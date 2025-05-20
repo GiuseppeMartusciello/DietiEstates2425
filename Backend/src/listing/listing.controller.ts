@@ -38,7 +38,7 @@ export class ListingController {
     return this.listingService.getAllListingImages();
   }
 
-  @Get('/agent/:id') //ridurre a gestMyListings per agent
+/* @Get('/agent/:id') //ridurre a gestMyListings per agent
   @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
   async getListingByAgentId(
     @Param('id', new ParseUUIDPipe()) agentId: string,
@@ -56,7 +56,7 @@ export class ListingController {
     const agencyId = this.getAgencyIdFromUser(user);
 
     return this.listingService.getListingByAgencyId(agencyId);
-  }
+  }*/
 
   @Get('/:id')
   getListingById(
@@ -66,9 +66,15 @@ export class ListingController {
   }
 
   @Get()
-  @Roles(UserRoles.CLIENT, UserRoles.AGENT) //UserRoles.AGENT da rimuovere in futuro
-  getAllListing(): Promise<Listing[]> {
-    return this.listingService.getAllListing();
+  getAllListing(@GetUser() user: UserItem): Promise<Listing[]> {
+    if(user.client)
+      return this.listingService.getAllListing();
+    else if(user.agent)
+      return this.listingService.getListingByAgentId(user.agent.userId,user.agent.agency.id)
+    else{
+      const agencyId = this.getAgencyIdFromUser(user)
+      return this.listingService.getListingByAgencyId(agencyId)
+    }
   }
 
   @Post('/search')
