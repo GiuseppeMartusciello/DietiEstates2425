@@ -186,6 +186,19 @@ export class AgencyManagerService {
     };
   }
 
+  async getAgents(user: UserItem) {
+    const agencyId = user.supportAdmin?.agency.id
+      ? user.supportAdmin?.agency.id
+      : user.manager?.agency.id;
+
+    const agents = this.agentRepository.find({
+      where: { agency: { id: agencyId } },
+      relations: ['user'],
+    });
+
+    return agents;
+  }
+
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt();
     return bcrypt.hash(password, salt);

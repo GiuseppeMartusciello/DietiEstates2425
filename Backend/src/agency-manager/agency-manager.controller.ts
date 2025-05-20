@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -52,5 +53,11 @@ export class AgencyManagerController {
   @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   deleteAgent(@Param('id', new ParseUUIDPipe()) agentId: string) {
     return this.managerService.deleteAgentById(agentId);
+  }
+
+  @Get('agents')
+  @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  getAgents(@GetUser() user: UserItem) {
+    return this.managerService.getAgents(user);
   }
 }
