@@ -30,14 +30,13 @@ import com.example.dietiestates.ui.screens.FullTextScreen
 import com.example.dietiestates.ui.screens.HomeScreen
 import com.example.dietiestates.ui.screens.ListingScreen
 import com.example.dietiestates.ui.screens.LoginScreen
-import com.example.dietiestates.ui.screens.RegisterScreen
 import com.example.dietiestates.ui.screens.ModifyListingScreen
-import com.example.dietiestates.ui.screens.MyOffersScreen
-import com.example.dietiestates.ui.screens.OfferScreen
+import com.example.dietiestates.ui.screens.RegisterScreen
 import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.AuthViewModel
+import com.example.dietiestates.ui.viewModel.HomeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +45,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             CompositionLocalProvider(LocalAppTypography provides CustomTypography) {
-                DietiEstatesTheme {
+                DietiEstatesTheme(darkTheme = false) {
                     // A surface container using the 'background' color from the theme
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -68,21 +67,20 @@ fun MyApp() {
     val authViewModel: AuthViewModel = viewModel()
     authViewModel.checkLogin()
     val startDestination = if (authViewModel.isLoggedIn.value) "home" else "loginscreen"
-    Log.d("traccia",startDestination)
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(route = "loginscreen") {
             LoginScreen(navController)
         }
         composable(
-            route ="registerscreen"
-            ) {
+            route = "registerscreen"
+        ) {
             RegisterScreen(navController = navController)
         }
         composable(
             route = "changepasswordscreen",
-        ){
-            ChangePassword(navController= navController)
+        ) {
+            ChangePassword(navController = navController)
         }
 
         composable(
@@ -95,9 +93,7 @@ fun MyApp() {
             route = "modifylistingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) { backStackEntry ->
-
             ModifyListingScreen(navController)
-
         }
         composable(
             route = "listingviewdescriptionscreen/{text}",
@@ -128,15 +124,6 @@ fun MyApp() {
     }
 }
 
-/*@Composable
-fun SetStatusBarColor(color: Color, darkIcons: Boolean = false) {
-    val window = (LocalView.current.context as Activity).window
-    SideEffect {
-        window.statusBarColor = color.toArgb()
-        WindowCompat.getInsetsController(window, window.decorView)
-            ?.isAppearanceLightStatusBars = darkIcons
-    }
-}*/
 
 
 

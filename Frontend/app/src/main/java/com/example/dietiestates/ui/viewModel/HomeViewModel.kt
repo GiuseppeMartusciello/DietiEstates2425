@@ -32,6 +32,7 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             try{
                 val listings = AppContainer.listingRepository.getListings()
+
                 _listingState.value = _listingState.value.copy(
                     list = listings,
                     loading = false,

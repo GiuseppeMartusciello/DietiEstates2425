@@ -76,7 +76,7 @@ export class AdminService {
       await queryRunner.manager.save(agency);
 
       const defaultPassword = this.configService.get<string>(
-        'DEFAULT_MANAGER_PASSWORD',
+        'DEFAULT_PASSWORD',
         'Manager1234!',
       );
       const hashedPassword = await this.hashPassword(defaultPassword);

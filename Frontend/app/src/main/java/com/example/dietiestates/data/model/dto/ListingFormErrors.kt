@@ -1,4 +1,4 @@
-package com.example.dietiestates.data.model
+package com.example.dietiestates.data.model.dto
 
 data class ListingFormErrors(
     val address: String? = null,

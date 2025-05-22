@@ -18,12 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -43,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.dietiestates.data.model.ModifyOrCreateListingDto
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.ui.screens.components.BottomBar
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ImageGalleryPager
@@ -51,19 +53,21 @@ import com.example.dietiestates.ui.screens.components.LabeledCheckBoxField
 import com.example.dietiestates.ui.screens.components.LabeledNumberField
 import com.example.dietiestates.ui.screens.components.LabeledTextField
 import com.example.dietiestates.ui.screens.components.LocalPhotoEditor
+import com.example.dietiestates.ui.screens.components.SimpleDropdownSelector
 import com.example.dietiestates.ui.screens.components.dropDownMenu
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.EditOperation
-import com.example.dietiestates.ui.viewModel.ListingViewModel
+import com.example.dietiestates.ui.viewModel.ModifyOrCreateListingViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateListingScreen(navController: NavController) {
-    val viewModel: ListingViewModel = viewModel()
-    val editState = viewModel.editListingState.value //Stato della modifica/aggiornamento del listing
+    val viewModel: ModifyOrCreateListingViewModel = viewModel()
+    val editState =
+        viewModel.editListingState.value //Stato della modifica/aggiornamento del listing
     val scrollState = rememberScrollState()
     val systemUiController = rememberSystemUiController()
     var showPhotoEditor by remember { mutableStateOf(false) }
@@ -72,6 +76,9 @@ fun CreateListingScreen(navController: NavController) {
 
     val form = viewModel.formState
     val errors = viewModel.formErrors
+
+    // Dropdown con agenti
+    var expanded by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -244,7 +251,13 @@ fun CreateListingScreen(navController: NavController) {
                     label = "Stanze",
                     value = form.numberOfRooms,
                     options = (0..20).map { it.toString() },
-                    onValueChange = { viewModel.onFieldChange { current -> current.copy(numberOfRooms = it) } },
+                    onValueChange = {
+                        viewModel.onFieldChange { current ->
+                            current.copy(
+                                numberOfRooms = it
+                            )
+                        }
+                    },
                 )
                 dropDownMenu(
                     label = "Classe Energetica",
@@ -280,13 +293,40 @@ fun CreateListingScreen(navController: NavController) {
                 LabeledCheckBoxField(
                     label = "Aria Condizionata",
                     value = form.hasAirConditioning,
-                    onValueChange = { viewModel.onFieldChange { current -> current.copy(hasAirConditioning = it) } }
+                    onValueChange = {
+                        viewModel.onFieldChange { current ->
+                            current.copy(
+                                hasAirConditioning = it
+                            )
+                        }
+                    }
                 )
                 LabeledCheckBoxField(
                     label = "Garage",
                     value = form.hasGarage,
                     onValueChange = { viewModel.onFieldChange { current -> current.copy(hasGarage = it) } }
                 )
+                if (AppContainer.tokenManager.getUserRole() == "MANAGER" || AppContainer.tokenManager.getUserRole() == "SUPPORT_ADMIN") {
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = "Agente Referente",
+                            style = LocalAppTypography.current.featureTitle,
+                            fontSize = 16.sp,
+                        )
+
+
+                        SimpleDropdownSelector(
+                            options = viewModel.uiState.value.agents.map { it.userId },
+                            selectedOption = viewModel.uiState.value.selectedAgentId,
+                            onOptionSelected = { viewModel.setSelectedAgent(it!!) },
+                            modifier = Modifier.fillMaxWidth().padding(vertical= 10.dp)
+                        )
+
+                    }
+                }
 
                 Text(
                     text = "Descrizione",
@@ -309,6 +349,7 @@ fun CreateListingScreen(navController: NavController) {
                     singleLine = false,
                     maxLines = 10
                 )
+
 
             }
         }
