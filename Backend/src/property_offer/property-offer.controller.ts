@@ -21,7 +21,7 @@ import { GetUser } from 'src/auth/get-user.decorator';
 import { Listing } from 'src/listing/Listing.entity';
 import { Client } from 'src/client/client.entity';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
-import { ListingWithImageDto } from 'src/listing/dto/listing-with-image.dto';
+import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
 
 @Controller('offer')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -64,9 +64,7 @@ export class OfferController {
   //questo metodo restituisce tutti i listining per cui il cliente ha fatto un offerta
   @Get('/my-offer/listing')
   @Roles(UserRoles.CLIENT)
-  getOffersbyClientId(
-    @GetUser() user: UserItem,
-  ): Promise<ListingWithImageDto[]> {
+  getOffersbyClientId(@GetUser() user: UserItem): Promise<ListingResponse[]> {
     console.log('Sono nel controller.');
 
     return this.offerService.getListingByClientId(user.id);

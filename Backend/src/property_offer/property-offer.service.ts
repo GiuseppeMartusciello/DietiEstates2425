@@ -18,7 +18,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/common/types/notification.enum';
-import { ListingWithImageDto } from 'src/listing/dto/listing-with-image.dto';
+import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
 import { ListingService } from 'src/listing/listing.service';
 
 @Injectable()
@@ -39,7 +39,7 @@ export class OfferService {
 
   // tutti gli immobili per cui il cliente ha fatto un offerta
   // essendo una query presonalizzata è stata inserirta nel repository del listing
-  async getListingByClientId(userId: string): Promise<ListingWithImageDto[]> {
+  async getListingByClientId(userId: string): Promise<ListingResponse[]> {
     const listings = await this.listingRepository
       .createQueryBuilder('listing')
       .innerJoinAndSelect('listing.propertyOffers', 'propertyOffer')
@@ -47,12 +47,11 @@ export class OfferService {
       .distinct(true)
       .getMany();
 
-    // Simulazione recupero immagini (puoi anche fare query vere se le immagini sono in un'altra entità)
-    const listingsWithImages: ListingWithImageDto[] = await Promise.all(
+    const listingsWithImages: ListingResponse[] = await Promise.all(
       listings.map(async (listing) => {
         const imagePaths = await this.listingService.getImagesForListing(
           listing.id,
-        ); // metodo custom da creare
+        );
 
         const firstImage = imagePaths[0] ?? null;
 

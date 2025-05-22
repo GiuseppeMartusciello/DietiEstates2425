@@ -1,4 +1,4 @@
-export class ListingWithImageDto {
+export class ListingResponse {
   id: string;
   title: string;
   address: string;
