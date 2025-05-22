@@ -93,7 +93,7 @@ class AuthViewModel : ViewModel() {
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
-            val result = AppContainer.authRepository.login(email, password)
+            val result = authRepository.login(email, password)
 
             _loginState.value = when {
                 result.isSuccess -> {
@@ -144,7 +144,7 @@ class AuthViewModel : ViewModel() {
     fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
-            val result = AppContainer.authRepository.loginWithGoogle(idToken)
+            val result = authRepository.loginWithGoogle(idToken)
 
             _loginState.value = when {
                 result.isSuccess -> {
@@ -165,7 +165,7 @@ class AuthViewModel : ViewModel() {
     fun changePassword(currentPassword: String, newPassword: String) {
         viewModelScope.launch {
             _changePasswordState.value = ChangePasswordState.Loading
-            val result = AppContainer.authRepository.changePassword(currentPassword, newPassword)
+            val result = authRepository.changePassword(currentPassword, newPassword)
 
             _changePasswordState.value = when {
                 result.isSuccess -> ChangePasswordState.Success

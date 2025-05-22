@@ -1,5 +1,6 @@
 package com.example.dietiestates.data.remote
 
+import com.example.dietiestates.data.remote.api.AgencyApi
 import com.example.dietiestates.data.remote.api.AuthApi
 import com.example.dietiestates.data.remote.api.ListingApi
 import com.example.dietiestates.utility.TokenManager
@@ -10,9 +11,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 class RetrofitClient private constructor(retrofit: Retrofit) {
 
     private val listingApi = retrofit.create(ListingApi::class.java)
+    private val agencyApi = retrofit.create(AgencyApi::class.java)
     private val authApi = retrofit.create(AuthApi::class.java)
 
     fun createListingApi() = listingApi
+    fun createAgencyApi() = agencyApi
     fun createAuthApi() = authApi
 
     companion object {
@@ -23,7 +26,7 @@ class RetrofitClient private constructor(retrofit: Retrofit) {
 
             val retrofit = Retrofit.Builder()
                 //.baseUrl("http://10.0.2.2:3000/")
-                .baseUrl("http://192.168.1.13:3000/")
+                .baseUrl("http://dietiestates.duckdns.org:3000/")
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()

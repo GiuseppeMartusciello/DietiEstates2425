@@ -1,7 +1,7 @@
 package com.example.dietiestates.data.remote.api
 
 import com.example.dietiestates.data.model.Listing
-import com.example.dietiestates.data.model.ModifyOrCreateListingDto
+import com.example.dietiestates.data.model.dto.ModifyOrCreateListingDto
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body

@@ -20,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Error
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.dietiestates.data.model.ModifyOrCreateListingDto
 import com.example.dietiestates.ui.screens.components.BottomBar
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ImageGalleryPager
@@ -58,12 +56,13 @@ import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.EditOperation
 import com.example.dietiestates.ui.viewModel.ListingViewModel
+import com.example.dietiestates.ui.viewModel.ModifyOrCreateListingViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModifyListingScreen(navController: NavController) {
-    val viewModel: ListingViewModel = viewModel()
+    val viewModel: ModifyOrCreateListingViewModel = viewModel()
     val listing = viewModel.listingState.value.listing
     val state = viewModel.listingState.value  //Stato del caricamento del listing
     val editState = viewModel.editListingState.value //Stato della modifica/aggiornamento del listing
@@ -152,7 +151,7 @@ fun ModifyListingScreen(navController: NavController) {
                             .padding(bottom = 100.dp)
                     ) {
                         Column() {
-                            ImageGalleryPager(images = viewModel.imageUrls)
+                            ImageGalleryPager(images = listing.imageUrls)
 
                             CustomButton(
                                 onClick = { showPhotoEditor = true },
@@ -169,7 +168,7 @@ fun ModifyListingScreen(navController: NavController) {
                         if (showPhotoEditor) {
                             ModalBottomSheet(onDismissRequest = { showPhotoEditor = false }) {
                                 RemotePhotoEditor(
-                                    imageUrls = viewModel.imageUrls,
+                                    imageUrls = listing.imageUrls,
                                     listingId = listing.id,
                                     modifier = Modifier.fillMaxHeight(0.3f),
                                 )

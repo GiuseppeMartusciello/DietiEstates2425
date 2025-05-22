@@ -5,7 +5,6 @@ data class Listing(
     val title: String,
     val address: String,
     val municipality: String,
-    val city: String,
     val postalCode: String,
     val province: String,
     val size: String,
@@ -22,5 +21,4 @@ data class Listing(
     val hasAirConditioning: Boolean,
     val hasGarage: Boolean,
     val imageUrls: List<String> = emptyList()
-
 )
