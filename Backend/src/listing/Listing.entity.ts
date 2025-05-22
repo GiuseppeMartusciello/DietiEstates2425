@@ -33,7 +33,7 @@ export class Listing {
   province: string;
 
   @Column()
-  size: string; //dimensione in metri quadri
+  size: string;
 
   @Column('double precision')
   latitude: number;
@@ -48,7 +48,7 @@ export class Listing {
   energyClass: string;
 
   @Column('text', { array: true })
-  nearbyPlaces: string[]; //posti vicini
+  nearbyPlaces: string[];
 
   @Column('text')
   description: string;
@@ -56,10 +56,10 @@ export class Listing {
   @Column('float')
   price: number;
   @Column({ type: 'enum', enum: ListingCategory })
-  category: ListingCategory; // categoria di contratto (vendita, affitto ecc)
+  category: ListingCategory;
 
   @Column()
-  floor: string; //piano dell'appartamento
+  floor: string;
 
   @Column()
   hasElevator: boolean;

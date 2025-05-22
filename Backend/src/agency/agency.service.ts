@@ -174,11 +174,7 @@ export class AgencyService {
     return agent;
   }
 
-  async deleteAgentById(agentId: string, user: UserItem) {
-    const agencyId =
-      user.role === UserRoles.MANAGER
-        ? user.manager?.agency.id
-        : user.supportAdmin?.agency.id;
+  async deleteAgentById(agentId: string, agencyId: String) {
 
     const found = await this.userRepository.findOneBy({ id: agentId });
     if (!found)
@@ -199,8 +195,7 @@ export class AgencyService {
     };
   }
 
-  async deleteSupportAdminById(supportAdminId: string, user: UserItem) {
-    const agencyId = user.manager?.agency.id;
+  async deleteSupportAdminById(supportAdminId: string, agencyId: string) {
 
     const found = await this.userRepository.findOneBy({ id: supportAdminId });
     if (!found)
@@ -217,7 +212,7 @@ export class AgencyService {
       );
 
     if (supportAdmin?.agency.id !== agencyId)
-      throw new UnauthorizedException('ciao');
+      throw new UnauthorizedException();
 
     await this.userRepository.delete(supportAdminId);
 
@@ -226,10 +221,7 @@ export class AgencyService {
     };
   }
 
-  async getAgents(user: UserItem) {
-    const agencyId = user.supportAdmin?.agency.id
-      ? user.supportAdmin?.agency.id
-      : user.manager?.agency.id;
+  async getAgents(agencyId: string) {
 
     const agents = this.agentRepository.find({
       where: { agency: { id: agencyId } },
