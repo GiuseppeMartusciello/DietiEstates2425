@@ -25,6 +25,7 @@ import { AgentService } from 'src/agent/agent.service';
 import { ModifyListingDto } from './dto/modify-listing.dto';
 import { ResearchListingDto } from '../research/dto/create-research.dto'
 import { ListingImageUploadInterceptor } from 'src/common/interceptors/listing-image-upload.interceptor';
+import { ListingResponse } from './dto/listing-with-image.dto';
 
 @Controller('listing')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -61,12 +62,12 @@ export class ListingController {
   @Get('/:id')
   getListingById(
     @Param('id', new ParseUUIDPipe()) id: string,
-  ): Promise<Listing> {
+  ): Promise<ListingResponse> {
     return this.listingService.getListingById(id);
   }
 
   @Get()
-  getAllListing(@GetUser() user: UserItem): Promise<Listing[]> {
+  getAllListing(@GetUser() user: UserItem): Promise<ListingResponse[]> {
     if(user.client)
       return this.listingService.getAllListing();
     else if(user.agent)
@@ -81,7 +82,7 @@ export class ListingController {
   @Roles(UserRoles.CLIENT)
   searchListing(
     @Body() searchListingDto: ResearchListingDto,
-  ): Promise<Listing[]> {
+  ): Promise<ListingResponse[]> {
     return this.listingService.searchListing(searchListingDto);
   }
 
@@ -139,7 +140,7 @@ export class ListingController {
 
   async findListingOrThrow(listingId: string): Promise<Listing> {
     const listing: Listing =
-      await this.listingService.getListingById(listingId);
+      (await this.listingService.getListingById(listingId)).listing;
 
     if (!listing)
       throw new BadRequestException(`Listing with id ${listingId} not found `);

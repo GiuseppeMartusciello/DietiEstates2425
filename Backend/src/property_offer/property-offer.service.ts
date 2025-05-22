@@ -47,24 +47,16 @@ export class OfferService {
       .distinct(true)
       .getMany();
 
-    const listingsWithImages: ListingResponse[] = await Promise.all(
-      listings.map(async (listing) => {
-        const imagePaths = await this.listingService.getImagesForListing(
-          listing.id,
-        );
-
-        const firstImage = imagePaths[0] ?? null;
-
-        return {
-          ...listing,
-          imageUrls: firstImage ? [firstImage] : [],
-        };
-      }),
+    const response: ListingResponse[] = await Promise.all(
+      listings.map(async (listing) => ({
+        listing,
+        imageUrls:
+          (await this.listingService.getImagesForListing(listing.id)[0]) ??
+          null,
+      })),
     );
 
-    console.log(listingsWithImages);
-
-    return listingsWithImages;
+    return response;
   }
 
   //viene creata un offerta per un immobile da parte del cliente
