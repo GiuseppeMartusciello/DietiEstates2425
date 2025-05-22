@@ -41,6 +41,9 @@ class ListingViewModel(    savedStateHandle: SavedStateHandle ) : ViewModel() {
         }
     }
 
+
+
+
     private fun fetchListing(id: String){
         viewModelScope.launch {
             try {

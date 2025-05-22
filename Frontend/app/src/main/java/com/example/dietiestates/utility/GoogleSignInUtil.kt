@@ -1,4 +1,4 @@
-package com.example.dietiestates.ui.screens
+package com.example.dietiestates.utility
 
 
 import android.content.Context

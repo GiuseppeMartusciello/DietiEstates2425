@@ -3,20 +3,17 @@ package com.example.dietiestates.ui.viewModel
 import android.content.Intent
 import android.util.Log
 import android.util.Patterns
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dietiestates.AppContainer
-import com.example.dietiestates.AppContainer.authRepository
-import com.example.dietiestates.data.model.LoginRequest
+
 import com.example.dietiestates.data.model.PostLoginNavigation
-import com.example.dietiestates.data.model.SignUpRequest
-import com.example.dietiestates.data.remote.RetrofitClient
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,10 +59,10 @@ class AuthViewModel : ViewModel() {
             onInvalid("Inserisci un'email.")
             return false
         }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            onInvalid("L'email inserita non è valida.")
-            return false
-        }
+//        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+//            onInvalid("L'email inserita non è valida.")
+//            return false
+//        }
         if (password.isBlank()) {
             onInvalid("Inserisci una password.")
             return false

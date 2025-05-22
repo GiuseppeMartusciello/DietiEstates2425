@@ -118,12 +118,14 @@ fun HomeScreen(navController: NavController) {
                     "cerca",
                     Icons.Outlined.Search, Icons.Filled.Search
                 ), NavItem(
-                    "notifiche",
+                    "offer",
                     Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
-                ), NavItem(
+                ),
+                NavItem(
                     "logout",
                     Icons.Outlined.Person, Icons.Filled.Person,
                 )
+
             )
         )
     }) { paddingValues ->

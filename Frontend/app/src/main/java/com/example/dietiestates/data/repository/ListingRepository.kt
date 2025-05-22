@@ -11,7 +11,12 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 class ListingRepository(private val api: ListingApi) {
-    private val BASE_IMAGE_URL = "http://10.0.2.2:3000"
+    //private val BASE_IMAGE_URL = "http://10.0.2.2:3000"
+    //private val BASE_IMAGE_URL = "http://192.168.1.13:3000"
+    private val BASE_IMAGE_URL = "http://dietiestates.duckdns.org:3000"
+    //.baseUrl("http://192.168.1.13:3000/")
+
+
 
     //Quando carico tutti i listing carico una sola foto per ogni listing,
     // ma facendo un'unica chiamata per tutte le immagini, per evitare il doppio delle chiamate per ogni listing
@@ -119,4 +124,5 @@ class ListingRepository(private val api: ListingApi) {
             throw Exception("Errore ${response.code()}: ${response.errorBody()?.string()}")
         }
     }
+
 }
