@@ -139,13 +139,15 @@ export class ListingController {
   }
 
   async findListingOrThrow(listingId: string): Promise<Listing> {
-    const listing: Listing =
-      (await this.listingService.getListingById(listingId)).listing;
+    const listingResponse =
+      (await this.listingService.getListingById(listingId));
 
-    if (!listing)
+    if (!listingResponse)
       throw new BadRequestException(`Listing with id ${listingId} not found `);
 
-    return listing;
+     const { imageUrls, ...listing } = listingResponse;
+
+    return listing as Listing;
   }
 
   checkAuthorization(user: UserItem, listing: Listing): void {

@@ -20,6 +20,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/common/types/notification.enum';
 import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
 import { ListingService } from 'src/listing/listing.service';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class OfferService {
@@ -49,7 +50,7 @@ export class OfferService {
 
     const response: ListingResponse[] = await Promise.all(
       listings.map(async (listing) => ({
-        listing,
+         ...(instanceToPlain(listing) as Listing),
         imageUrls:
           (await this.listingService.getImagesForListing(listing.id)[0]) ??
           null,

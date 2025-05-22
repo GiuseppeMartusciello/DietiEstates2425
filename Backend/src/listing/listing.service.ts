@@ -14,6 +14,7 @@ import { ResearchListingDto } from '../research/dto/create-research.dto';
 import * as pathModule from 'path';
 import * as fs from 'fs';
 import { ListingResponse } from './dto/listing-with-image.dto';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class ListingService {
@@ -35,7 +36,7 @@ export class ListingService {
 
     const response: ListingResponse[] = await Promise.all(
       listings.map(async (listing) => ({
-        listing,
+         ...(instanceToPlain(listing) as Listing),
         imageUrls: await this.getImagesForListing(listing.id),
       })),
     );
@@ -53,7 +54,7 @@ export class ListingService {
     const images = this.getAllListingImages();
 
     const response: ListingResponse[] = listings.map((listing) => ({
-      listing,
+       ...(instanceToPlain(listing) as Listing),
       imageUrls: images[listing.id] || [],
     }));
 
@@ -67,12 +68,10 @@ export class ListingService {
 
     const images: string[] = await this.getImagesForListing(id);
 
-    const response: ListingResponse = {
-      listing,
+    return {
+       ...(instanceToPlain(listing) as Listing),
       imageUrls: images,
     };
-
-    return response;
   }
 
   async getAllListing(): Promise<ListingResponse[]> {
@@ -80,7 +79,7 @@ export class ListingService {
     const images = this.getAllListingImages();
 
     const response: ListingResponse[] = listings.map((listing) => ({
-      listing,
+       ...(instanceToPlain(listing) as Listing),
       imageUrls: images[listing.id] || [],
     }));
 
@@ -92,7 +91,7 @@ export class ListingService {
 
     const response: ListingResponse[] = await Promise.all(
       listings.map(async (listing) => ({
-        listing,
+         ...(instanceToPlain(listing) as Listing),
         imageUrls: await this.getImagesForListing(listing.id),
       })),
     );
