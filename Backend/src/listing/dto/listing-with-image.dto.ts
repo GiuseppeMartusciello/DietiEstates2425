@@ -18,5 +18,5 @@ export class ListingWithImageDto {
   hasElevator: boolean;
   hasAirConditioning: boolean;
   hasGarage: boolean;
-  imageUrl: string | null;
+  imageUrls: string[];
 }

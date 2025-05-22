@@ -53,13 +53,12 @@ export class OfferService {
         const imagePaths = await this.listingService.getImagesForListing(
           listing.id,
         ); // metodo custom da creare
-        const imageUrl = imagePaths[0]
-          ? `http://dietiestates.duckdns.org:3000${imagePaths[0]}`
-          : null;
+
+        const firstImage = imagePaths[0] ?? null;
 
         return {
           ...listing,
-          imageUrl,
+          imageUrls: firstImage ? [firstImage] : [],
         };
       }),
     );
