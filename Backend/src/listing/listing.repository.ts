@@ -17,7 +17,9 @@ export class ListingRepository extends Repository<Listing> {
     super(repository.target, repository.manager, repository.queryRunner);
   }
 
-  async searchListings(serchListingDto: ResearchListingDto): Promise<Listing[]> {
+  async searchListings(
+    serchListingDto: ResearchListingDto,
+  ): Promise<Listing[]> {
     const {
       searchType,
       municipality,
@@ -55,8 +57,7 @@ export class ListingRepository extends Repository<Listing> {
       query.andWhere('listing.size >= :minSize', { minSize });
 
     if (energyClass !== undefined)
-      //al momento controlla che siano uguali, sarebbe meglio controllare che sia >= ?
-      query.andWhere('listing.energyClass = :energyClass', { energyClass });
+      query.andWhere('listing.energyClass <= :energyClass', { energyClass });
 
     if (hasElevator !== undefined && hasElevator)
       query.andWhere('listing.hasElevator = true');

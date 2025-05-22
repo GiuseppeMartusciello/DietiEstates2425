@@ -25,6 +25,7 @@ import { AgentService } from 'src/agent/agent.service';
 import { ModifyListingDto } from './dto/modify-listing.dto';
 import { ResearchListingDto } from '../research/dto/create-research.dto'
 import { ListingImageUploadInterceptor } from 'src/common/interceptors/listing-image-upload.interceptor';
+import { ListingResponse } from './dto/listing-with-image.dto';
 
 @Controller('listing')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -38,44 +39,30 @@ export class ListingController {
     return this.listingService.getAllListingImages();
   }
 
-  @Get('/agent/:id') //ridurre a gestMyListings per agent
-  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  async getListingByAgentId(
-    @Param('id', new ParseUUIDPipe()) agentId: string,
-    @GetUser() user: UserItem,
-  ): Promise<Listing[]> {
-    if (user.agent) agentId = user.id;
-
-    const agencyId: string = this.getAgencyIdFromUser(user);
-    return this.listingService.getListingByAgentId(agentId, agencyId);
-  }
-
-  @Get('/agency')
-  @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  getListingByAgencyId(@GetUser() user: UserItem): Promise<Listing[]> {
-    const agencyId = this.getAgencyIdFromUser(user);
-
-    return this.listingService.getListingByAgencyId(agencyId);
-  }
-
   @Get('/:id')
   getListingById(
     @Param('id', new ParseUUIDPipe()) id: string,
-  ): Promise<Listing> {
+  ): Promise<ListingResponse> {
     return this.listingService.getListingById(id);
   }
 
   @Get()
-  @Roles(UserRoles.CLIENT, UserRoles.AGENT) //UserRoles.AGENT da rimuovere in futuro
-  getAllListing(): Promise<Listing[]> {
-    return this.listingService.getAllListing();
+  getAllListing(@GetUser() user: UserItem): Promise<ListingResponse[]> {
+    if(user.client)
+      return this.listingService.getAllListing();
+    else if(user.agent)
+      return this.listingService.getListingByAgentId(user.agent.userId,user.agent.agency.id)
+    else{
+      const agencyId = this.getAgencyIdFromUser(user)
+      return this.listingService.getListingByAgencyId(agencyId)
+    }
   }
 
   @Post('/search')
   @Roles(UserRoles.CLIENT)
   searchListing(
     @Body() searchListingDto: ResearchListingDto,
-  ): Promise<Listing[]> {
+  ): Promise<ListingResponse[]> {
     return this.listingService.searchListing(searchListingDto);
   }
 
@@ -132,13 +119,15 @@ export class ListingController {
   }
 
   async findListingOrThrow(listingId: string): Promise<Listing> {
-    const listing: Listing =
-      await this.listingService.getListingById(listingId);
+    const listingResponse =
+      (await this.listingService.getListingById(listingId));
 
-    if (!listing)
+    if (!listingResponse)
       throw new BadRequestException(`Listing with id ${listingId} not found `);
 
-    return listing;
+     const { imageUrls, ...listing } = listingResponse;
+
+    return listing as Listing;
   }
 
   checkAuthorization(user: UserItem, listing: Listing): void {

@@ -11,11 +11,27 @@ import { NotificationService } from 'src/notification/notification.service';
 import { NotificationModule } from 'src/notification/notification.module';
 import { Notification } from 'src/notification/notification.entity';
 import { UserNotification } from 'src/notification/user-notification.entity';
+import { ListingService } from 'src/listing/listing.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PropertyOffer,Client,Listing,Notification,UserNotification]), NotificationModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      PropertyOffer,
+      Client,
+      Listing,
+      Notification,
+      UserNotification,
+    ]),
+    NotificationModule,
+  ],
   controllers: [OfferController],
-  providers: [OfferService, ListingRepository, GeoapifyService, NotificationService],
+  providers: [
+    OfferService,
+    ListingRepository,
+    GeoapifyService,
+    NotificationService,
+    ListingService,
+  ],
   exports: [],
 })
 export class PropertyOfferModule {}
