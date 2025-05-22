@@ -18,7 +18,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/common/types/notification.enum';
-
+import { ListingWithImageDto } from 'src/listing/dto/listing-with-image.dto';
+import { ListingService } from 'src/listing/listing.service';
 
 @Injectable()
 export class OfferService {
@@ -32,19 +33,40 @@ export class OfferService {
     private readonly clientRepository: Repository<Client>,
 
     private readonly notificationService: NotificationService,
+
+    private readonly listingService: ListingService,
   ) {}
 
   // tutti gli immobili per cui il cliente ha fatto un offerta
   // essendo una query presonalizzata è stata inserirta nel repository del listing
-  async getListingByClientId(userId: string): Promise<Listing[]> {
-    const uniqueListings = await this.listingRepository
+  async getListingByClientId(userId: string): Promise<ListingWithImageDto[]> {
+    const listings = await this.listingRepository
       .createQueryBuilder('listing')
       .innerJoinAndSelect('listing.propertyOffers', 'propertyOffer')
       .where('propertyOffer.client.userId = :userId', { userId })
       .distinct(true)
       .getMany();
 
-    return uniqueListings;
+    // Simulazione recupero immagini (puoi anche fare query vere se le immagini sono in un'altra entità)
+    const listingsWithImages: ListingWithImageDto[] = await Promise.all(
+      listings.map(async (listing) => {
+        const imagePaths = await this.listingService.getImagesForListing(
+          listing.id,
+        ); // metodo custom da creare
+        const imageUrl = imagePaths[0]
+          ? `http://dietiestates.duckdns.org:3000${imagePaths[0]}`
+          : null;
+
+        return {
+          ...listing,
+          imageUrl,
+        };
+      }),
+    );
+
+    console.log(listingsWithImages);
+
+    return listingsWithImages;
   }
 
   //viene creata un offerta per un immobile da parte del cliente
@@ -143,7 +165,6 @@ export class OfferService {
     updateOfferdto: UpdateOfferDto,
     user: UserItem,
   ): Promise<PropertyOffer> {
-
     const { status } = updateOfferdto;
 
     // cerco l oggetto offerta tramite l id dell offerta
@@ -155,7 +176,6 @@ export class OfferService {
     if (!offer) throw new NotFoundException('Offer not found');
     else if (offer.state !== OfferState.PENDING)
       throw new BadRequestException('Offer already processed');
-
 
     //se non è un cliente
     //si recupera l immobile tramite l offerta e poi si controllano se i permessi sono validi
@@ -176,7 +196,9 @@ export class OfferService {
         madeByUser &&
         status == (OfferState.ACCEPTED || OfferState.DECLINED)
       ) {
-        throw new UnauthorizedException('Client cannot accept or decline an offer',);
+        throw new UnauthorizedException(
+          'Client cannot accept or decline an offer',
+        );
       }
     } else {
       //se l offerta è stata fatta da un agente non può accetare o rifiutare la propria del cliente
@@ -315,7 +337,6 @@ export class OfferService {
       throw new UnauthorizedException();
   }
 
-
   // PRIVATE HELPERS
   private async findClientByListingId(listingId: string): Promise<Client[]> {
     const clients = await this.clientRepository
@@ -326,7 +347,7 @@ export class OfferService {
       .distinct(true)
       .getMany();
 
-      if(!clients) return [] as Client[];
+    if (!clients) return [] as Client[];
 
     return clients;
   }

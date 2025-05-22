@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { ListingCategory } from '../common/types/listing-category';
 import { Agency } from '../agency/agency.entity';
 import { Exclude } from 'class-transformer';
@@ -6,14 +12,13 @@ import { Agent } from 'src/agent/agent.entity';
 import { PropertyOffer } from 'src/property_offer/property_offer.entity';
 import { Notification } from '../notification/notification.entity';
 
-
 @Entity()
 export class Listing {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  title: string
+  title: string;
 
   @Column()
   address: string;
@@ -50,7 +55,6 @@ export class Listing {
 
   @Column('float')
   price: number;
-
   @Column({ type: 'enum', enum: ListingCategory })
   category: ListingCategory; // categoria di contratto (vendita, affitto ecc)
 
@@ -70,7 +74,7 @@ export class Listing {
   @ManyToOne(() => Agency, (agency) => agency.listings, {
     onDelete: 'CASCADE',
     nullable: true,
-    eager: true
+    eager: true,
   })
   agency: Agency;
 
@@ -78,7 +82,7 @@ export class Listing {
   @ManyToOne(() => Agent, (agent) => agent.listings, {
     onDelete: 'CASCADE',
     nullable: true,
-    eager: true
+    eager: true,
   })
   agent: Agent;
 
@@ -87,5 +91,4 @@ export class Listing {
 
   @OneToMany(() => Notification, (notification) => notification.listing)
   notifications: Notification[];
-
 }
