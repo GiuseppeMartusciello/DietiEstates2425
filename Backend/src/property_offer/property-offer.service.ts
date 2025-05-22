@@ -50,10 +50,13 @@ export class OfferService {
 
     const response: ListingResponse[] = await Promise.all(
       listings.map(async (listing) => ({
-         ...(instanceToPlain(listing) as Listing),
-        imageUrls:
-          (await this.listingService.getImagesForListing(listing.id)[0]) ??
-          null,
+        ...(instanceToPlain(listing) as Listing),
+        imageUrls: [
+          ...(await this.listingService.getImagesForListing(listing.id)).slice(
+            0,
+            1,
+          ),
+        ],
       })),
     );
 
