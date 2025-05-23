@@ -39,7 +39,6 @@ class TokenManager(private val context: Context) {
         return !jwt.isExpired(10)
     }
 
-
     fun getUserRole(): String? {
         return prefs.getString("user_role", null)
     }

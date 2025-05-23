@@ -45,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.theme.LocalAppTypography
@@ -110,10 +111,13 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
                             value = listing.energyClass.toString()
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        EditDeleteMenu(
-                            onEditClick = { onClickOptions() },
-                            onDeleteClick = { onClickDelete() }
-                        )
+                        val role = AppContainer.tokenManager.getUserRole()
+                        if(role == "AGENT" || role == "SUPPORT-ADMIN" || role == "MANAGER") {
+                            EditDeleteMenu(
+                                onEditClick = { onClickOptions() },
+                                onDeleteClick = { onClickDelete() }
+                            )
+                        }
 
                     }
 

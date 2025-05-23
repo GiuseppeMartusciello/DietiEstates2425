@@ -72,10 +72,10 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:2.11.4")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
-    implementation ("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     // JWT DECODE
-    implementation ("com.auth0.android:jwtdecode:2.0.1")
+    implementation("com.auth0.android:jwtdecode:2.0.1")
 
 
     // Navigation

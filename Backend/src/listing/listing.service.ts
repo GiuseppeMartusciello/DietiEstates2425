@@ -13,6 +13,8 @@ import { ModifyListingDto } from './dto/modify-listing.dto';
 import { ResearchListingDto } from '../research/dto/create-research.dto';
 import * as pathModule from 'path';
 import * as fs from 'fs';
+import { ListingResponse } from './dto/listing-with-image.dto';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class ListingService {
@@ -24,43 +26,80 @@ export class ListingService {
   async getListingByAgentId(
     agentId: string,
     agencyId: string,
-  ): Promise<Listing[]> {
-    const found = await this.listingRepository.find({
+  ): Promise<ListingResponse[]> {
+    const listings = await this.listingRepository.find({
       where: {
         agent: { userId: agentId } as Agent,
         agency: { id: agencyId } as Agency,
       },
     });
 
-    return found;
+    const response: ListingResponse[] = await Promise.all(
+      listings.map(async (listing) => ({
+        ...(instanceToPlain(listing) as Listing),
+        imageUrls: await this.getImagesForListing(listing.id),
+      })),
+    );
+
+    return response;
   }
 
-  async getListingByAgencyId(agencyId: string): Promise<Listing[]> {
-    const found = await this.listingRepository.find({
+  async getListingByAgencyId(agencyId: string): Promise<ListingResponse[]> {
+    const listings = await this.listingRepository.find({
       where: {
         agency: { id: agencyId } as Agency,
       },
     });
 
-    return found;
+    const images = this.getAllListingImages();
+
+    const response: ListingResponse[] = listings.map((listing) => ({
+      ...(instanceToPlain(listing) as Listing),
+      imageUrls: images[listing.id] || [],
+    }));
+
+    return response;
   }
 
-  async getListingById(id: string): Promise<Listing> {
-    const found = await this.listingRepository.findOneBy({ id: id });
+  async getListingById(id: string): Promise<ListingResponse> {
+    const listing = await this.listingRepository.findOneBy({ id: id });
 
-    if (!found) throw new NotFoundException(`Listing id  "${id}" not found`);
+    if (!listing) throw new NotFoundException(`Listing id  "${id}" not found`);
 
-    return found;
+    const images: string[] = await this.getImagesForListing(id);
+
+    return {
+      ...(instanceToPlain(listing) as Listing),
+      imageUrls: images,
+    };
   }
 
-  async getAllListing(): Promise<Listing[]> {
-    const found = await this.listingRepository.find();
+  async getAllListing(): Promise<ListingResponse[]> {
+    const listings: Listing[] = await this.listingRepository.find();
+    const images = this.getAllListingImages();
 
-    return found;
+    const response: ListingResponse[] = listings.map((listing) => ({
+      ...(instanceToPlain(listing) as Listing),
+      imageUrls: images[listing.id] || [],
+    }));
+
+    return response;
   }
 
-  searchListing(searchListingDto: ResearchListingDto): Promise<Listing[]> {
-    return this.listingRepository.searchListings(searchListingDto);
+  async searchListing(
+    searchListingDto: ResearchListingDto,
+  ): Promise<ListingResponse[]> {
+    const listings =
+      await this.listingRepository.searchListings(searchListingDto);
+
+    const response: ListingResponse[] = await Promise.all(
+      listings.map(async (listing) => ({
+        ...(instanceToPlain(listing) as Listing),
+        imageUrls: await this.getImagesForListing(listing.id),
+      })),
+    );
+
+    return response;
   }
 
   async changeListing(
@@ -129,6 +168,16 @@ export class ListingService {
     if (result.affected === 0) {
       throw new BadRequestException(`Listing with ID "${listingId}" not found`);
     }
+
+    const folderPath = pathModule.join(
+      __dirname,
+      '..',
+      '..',
+      'uploads',
+      listingId,
+    );
+
+    this.deleteImagesFolder(folderPath);
   }
 
   async handleUploadedImages(listingId: string, files: Express.Multer.File[]) {
@@ -136,7 +185,6 @@ export class ListingService {
       throw new NotFoundException('No images uploaded');
     }
 
-    // Restituisco i path delle immagini relative
     return files.map((file) => ({
       filename: file.filename,
       path: `/uploads/${listingId}/${file.filename}`,
@@ -207,5 +255,23 @@ export class ListingService {
     fs.unlinkSync(filePath);
 
     return { success: true };
+  }
+
+  deleteImagesFolder(folderPath: string) {
+    if (fs.existsSync(folderPath)) {
+      const files = fs.readdirSync(folderPath);
+
+      for (const file of files) {
+        const filePath = pathModule.join(folderPath, file);
+        fs.unlinkSync(filePath);
+      }
+
+      fs.rmdirSync(folderPath);
+      console.log(
+        `Cartella ${folderPath} e tutti i file interni sono stati eliminati.`,
+      );
+    } else {
+      console.log(`Cartella ${folderPath} non trovata.`);
+    }
   }
 }

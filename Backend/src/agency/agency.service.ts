@@ -7,26 +7,26 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Manager } from './agency-manager.entity';
-import { CredentialDto } from './dto/credentials.dto';
+import { Manager } from '../agency-manager/agency-manager.entity';
+import { CredentialDto } from '../agency-manager/dto/credentials.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/auth/user.entity';
 import { AuthCredentialDto } from 'src/auth/dto/auth.credentials.dto';
 import { UserItem } from 'src/common/types/userItem';
 import { SupportAdmin } from 'src/support-admin/support-admin.entity';
 import { UserRoles } from 'src/common/types/user-roles';
-import { CreateSupportAdminDto } from './dto/create-support-admin.dto';
+import { CreateSupportAdminDto } from '../agency-manager/dto/create-support-admin.dto';
 import { Agent } from 'src/agent/agent.entity';
 import { AgentService } from 'src/agent/agent.service';
-import { CreateAgentDto } from './dto/create-agent.dto';
+import { CreateAgentDto } from '../agency-manager/dto/create-agent.dto';
 import { Agency } from 'src/agency/agency.entity';
 import { Provider } from 'src/common/types/provider.enum';
-import { CreateSupportAdminResponse } from './types/create-support-admin-response';
-import { CreateAgentResponse } from './types/create-agent-response';
+import { CreateSupportAdminResponse } from '../agency-manager/types/create-support-admin-response';
+import { CreateAgentResponse } from '../agency-manager/types/create-agent-response';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class AgencyManagerService {
+export class AgencyService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -174,16 +174,61 @@ export class AgencyManagerService {
     return agent;
   }
 
-  async deleteAgentById(agentId: string) {
+  async deleteAgentById(agentId: string, agencyId: String) {
+
     const found = await this.userRepository.findOneBy({ id: agentId });
     if (!found)
       throw new NotFoundException(`Agent with id "${agentId}" not found`);
+
+    const agent = await this.agentRepository.findOne({
+      where: { userId: agentId },
+    });
+    if (!agent)
+      throw new NotFoundException(`Agent with id "${agentId}" not found`);
+
+    if (agent?.agency.id !== agencyId) throw new UnauthorizedException('ciao');
 
     await this.userRepository.delete(agentId);
 
     return {
       message: 'Agent delete successfully',
     };
+  }
+
+  async deleteSupportAdminById(supportAdminId: string, agencyId: string) {
+
+    const found = await this.userRepository.findOneBy({ id: supportAdminId });
+    if (!found)
+      throw new NotFoundException(
+        `Support Admin with id "${supportAdminId}" not found`,
+      );
+
+    const supportAdmin = await this.supportAdminRepository.findOne({
+      where: { userId: supportAdminId },
+    });
+    if (!supportAdmin)
+      throw new NotFoundException(
+        `Support Admin with id "${supportAdminId}" not found`,
+      );
+
+    if (supportAdmin?.agency.id !== agencyId)
+      throw new UnauthorizedException();
+
+    await this.userRepository.delete(supportAdminId);
+
+    return {
+      message: 'Support Admin delete successfully',
+    };
+  }
+
+  async getAgents(agencyId: string) {
+
+    const agents = this.agentRepository.find({
+      where: { agency: { id: agencyId } },
+      relations: ['user'],
+    });
+
+    return agents;
   }
 
   private async hashPassword(password: string): Promise<string> {

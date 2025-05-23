@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.ListingViewModel
+import com.example.dietiestates.ui.viewModel.ModifyOrCreateListingViewModel
 
 @Composable
 fun RemotePhotoEditor(
@@ -33,7 +34,7 @@ fun RemotePhotoEditor(
     listingId: String,
     modifier: Modifier,
 ) {
-    val viewModel: ListingViewModel = viewModel()
+    val viewModel: ModifyOrCreateListingViewModel = viewModel()
     var showConfirmDialog by remember { mutableStateOf(false) }
     var imageToDelete by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current

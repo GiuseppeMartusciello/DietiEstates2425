@@ -142,7 +142,7 @@ fun ListingScreen(navController: NavController) {
                             .padding(bottom = 100.dp)
                     ) {
                         Box() {
-                            ImageGalleryPager(images = viewModel.imageUrls)
+                            ImageGalleryPager(images = listing.imageUrls)
                             IconButton(
                                 onClick = { navController.navigateUp() },
                                 modifier = Modifier
