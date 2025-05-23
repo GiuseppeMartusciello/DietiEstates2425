@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.viewModel
 
+import android.R.attr.name
 import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

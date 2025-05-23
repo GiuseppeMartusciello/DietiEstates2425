@@ -5,6 +5,7 @@ import android.content.Context
 import com.example.dietiestates.data.remote.RetrofitClient
 import com.example.dietiestates.data.repository.AuthRepository
 import com.example.dietiestates.data.repository.ListingRepository
+import com.example.dietiestates.data.repository.ResearchRepository
 import com.example.dietiestates.utility.TokenManager
 
 object AppContainer {
@@ -18,6 +19,9 @@ object AppContainer {
         private set
 
     lateinit var authRepository: AuthRepository
+        private set
+
+    lateinit var researchRepository: ResearchRepository
         private set
 
 

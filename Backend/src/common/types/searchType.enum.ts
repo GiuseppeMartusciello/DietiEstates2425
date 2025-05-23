@@ -1,5 +1,4 @@
 export enum SearchType {
   MUNICIPALITY  = 'MUNICIPALITY',
   COORDINATES = 'COORDINATES',
-  RADIUS = 'RADIUS',
 }
