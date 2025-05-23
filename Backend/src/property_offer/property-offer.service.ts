@@ -164,6 +164,7 @@ export class OfferService {
     // cerco l oggetto offerta tramite l id dell offerta
     const offer = await this.offerRepository.findOne({
       where: { id: offerId },
+      relations: ['listing'],
     });
 
     //controllo se l offerta esiste e se è in stato PENDING
