@@ -39,26 +39,6 @@ export class ListingController {
     return this.listingService.getAllListingImages();
   }
 
-/* @Get('/agent/:id') //ridurre a gestMyListings per agent
-  @Roles(UserRoles.AGENT, UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  async getListingByAgentId(
-    @Param('id', new ParseUUIDPipe()) agentId: string,
-    @GetUser() user: UserItem,
-  ): Promise<Listing[]> {
-    if (user.agent) agentId = user.id;
-
-    const agencyId: string = this.getAgencyIdFromUser(user);
-    return this.listingService.getListingByAgentId(agentId, agencyId);
-  }
-
-  @Get('/agency')
-  @Roles(UserRoles.SUPPORT_ADMIN, UserRoles.MANAGER)
-  getListingByAgencyId(@GetUser() user: UserItem): Promise<Listing[]> {
-    const agencyId = this.getAgencyIdFromUser(user);
-
-    return this.listingService.getListingByAgencyId(agencyId);
-  }*/
-
   @Get('/:id')
   getListingById(
     @Param('id', new ParseUUIDPipe()) id: string,

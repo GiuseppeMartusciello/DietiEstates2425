@@ -36,7 +36,7 @@ export class ListingService {
 
     const response: ListingResponse[] = await Promise.all(
       listings.map(async (listing) => ({
-         ...(instanceToPlain(listing) as Listing),
+        ...(instanceToPlain(listing) as Listing),
         imageUrls: await this.getImagesForListing(listing.id),
       })),
     );
@@ -54,7 +54,7 @@ export class ListingService {
     const images = this.getAllListingImages();
 
     const response: ListingResponse[] = listings.map((listing) => ({
-       ...(instanceToPlain(listing) as Listing),
+      ...(instanceToPlain(listing) as Listing),
       imageUrls: images[listing.id] || [],
     }));
 
@@ -69,7 +69,7 @@ export class ListingService {
     const images: string[] = await this.getImagesForListing(id);
 
     return {
-       ...(instanceToPlain(listing) as Listing),
+      ...(instanceToPlain(listing) as Listing),
       imageUrls: images,
     };
   }
@@ -79,19 +79,22 @@ export class ListingService {
     const images = this.getAllListingImages();
 
     const response: ListingResponse[] = listings.map((listing) => ({
-       ...(instanceToPlain(listing) as Listing),
+      ...(instanceToPlain(listing) as Listing),
       imageUrls: images[listing.id] || [],
     }));
 
     return response;
   }
 
-  async searchListing(searchListingDto: ResearchListingDto): Promise<ListingResponse[]> {
-    const listings = await this.listingRepository.searchListings(searchListingDto);
+  async searchListing(
+    searchListingDto: ResearchListingDto,
+  ): Promise<ListingResponse[]> {
+    const listings =
+      await this.listingRepository.searchListings(searchListingDto);
 
     const response: ListingResponse[] = await Promise.all(
       listings.map(async (listing) => ({
-         ...(instanceToPlain(listing) as Listing),
+        ...(instanceToPlain(listing) as Listing),
         imageUrls: await this.getImagesForListing(listing.id),
       })),
     );
@@ -166,7 +169,15 @@ export class ListingService {
       throw new BadRequestException(`Listing with ID "${listingId}" not found`);
     }
 
-    /* ToDo elimina foto relative al listing*/
+    const folderPath = pathModule.join(
+      __dirname,
+      '..',
+      '..',
+      'uploads',
+      listingId,
+    );
+
+    this.deleteImagesFolder(folderPath);
   }
 
   async handleUploadedImages(listingId: string, files: Express.Multer.File[]) {
@@ -174,7 +185,6 @@ export class ListingService {
       throw new NotFoundException('No images uploaded');
     }
 
-    // Restituisco i path delle immagini relative
     return files.map((file) => ({
       filename: file.filename,
       path: `/uploads/${listingId}/${file.filename}`,
@@ -245,5 +255,23 @@ export class ListingService {
     fs.unlinkSync(filePath);
 
     return { success: true };
+  }
+
+  deleteImagesFolder(folderPath: string) {
+    if (fs.existsSync(folderPath)) {
+      const files = fs.readdirSync(folderPath);
+
+      for (const file of files) {
+        const filePath = pathModule.join(folderPath, file);
+        fs.unlinkSync(filePath);
+      }
+
+      fs.rmdirSync(folderPath);
+      console.log(
+        `Cartella ${folderPath} e tutti i file interni sono stati eliminati.`,
+      );
+    } else {
+      console.log(`Cartella ${folderPath} non trovata.`);
+    }
   }
 }

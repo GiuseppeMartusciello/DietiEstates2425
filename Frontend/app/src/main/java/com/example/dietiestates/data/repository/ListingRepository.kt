@@ -4,32 +4,28 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.dietiestates.data.model.Listing
-import com.example.dietiestates.data.model.ModifyOrCreateListingDto
+import com.example.dietiestates.data.model.dto.ModifyOrCreateListingDto
 import com.example.dietiestates.data.remote.api.ListingApi
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 class ListingRepository(private val api: ListingApi) {
-    private val BASE_IMAGE_URL = "http://10.0.2.2:3000"
+    private val BASE_IMAGE_URL = "http://dietiestates.duckdns.org:3000"
 
-    //Quando carico tutti i listing carico una sola foto per ogni listing,
-    // ma facendo un'unica chiamata per tutte le immagini, per evitare il doppio delle chiamate per ogni listing
     suspend fun getListings(): List<Listing> {
         val listingsResponse = api.getListings()
-        val imagesResponse = api.getAllListingImages()
 
-        if (listingsResponse.isSuccessful /*&& imagesResponse.isSuccessful*/) {
-            val baseListings = listingsResponse.body() ?: emptyList()
-            val imageMap = imagesResponse.body() ?: emptyMap()
+        if (listingsResponse.isSuccessful ) {
+            val listing = listingsResponse.body()?.map { listing ->
+                listing.copy(
+                    imageUrls = listing.imageUrls.map { "$BASE_IMAGE_URL$it" }
+                )
+            } ?: emptyList()
 
-            return baseListings.map { listing ->
-                val firstImage = imageMap[listing.id]?.firstOrNull()
-                val fullUrl = firstImage?.let { "$BASE_IMAGE_URL$it" }
-                listing.copy(imageUrls = listOfNotNull(fullUrl))
-            }
+            return listing
         } else {
-            val code = if (!listingsResponse.isSuccessful) listingsResponse.code() else imagesResponse.code()
+            val code = listingsResponse.code()
             throw Exception("Errore nel caricamento dei dati: HTTP $code")
         }
 
@@ -39,7 +35,11 @@ class ListingRepository(private val api: ListingApi) {
         val response = api.getListing(id)
 
         if (response.isSuccessful) {
-            return response.body() ?: null
+            val listing = response.body() ?: null
+            Log.d("output",listing.toString())
+            return listing?.copy(
+                imageUrls = listing.imageUrls.map { "$BASE_IMAGE_URL$it" }
+            )
         } else {
             throw Exception("Errore HTTP: ${response.code()}")
         }

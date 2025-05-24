@@ -3,20 +3,17 @@ package com.example.dietiestates.ui.viewModel
 import android.content.Intent
 import android.util.Log
 import android.util.Patterns
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dietiestates.AppContainer
-import com.example.dietiestates.AppContainer.authRepository
-import com.example.dietiestates.data.model.LoginRequest
+
 import com.example.dietiestates.data.model.PostLoginNavigation
-import com.example.dietiestates.data.model.SignUpRequest
-import com.example.dietiestates.data.remote.RetrofitClient
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,10 +59,10 @@ class AuthViewModel : ViewModel() {
             onInvalid("Inserisci un'email.")
             return false
         }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            onInvalid("L'email inserita non è valida.")
-            return false
-        }
+//        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+//            onInvalid("L'email inserita non è valida.")
+//            return false
+//        }
         if (password.isBlank()) {
             onInvalid("Inserisci una password.")
             return false
@@ -93,7 +90,7 @@ class AuthViewModel : ViewModel() {
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
-            val result = AppContainer.authRepository.login(email, password)
+            val result = authRepository.login(email, password)
 
             _loginState.value = when {
                 result.isSuccess -> {
@@ -144,7 +141,7 @@ class AuthViewModel : ViewModel() {
     fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
-            val result = AppContainer.authRepository.loginWithGoogle(idToken)
+            val result = authRepository.loginWithGoogle(idToken)
 
             _loginState.value = when {
                 result.isSuccess -> {
@@ -165,7 +162,7 @@ class AuthViewModel : ViewModel() {
     fun changePassword(currentPassword: String, newPassword: String) {
         viewModelScope.launch {
             _changePasswordState.value = ChangePasswordState.Loading
-            val result = AppContainer.authRepository.changePassword(currentPassword, newPassword)
+            val result = authRepository.changePassword(currentPassword, newPassword)
 
             _changePasswordState.value = when {
                 result.isSuccess -> ChangePasswordState.Success

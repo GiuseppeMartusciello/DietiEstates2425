@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -25,7 +26,7 @@ import { CreateAgentDto } from '../agency-manager/dto/create-agent.dto';
 export class AgencyController {
   constructor(private readonly agencyService: AgencyService) {}
 
-  @Post('support-admin')
+  @Post('/support-admin')
   @Roles(UserRoles.MANAGER)
   createSupportAdmin(
     @Body() createSupportAdminDto: CreateSupportAdminDto,
@@ -35,7 +36,7 @@ export class AgencyController {
   }
 
   //inserire un nuovo agente (admin, support-admin)
-  @Post('agent')
+  @Post('/agent')
   @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   createAgent(
     @GetUser() user: UserItem,
@@ -48,27 +49,40 @@ export class AgencyController {
   }
 
   //eliminare un agente
-  @Delete('agent/:id/delete')
+  @Delete('/agent/:id/delete')
   @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   deleteAgent(
     @GetUser() user: UserItem,
     @Param('id', new ParseUUIDPipe()) agentId: string,
   ) {
-    return this.agencyService.deleteAgentById(agentId, user);
+    const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
+    if (!agencyId) 
+      throw new BadRequestException('Nessuna agenzia associata all’utente.');
+
+    return this.agencyService.deleteAgentById(agentId, agencyId);
   }
 
-  @Delete('support-admin/:id/delete')
+  @Delete('/support-admin/:id/delete')
   @Roles(UserRoles.MANAGER)
   deleteSupportAdmin(
     @GetUser() user: UserItem,
     @Param('id', new ParseUUIDPipe()) supportAdminId: string,
   ) {
-    return this.agencyService.deleteSupportAdminById(supportAdminId, user);
+    const agencyId = user.manager?.agency.id;
+    if (!agencyId) {
+      throw new BadRequestException('Nessuna agenzia associata all’utente.');
+    }
+
+    return this.agencyService.deleteSupportAdminById(supportAdminId, agencyId);
   }
 
-  @Get('agents')
+  @Get('/agents')
   @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   getAgents(@GetUser() user: UserItem) {
-    return this.agencyService.getAgents(user);
+    const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
+    if (!agencyId) {
+      throw new BadRequestException('Nessuna agenzia associata all’utente.');
+    }
+    return this.agencyService.getAgents(agencyId);
   }
 }

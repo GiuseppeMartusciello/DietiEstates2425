@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.dietiestates.AppContainer
 
 data class NavItem(
     val route: String,
@@ -46,6 +47,8 @@ data class NavItem(
 @Composable
 fun NavBar(navController: NavController, items: List<NavItem>) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val role = AppContainer.tokenManager.getUserRole()
+
     Box(
     ) {
         NavigationBar(
@@ -78,9 +81,9 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
             }
 
             // SPAZIO CENTRALE PER IL FAB
-            Spacer(modifier = Modifier.weight(0.7f))
+            if(role == "AGENT" || role == "SUPPORT-ADMIN" || role == "MANAGER")
+                Spacer(modifier = Modifier.weight(0.7f))
 
-            // ALTRI DUE
             items.takeLast(2).forEach { item ->
                 val selected = currentRoute == item.route
                 NavigationBarItem(
@@ -103,16 +106,18 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
                 )
             }
         }
-        FloatingActionButton(
-            onClick = { navController.navigate("createlistingscreen") },
-            containerColor = Color(0xFF3F51B5),
-            contentColor = Color.White,
-            shape = CircleShape,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (-20).dp) // Stacca il bottone dalla NavigationBar
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add")
+        if(role == "AGENT" || role == "SUPPORT-ADMIN" || role == "MANAGER") {
+            FloatingActionButton(
+                onClick = { navController.navigate("createlistingscreen") },
+                containerColor = Color(0xFF3F51B5),
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-20).dp) // Stacca il bottone dalla NavigationBar
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
         }
     }
 }

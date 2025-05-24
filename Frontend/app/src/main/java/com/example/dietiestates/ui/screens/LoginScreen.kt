@@ -1,8 +1,5 @@
 package com.example.dietiestates.ui.screens
 
-import android.content.Context
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -36,10 +33,6 @@ import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.AuthViewModel
 import com.example.dietiestates.ui.viewModel.LoginState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -47,6 +40,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.dietiestates.data.model.PostLoginNavigation
 import com.example.dietiestates.ui.theme.customBlue
+import com.example.dietiestates.utility.GoogleSignInUtil
 
 
 @Composable
