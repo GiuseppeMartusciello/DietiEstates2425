@@ -44,7 +44,7 @@ export class OfferController {
   async getClientsListiningId(
     @GetUser() agent: UserItem,
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
-  ): Promise<Client[]> {
+  ): Promise<PropertyOffer[]> {
     return this.offerService.getClientsByListinigId(listingId, agent);
   }
 
