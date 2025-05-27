@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -76,8 +77,9 @@ export class OfferService {
     });
     if (!listing) throw new NotFoundException('Listing not found');
 
-    if (listing.price < price)
-      throw new BadRequestException('Price exceeds listing price');
+    await this.checkValidate(listing.id);
+
+    this.checkPrice(listing.price, price);
 
     const offer = this.offerRepository.create({
       price: price,
@@ -123,18 +125,11 @@ export class OfferService {
 
     this.checkAuthorization(user, listing); //controllo permessi
 
-    if (listing.price < price)
-      throw new BadRequestException('Price exceeds listing price');
+    await this.checkValidate(listing.id);
 
-    const offer = this.offerRepository.create({
-      price: price,
-      date: new Date(),
-      state: OfferState.PENDING,
-      madeByUser: false,
-      listing: listing,
-      client: { userId: clientId } as Client,
-    });
-    await this.offerRepository.save(offer);
+    this.checkPrice(listing.price, price);
+
+    const offer = await this.createOffer2(price, listing, clientId);
 
     //crea notifica specifica per una nuova offerta
     const notifica =
@@ -166,9 +161,13 @@ export class OfferService {
       where: { id: offerId },
       relations: ['listing'],
     });
+    if (!offer) throw new NotFoundException('Offer not found');
+
+    if (status === OfferState.ACCEPTED) {
+      await this.checkValidate(offer.listing.id);
+    }
 
     //controllo se l offerta esiste e se è in stato PENDING
-    if (!offer) throw new NotFoundException('Offer not found');
     else if (offer.state !== OfferState.PENDING)
       throw new BadRequestException('Offer already processed');
 
@@ -345,5 +344,38 @@ export class OfferService {
     });
 
     return offers;
+  }
+
+  private async checkValidate(listingId: string) {
+    const exist = await this.offerRepository.findOne({
+      where: { state: OfferState.ACCEPTED, listing: { id: listingId } },
+    });
+
+    if (exist) throw new ConflictException('An offer accepted already exist');
+  }
+
+  private checkPrice(listingPrice: number, userOffer: number) {
+    if (listingPrice < userOffer)
+      throw new BadRequestException('Price exceeds listing price');
+
+    if (userOffer <= 0)
+      throw new BadRequestException('Price can t be < then 0');
+  }
+
+  private async createOffer2(
+    price: number,
+    listing: Listing,
+    clientId: string,
+  ) {
+    const offer = this.offerRepository.create({
+      price: price,
+      date: new Date(),
+      state: OfferState.PENDING,
+      madeByUser: false,
+      listing: listing,
+      client: { userId: clientId } as Client,
+    });
+
+    return this.offerRepository.save(offer);
   }
 }
