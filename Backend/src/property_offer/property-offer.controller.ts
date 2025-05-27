@@ -38,13 +38,13 @@ export class OfferController {
     return this.offerService.getAllOffersByListingId(listingId, user.id);
   }
 
-  // questo metodo restituisce tutte i clienti che hannpo fatto un offerta per uno specifico immobile lato agent
+  // questo metodo restituisce tutte le offerte fatte (di qualsiasi client) a quel immobile
   @Get('listing/:listingId/clients')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   async getClientsListiningId(
     @GetUser() agent: UserItem,
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
-  ): Promise<Client[]> {
+  ): Promise<PropertyOffer[]> {
     return this.offerService.getClientsByListinigId(listingId, agent);
   }
 

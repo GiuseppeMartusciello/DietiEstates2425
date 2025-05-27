@@ -164,6 +164,7 @@ export class OfferService {
     // cerco l oggetto offerta tramite l id dell offerta
     const offer = await this.offerRepository.findOne({
       where: { id: offerId },
+      relations: ['listing'],
     });
 
     //controllo se l offerta esiste e se è in stato PENDING
@@ -255,7 +256,7 @@ export class OfferService {
   async getClientsByListinigId(
     listingId: string,
     agent: UserItem,
-  ): Promise<Client[]> {
+  ): Promise<PropertyOffer[]> {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
     });
@@ -332,17 +333,17 @@ export class OfferService {
   }
 
   // PRIVATE HELPERS
-  private async findClientByListingId(listingId: string): Promise<Client[]> {
-    const clients = await this.clientRepository
-      .createQueryBuilder('client')
-      .innerJoinAndSelect('client.propertyOffers', 'propertyOffer')
-      .innerJoin('propertyOffer.listing', 'listing')
-      .where('listing.id = :listingId', { listingId })
-      .distinct(true)
-      .getMany();
+  private async findClientByListingId(
+    listingId: string,
+  ): Promise<PropertyOffer[]> {
+    const offers = await this.offerRepository.find({
+      where: {
+        listing: { id: listingId },
+      },
+      relations: ['client', 'listing'],
+      order: { date: 'ASC' },
+    });
 
-    if (!clients) return [] as Client[];
-
-    return clients;
+    return offers;
   }
 }
