@@ -65,6 +65,6 @@ export class ResearchListingDto {
   @IsBoolean()
   hasGarage?: boolean;
 
-  @Validate(MunicipalityCoordinatesValidator)
-  dummyPropertyForCustomValidation: any; // workaround per attivare la validazione sulla classe
+  //@Validate(MunicipalityCoordinatesValidator)
+  //dummyPropertyForCustomValidation: any; // workaround per attivare la validazione sulla classe
 }
