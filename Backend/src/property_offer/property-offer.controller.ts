@@ -22,6 +22,7 @@ import { Listing } from 'src/listing/Listing.entity';
 import { Client } from 'src/client/client.entity';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
 import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
+import { ClientWithLastOfferDto } from './dto/last-offer.dto';
 
 @Controller('offer')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -44,7 +45,7 @@ export class OfferController {
   async getClientsListiningId(
     @GetUser() user: UserItem,
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
-  ): Promise<PropertyOffer[]> {
+  ): Promise<ClientWithLastOfferDto[]> {
     return this.offerService.getLatestOffersByListingId(listingId, user);
   }
 

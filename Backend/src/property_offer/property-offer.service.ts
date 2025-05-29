@@ -22,6 +22,7 @@ import { NotificationType } from 'src/common/types/notification.enum';
 import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
 import { ListingService } from 'src/listing/listing.service';
 import { instanceToPlain } from 'class-transformer';
+import { ClientWithLastOfferDto } from './dto/last-offer.dto';
 
 @Injectable()
 export class OfferService {
@@ -255,7 +256,7 @@ export class OfferService {
   async getLatestOffersByListingId(
     listingId: string,
     user: UserItem,
-  ): Promise<PropertyOffer[]> {
+  ): Promise<ClientWithLastOfferDto[]> {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
     });
@@ -275,7 +276,39 @@ export class OfferService {
       .addOrderBy('offer.date', 'DESC') // prende l'ultima offerta per client
       .getMany();
 
-    return offers;
+    const result: ClientWithLastOfferDto[] = offers.map((offer) => {
+      if (offer.guestEmail) {
+        // Offerta da utente esterno (ospite)
+        return {
+          userId: null,
+          name: offer.guestName ?? '',
+          surname: offer.guestSurname ?? '',
+          email: offer.guestEmail,
+          phone: null,
+          lastOffer: {
+            price: offer.price,
+            date: offer.date,
+            state: offer.state,
+          },
+        };
+      } else {
+        // Offerta da utente registrato
+        return {
+          userId: offer.client?.userId,
+          name: offer.client?.user?.name ?? '',
+          surname: offer.client?.user?.surname ?? '',
+          email: offer.client?.user?.email ?? '',
+          phone: offer.client?.user?.phone ?? null,
+          lastOffer: {
+            price: offer.price,
+            date: offer.date,
+            state: offer.state,
+          },
+        };
+      }
+    });
+
+    return result;
   }
 
   async getClientsByListingId(

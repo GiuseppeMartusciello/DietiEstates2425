@@ -35,6 +35,9 @@ export class PropertyOffer {
   @Column({ nullable: true })
   guestName?: string;
 
+  @Column({ nullable: true })
+  guestSurname?: string;
+
   //si è dovuto mettere nullable true per poter far accettare dal sistema le richieste esterne
   //ovvero quando un admin aggiunge un offerta da un cliente esterno al sistema
   @ManyToOne(() => Client, (client) => client.propertyOffers, {
