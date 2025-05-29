@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {  Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Listing } from './Listing.entity';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -18,82 +18,100 @@ export class ListingRepository extends Repository<Listing> {
   }
 
   async searchListings(
-    serchListingDto: ResearchListingDto,
-  ): Promise<Listing[]> {
-    const {
-      searchType,
-      municipality,
-      latitude,
-      longitude,
-      radius,
-      minPrice,
-      maxPrice,
-      numberOfRooms,
-      category,
-      minSize,
-      energyClass,
-      hasElevator,
-      hasAirConditioning,
-      hasGarage,
-    } = serchListingDto;
+  serchListingDto: ResearchListingDto,
+): Promise<Listing[]> {
+  const {
+    searchType,
+    municipality,
+    latitude,
+    longitude,
+    radius,
+    minPrice,
+    maxPrice,
+    numberOfRooms,
+    category,
+    minSize,
+    energyClass,
+    hasElevator,
+    hasAirConditioning,
+    hasGarage,
+  } = serchListingDto;
 
-    const query = this.createQueryBuilder('listing');
+  //todo si dovrebbe aggiungere anche provincia tra i filtri
+  const energyRank: Record<string, number> = {
+    A: 5,
+    B: 6,
+    C: 7,
+    D: 8,
+    E: 9,
+    F: 10,
+    G: 11,
+  };
 
-    if (minPrice !== undefined)
-      query.andWhere('listing.price >= :minPrice', { minPrice });
+  const query = this.createQueryBuilder('listing');
 
-    if (maxPrice !== undefined)
-      query.andWhere('listing.price <= :maxPrice', { maxPrice });
+  if (minPrice !== undefined)
+    query.andWhere('listing.price >= :minPrice', { minPrice });
 
-    if (numberOfRooms !== undefined)
-      query.andWhere('listing.numberOfRooms >= :numberOfRooms', {
-        numberOfRooms,
-      });
+  if (maxPrice !== undefined)
+    query.andWhere('listing.price <= :maxPrice', { maxPrice });
 
-    if (category !== undefined)
-      query.andWhere('listing.category = :category', { category });
+  if (numberOfRooms !== undefined)
+    query.andWhere('listing.numberOfRooms >= :numberOfRooms', { numberOfRooms });
 
-    if (minSize !== undefined)
-      query.andWhere('listing.size >= :minSize', { minSize });
+  if (category !== undefined)
+    query.andWhere('listing.category = :category', { category });
 
-    if (energyClass !== undefined)
-      query.andWhere('listing.energyClass <= :energyClass', { energyClass });
+  if (minSize !== undefined)
+      query.andWhere('CAST(listing.size AS INTEGER) >= :minSize', { minSize });
 
-    if (hasElevator !== undefined && hasElevator)
-      query.andWhere('listing.hasElevator = true');
+  if (hasElevator) query.andWhere('listing.hasElevator = true');
+  if (hasAirConditioning) query.andWhere('listing.hasAirConditioning = true');
+  if (hasGarage) query.andWhere('listing.hasGarage = true');
 
-    if (hasAirConditioning !== undefined && hasAirConditioning)
-      query.andWhere('listing.hasAirConditioning = true');
+  let listings = await query.getMany();
 
-    if (hasGarage !== undefined && hasGarage)
-      query.andWhere('listing.hasGarage = true');
-
-    if (searchType === SearchType.MUNICIPALITY) {
-      query.andWhere('listing.municipality = :municipality', { municipality });
-      return await query.getMany();
-    }
-
-    // Se la ricerca è per raggio allora continuo
-    const listings = await query.getMany();
-
-    if (
-      latitude !== undefined &&
-      longitude !== undefined &&
-      radius !== undefined
-    ) {
-      return listings.filter((listing) => {
-        const dist = this.geopifyService.calculateDistance(
-          latitude,
-          longitude,
-          listing.latitude,
-          listing.longitude,
-        );
-        return dist <= radius;
-      });
-    }
-
-    return listings;
+  //  Energy class filter
+  if (energyClass && energyRank[energyClass] !== undefined) {
+    const threshold = energyRank[energyClass];
+    listings = listings.filter(
+      (listing) =>
+        listing.energyClass &&
+        energyRank[listing.energyClass] !== undefined &&
+        energyRank[listing.energyClass] <= threshold
+    );
   }
+
+  //  Municipality match
+  if (searchType === SearchType.MUNICIPALITY && municipality?.trim()) {
+    listings = listings.filter((listing) =>
+      listing.municipality?.toLowerCase().includes(municipality.toLowerCase())
+    );
+  }
+
+  //  Coordinates (radius) match
+  if (
+    searchType === SearchType.COORDINATES &&
+    latitude !== undefined &&
+    longitude !== undefined &&
+    radius !== undefined
+  ) {
+    listings = listings.filter((listing) => {
+      const dist = this.geopifyService.calculateDistance(
+        latitude,
+        longitude,
+        listing.latitude,
+        listing.longitude,
+      );
+      return dist <= radius;
+    });
+  }
+
+  
+  return listings;
+}
+
+
 
   async modifyListing(
     listing: Listing,
