@@ -267,6 +267,7 @@ export class OfferService {
       .createQueryBuilder('offer')
       .distinctOn(['offer.clientUserId']) // clientUserId è la FK nel DB
       .innerJoinAndSelect('offer.client', 'client')
+      .leftJoinAndSelect('client.user', 'user')
       .innerJoinAndSelect('offer.listing', 'listing')
       .where('offer.listingId = :listingId', { listingId })
       .andWhere('offer.madeByUser = true')
