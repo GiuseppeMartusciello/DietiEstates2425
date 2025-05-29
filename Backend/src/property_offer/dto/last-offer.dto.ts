@@ -1,4 +1,5 @@
 export class LastOfferDto {
+  id: string;
   price: number;
   date: Date;
   state: string;

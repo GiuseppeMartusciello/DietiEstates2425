@@ -286,6 +286,7 @@ export class OfferService {
           email: offer.guestEmail,
           phone: null,
           lastOffer: {
+            id: offer.id,
             price: offer.price,
             date: offer.date,
             state: offer.state,
@@ -300,6 +301,7 @@ export class OfferService {
           email: offer.client?.user?.email ?? '',
           phone: offer.client?.user?.phone ?? null,
           lastOffer: {
+            id: offer.id,
             price: offer.price,
             date: offer.date,
             state: offer.state,
@@ -398,7 +400,7 @@ export class OfferService {
 
     return offers;
   }
-
+  //agg
   private async checkValidate(listingId: string) {
     const exist = await this.offerRepository.findOne({
       where: { state: OfferState.ACCEPTED, listing: { id: listingId } },
