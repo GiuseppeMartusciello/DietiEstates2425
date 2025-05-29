@@ -52,7 +52,7 @@ export class OfferController {
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto
   // serve sia l id dell utente sia l id della proprieta
   //questo è il caso in cui l agente clicca su una chat e vede lo storico di offerte con un cliente
-  @Get('/listing/:listingId/client/:clientId')
+  @Get('/listing/:listingId/client/:clientId/offers')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   async getOffersByAgentId(
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
