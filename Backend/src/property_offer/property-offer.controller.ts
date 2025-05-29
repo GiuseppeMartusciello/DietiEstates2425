@@ -42,10 +42,10 @@ export class OfferController {
   @Get('listing/:listingId/clients')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   async getClientsListiningId(
-    @GetUser() agent: UserItem,
+    @GetUser() user: UserItem,
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
   ): Promise<PropertyOffer[]> {
-    return this.offerService.getClientsByListinigId(listingId, agent);
+    return this.offerService.getLatestOffersByListingId(listingId, user);
   }
 
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto

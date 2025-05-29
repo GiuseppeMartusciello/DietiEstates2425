@@ -252,17 +252,45 @@ export class OfferService {
     return offers;
   }
 
-  async getClientsByListinigId(
+  async getLatestOffersByListingId(
     listingId: string,
-    agent: UserItem,
+    user: UserItem,
   ): Promise<PropertyOffer[]> {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
     });
     if (!listing) throw new UnauthorizedException('Listing not found');
 
-    this.checkAuthorization(agent, listing); //controllo permessi
+    this.checkAuthorization(user, listing); //controllo permessi
 
+    const qb = this.offerRepository
+      .createQueryBuilder('offer')
+      .innerJoinAndSelect('offer.client', 'client')
+      .innerJoinAndSelect('offer.listing', 'listing')
+      .where('listing.id = :listingId', { listingId })
+      .andWhere('offer.madeByUser = true')
+      .andWhere('offer.client IS NOT NULL')
+      .andWhere('offer.listing IS NOT NULL')
+      .andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('MAX(subOffer.date)', 'maxDate')
+          .from(PropertyOffer, 'subOffer')
+          .where('subOffer.clientId = offer.clientId')
+          .andWhere('subOffer.listingId = :listingId')
+          .andWhere('subOffer.madeByUser = true')
+          .getQuery();
+        return `offer.date = ${subQuery}`;
+      });
+
+    const offers = await qb.getMany();
+    return offers;
+  }
+
+  async getClientsByListingId(
+    listingId: string,
+    agent: UserItem,
+  ): Promise<PropertyOffer[]> {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
     const uniqueClients = await this.findClientByListingId(listingId);
@@ -278,6 +306,7 @@ export class OfferService {
       where: {
         client: { userId: id } as Client,
         listing: { id: listingId },
+        madeByUser: true,
       },
       relations: ['client', 'listing'],
       order: { date: 'ASC' },
