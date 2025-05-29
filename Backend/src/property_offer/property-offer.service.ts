@@ -261,29 +261,19 @@ export class OfferService {
     });
     if (!listing) throw new UnauthorizedException('Listing not found');
 
-    this.checkAuthorization(user, listing); //controllo permessi
+    this.checkAuthorization(user, listing); // controllo permessi
 
-    const qb = this.offerRepository
+    const offers = await this.offerRepository
       .createQueryBuilder('offer')
+      .distinctOn(['offer.clientUserId']) // clientUserId è la FK nel DB
       .innerJoinAndSelect('offer.client', 'client')
       .innerJoinAndSelect('offer.listing', 'listing')
-      .where('listing.id = :listingId', { listingId })
+      .where('offer.listingId = :listingId', { listingId })
       .andWhere('offer.madeByUser = true')
-      .andWhere('offer.client IS NOT NULL')
-      .andWhere('offer.listing IS NOT NULL')
-      .andWhere((qb) => {
-        const subQuery = qb
-          .subQuery()
-          .select('MAX(subOffer.date)', 'maxDate')
-          .from(PropertyOffer, 'subOffer')
-          .where('subOffer.clientId = offer.clientId')
-          .andWhere('subOffer.listingId = :listingId')
-          .andWhere('subOffer.madeByUser = true')
-          .getQuery();
-        return `offer.date = ${subQuery}`;
-      });
+      .orderBy('offer.clientUserId', 'ASC')
+      .addOrderBy('offer.date', 'DESC') // prende l'ultima offerta per client
+      .getMany();
 
-    const offers = await qb.getMany();
     return offers;
   }
 
