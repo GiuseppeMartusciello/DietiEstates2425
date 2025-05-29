@@ -47,7 +47,7 @@ export class ResearchListingDto {
 
   @IsOptional()
   @IsInt()
-  minSize?: string; //dimensione in metri quadri
+  minSize?: number; //dimensione in metri quadri
 
   @IsOptional()
   @IsString()

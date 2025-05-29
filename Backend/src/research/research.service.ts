@@ -49,11 +49,11 @@ export class ResearchService {
       date: new Date(),
       client,
     });
+    await  this.researchRepository.save(newresearch);
 
     const result = await this.listingRepository.searchListings(researchListingDto);
 
-    await  this.researchRepository.save(newresearch);
-
+    
     return result;
   }
 
