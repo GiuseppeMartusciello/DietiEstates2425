@@ -72,15 +72,14 @@ export class ListingRepository extends Repository<Listing> {
   let listings = await query.getMany();
 
   //  Energy class filter
-  if (energyClass && energyRank[energyClass] !== undefined) {
-    const threshold = energyRank[energyClass];
-    listings = listings.filter(
-      (listing) =>
-        listing.energyClass &&
-        energyRank[listing.energyClass] !== undefined &&
-        energyRank[listing.energyClass] <= threshold
-    );
-  }
+  if (energyClass && energyRank[energyClass.toUpperCase().trim()] !== undefined) {
+  const threshold = energyRank[energyClass.toUpperCase().trim()];
+
+  listings = listings.filter((listing) => {
+    const cls = listing.energyClass?.toUpperCase().trim();
+    return cls && energyRank[cls] !== undefined && energyRank[cls] <= threshold;
+  });
+}
 
   //  Municipality match
   if (searchType === SearchType.MUNICIPALITY && municipality?.trim()) {
