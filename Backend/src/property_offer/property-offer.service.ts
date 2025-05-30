@@ -82,32 +82,21 @@ export class OfferService {
 
     this.checkPrice(listing.price, price);
 
-    const offer = this.offerRepository.create({
-      price: price,
-      date: new Date(),
-      state: OfferState.PENDING,
-      madeByUser: true,
-      listing: listing,
-      client: { userId: user.id } as Client,
-    });
-
-    await this.offerRepository.save(offer);
+    return this.createOffer2(price, listing, user.id);
 
     //crea notifica specifica per una nuova offerta
-    const notifica =
-      await this.notificationService.createSpecificNotificationOffer(
-        {
-          title: 'New offer',
-          description: 'New offer for your listing',
-          category: NotificationType.SPECIFIC,
-        },
-        offer,
-      );
+    // const notifica =
+    //   await this.notificationService.createSpecificNotificationOffer(
+    //     {
+    //       title: 'New offer',
+    //       description: 'New offer for your listing',
+    //       category: NotificationType.SPECIFIC,
+    //     },
+    //     offer,
+    //   );
 
-    if (!notifica)
-      throw new InternalServerErrorException('Notification not created');
-
-    return offer;
+    // if (!notifica)
+    //   throw new InternalServerErrorException('Notification not created');
   }
 
   // viene creata un offerta per un immobile da parte dell agente
