@@ -82,7 +82,7 @@ export class OfferService {
 
     this.checkPrice(listing.price, price);
 
-    return this.createOffer2(price, listing, user.id);
+    return this.createOffer2(price, listing, user.id, true);
 
     //crea notifica specifica per una nuova offerta
     // const notifica =
@@ -119,7 +119,7 @@ export class OfferService {
 
     this.checkPrice(listing.price, price);
 
-    const offer = await this.createOffer2(price, listing, clientId);
+    const offer = await this.createOffer2(price, listing, clientId, false);
 
     //crea notifica specifica per una nuova offerta
     const notifica =
@@ -409,12 +409,13 @@ export class OfferService {
     price: number,
     listing: Listing,
     clientId: string,
+    madeByUser: boolean,
   ) {
     const offer = this.offerRepository.create({
       price: price,
       date: new Date(),
       state: OfferState.PENDING,
-      madeByUser: false,
+      madeByUser: madeByUser,
       listing: listing,
       client: { userId: clientId } as Client,
     });
