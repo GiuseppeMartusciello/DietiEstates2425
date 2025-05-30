@@ -242,6 +242,44 @@ export class OfferService {
     return offers;
   }
 
+  async getExternalOffers(
+    listingId: string,
+    user: UserItem,
+  ): Promise<ClientWithLastOfferDto[]> {
+    const listing = await this.listingRepository.findOne({
+      where: { id: listingId },
+    });
+    if (!listing) throw new UnauthorizedException('Listing not found');
+
+    const externalOffers = await this.offerRepository
+      .createQueryBuilder('offer')
+      .where('offer.clientId IS NULL')
+      .andWhere('offer.guestName IS NOT NULL')
+      .andWhere('offer.guestSurname IS NOT NULL')
+      .andWhere('offer.guestEmail IS NOT NULL')
+      .orderBy('offer.date', 'DESC')
+      .getMany();
+
+    const result: ClientWithLastOfferDto[] = externalOffers.map((offer) => {
+      // Offerta da utente esterno (ospite)
+      return {
+        userId: null,
+        name: offer.guestName ?? '',
+        surname: offer.guestSurname ?? '',
+        email: offer.guestEmail ?? '',
+        phone: null,
+        lastOffer: {
+          id: offer.id,
+          price: offer.price,
+          date: offer.date,
+          state: offer.state,
+        },
+      };
+    });
+
+    return result;
+  }
+
   async getLatestOffersByListingId(
     listingId: string,
     user: UserItem,
@@ -266,37 +304,20 @@ export class OfferService {
       .getMany();
 
     const result: ClientWithLastOfferDto[] = offers.map((offer) => {
-      if (offer.guestEmail) {
-        // Offerta da utente esterno (ospite)
-        return {
-          userId: null,
-          name: offer.guestName ?? '',
-          surname: offer.guestSurname ?? '',
-          email: offer.guestEmail,
-          phone: null,
-          lastOffer: {
-            id: offer.id,
-            price: offer.price,
-            date: offer.date,
-            state: offer.state,
-          },
-        };
-      } else {
-        // Offerta da utente registrato
-        return {
-          userId: offer.client?.userId,
-          name: offer.client?.user?.name ?? '',
-          surname: offer.client?.user?.surname ?? '',
-          email: offer.client?.user?.email ?? '',
-          phone: offer.client?.user?.phone ?? null,
-          lastOffer: {
-            id: offer.id,
-            price: offer.price,
-            date: offer.date,
-            state: offer.state,
-          },
-        };
-      }
+      // Offerta da utente registrato
+      return {
+        userId: offer.client?.userId,
+        name: offer.client?.user?.name ?? '',
+        surname: offer.client?.user?.surname ?? '',
+        email: offer.client?.user?.email ?? '',
+        phone: offer.client?.user?.phone ?? null,
+        lastOffer: {
+          id: offer.id,
+          price: offer.price,
+          date: offer.date,
+          state: offer.state,
+        },
+      };
     });
 
     return result;

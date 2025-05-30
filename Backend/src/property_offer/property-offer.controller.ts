@@ -49,6 +49,15 @@ export class OfferController {
     return this.offerService.getLatestOffersByListingId(listingId, user);
   }
 
+  @Get('listing/:listingId/external')
+  @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  async getExternalOffer(
+    @GetUser() user: UserItem,
+    @Param('listingId', new ParseUUIDPipe()) listingId: string,
+  ): Promise<ClientWithLastOfferDto[]> {
+    return this.offerService.getExternalOffers(listingId, user);
+  }
+
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto
   // serve sia l id dell utente sia l id della proprieta
   //questo è il caso in cui l agente clicca su una chat e vede lo storico di offerte con un cliente
