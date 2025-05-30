@@ -37,7 +37,10 @@ export class ListingRepository extends Repository<Listing> {
     hasGarage,
   } = serchListingDto;
 
-  //todo si dovrebbe aggiungere anche provincia tra i filtri
+
+  console.log("DTO:",serchListingDto)
+
+  //todo si potrebbe aggiungere anche provincia tra i filtri
   const energyRank: Record<string, number> = {
     A: 5,
     B: 6,
@@ -50,19 +53,19 @@ export class ListingRepository extends Repository<Listing> {
 
   const query = this.createQueryBuilder('listing');
 
-  if (minPrice !== undefined)
+  if (minPrice !== null)
     query.andWhere('listing.price >= :minPrice', { minPrice });
 
-  if (maxPrice !== undefined)
+  if (maxPrice !== null)
     query.andWhere('listing.price <= :maxPrice', { maxPrice });
 
-  if (numberOfRooms !== undefined)
+  if (numberOfRooms !== null)
     query.andWhere('listing.numberOfRooms >= :numberOfRooms', { numberOfRooms });
 
-  if (category !== undefined)
+  if ( category !== null)
     query.andWhere('listing.category = :category', { category });
 
-  if (minSize !== undefined)
+  if ( minSize !== null)
       query.andWhere('CAST(listing.size AS INTEGER) >= :minSize', { minSize });
 
   if (hasElevator) query.andWhere('listing.hasElevator = true');
@@ -70,6 +73,8 @@ export class ListingRepository extends Repository<Listing> {
   if (hasGarage) query.andWhere('listing.hasGarage = true');
 
   let listings = await query.getMany();
+
+  console.log("Listings before filters:", listings)
 
   //  Energy class filter
   if (energyClass && energyRank[energyClass.toUpperCase().trim()] !== undefined) {
@@ -105,6 +110,8 @@ export class ListingRepository extends Repository<Listing> {
       return dist <= radius;
     });
   }
+
+  console.log("Listings after filters:", listings)
 
   
   return listings;
