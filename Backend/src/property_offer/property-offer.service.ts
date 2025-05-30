@@ -332,7 +332,6 @@ export class OfferService {
       where: {
         client: { userId: id } as Client,
         listing: { id: listingId },
-        madeByUser: true,
       },
       relations: ['client', 'listing'],
       order: { date: 'ASC' },
