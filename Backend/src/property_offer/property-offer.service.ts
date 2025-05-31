@@ -343,7 +343,6 @@ export class OfferService {
   ): Promise<PropertyOffer[]> {
     const offers = await this.offerRepository.find({
       where: {
-        client: { userId: id } as Client,
         listing: { id: listingId },
       },
       relations: ['client', 'listing'],
