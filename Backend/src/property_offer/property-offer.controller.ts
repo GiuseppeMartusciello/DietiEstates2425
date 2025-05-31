@@ -58,7 +58,7 @@ export class OfferController {
     return this.offerService.getExternalOffers(listingId, user);
   }
 
-  @Get('all')
+  @Get('listing/:listingId/all')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   async getAllOffer(
     @GetUser() user: UserItem,
