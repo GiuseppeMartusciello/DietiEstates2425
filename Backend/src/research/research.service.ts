@@ -7,7 +7,6 @@ import { Repository } from 'typeorm';
 import { ListingRepository } from 'src/listing/listing.repository';
 import { Listing } from 'src/listing/Listing.entity';
 
-
 @Injectable()
 export class ResearchService {
   constructor(
@@ -20,12 +19,11 @@ export class ResearchService {
 
   //Restituisce le ricercehe fatte da un cliente
   async getResearchByClientId(userId: string): Promise<Research[]> {
-
     const found = await this.researchRepository.find({
       where: { client: { userId: userId } },
       order: { date: 'DESC' },
     });
-    
+
     return found;
   }
 
@@ -43,17 +41,16 @@ export class ResearchService {
     researchListingDto: ResearchListingDto,
     client: Client,
   ): Promise<Listing[]> {
-
     const newresearch = this.researchRepository.create({
       ...researchListingDto,
       date: new Date(),
       client,
     });
-    await  this.researchRepository.save(newresearch);
+    await this.researchRepository.save(newresearch);
 
-    const result = await this.listingRepository.searchListings(researchListingDto);
+    const result =
+      await this.listingRepository.searchListings(researchListingDto);
 
-    
     return result;
   }
 
@@ -70,17 +67,21 @@ export class ResearchService {
   }
 
   //Aggiorna la data di una ricerca quando viene effettuata una seconda volta
-  async updateResearch(researchId: string, client: Client): Promise<Research> {
+  async updateResearch(researchId: string, client: Client): Promise<Listing[]> {
     const research = await this.researchRepository.findOne({
       where: { id: researchId, client },
     });
+
     if (!research) {
       throw new NotFoundException(`Research with ID "${researchId}" not found`);
     }
-
     research.date = new Date();
     await this.researchRepository.save(research);
 
-    return research;
+    const result = await this.listingRepository.searchListings(research);
+
+    console.log('Search results:', result);
+
+    return result;
   }
 }

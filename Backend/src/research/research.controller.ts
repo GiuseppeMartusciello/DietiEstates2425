@@ -69,7 +69,7 @@ export class ResearchController {
     updateResearch(
         @GetUser() user: UserItem,
         @Param('id') researchId: string,
-    ): Promise<Research> {
+    ): Promise<Listing[]> {
         const client = user.client;
         if(!client)
             throw new UnauthorizedException();
