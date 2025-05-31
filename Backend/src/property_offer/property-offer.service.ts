@@ -251,6 +251,8 @@ export class OfferService {
     });
     if (!listing) throw new UnauthorizedException('Listing not found');
 
+    this.checkAuthorization(user, listing);
+
     const externalOffers = await this.offerRepository
       .createQueryBuilder('offer')
       .where('offer.guestName IS NOT NULL')
@@ -258,6 +260,8 @@ export class OfferService {
       .andWhere('offer.guestEmail IS NOT NULL')
       .orderBy('offer.date', 'DESC')
       .getMany();
+
+    console.log(externalOffers);
 
     const result: ClientWithLastOfferDto[] = externalOffers.map((offer) => {
       // Offerta da utente esterno (ospite)
