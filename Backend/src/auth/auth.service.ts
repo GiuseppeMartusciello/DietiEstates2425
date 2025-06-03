@@ -15,12 +15,10 @@ import { UserRoles } from 'src/common/types/user-roles';
 import { JwtPayload } from './dto/jwt-payload.dto';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.credentials.dto';
-import { Gender } from 'src/common/types/gender.enum';
 import { Provider } from 'src/common/types/provider.enum';
 import { GoogleUser } from 'src/common/types/google-user';
 import * as crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
-import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +29,7 @@ export class AuthService {
     @InjectRepository(Client)
     private readonly clientRepository: Repository<Client>,
 
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signUp(authCredentialDto: AuthCredentialDto): Promise<AuthResponse> {
@@ -145,8 +143,8 @@ export class AuthService {
 
     const googleUser: GoogleUser = {
       email,
-      name: name || '',
-      surname: surname || '',
+      name: name ?? '',
+      surname: surname ?? '',
     };
 
     return this.socialLogin(googleUser);

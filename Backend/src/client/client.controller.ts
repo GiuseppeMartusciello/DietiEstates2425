@@ -1,13 +1,6 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ClientService } from './client.service';
-import { Client } from './client.entity';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { UserRoles } from 'src/common/types/user-roles';
@@ -17,7 +10,7 @@ import { UserItem } from 'src/common/types/userItem';
 @Controller('client')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class ClientController {
-  constructor(private clientService: ClientService) {}
+  constructor(private readonly clientService: ClientService) {}
 
   @Get('/me')
   @Roles(UserRoles.CLIENT)

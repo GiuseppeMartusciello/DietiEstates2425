@@ -23,7 +23,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { Listing } from './Listing.entity';
 import { AgentService } from 'src/agent/agent.service';
 import { ModifyListingDto } from './dto/modify-listing.dto';
-import { ResearchListingDto } from '../research/dto/create-research.dto'
+import { ResearchListingDto } from '../research/dto/create-research.dto';
 import { ListingImageUploadInterceptor } from 'src/common/interceptors/listing-image-upload.interceptor';
 import { ListingResponse } from './dto/listing-with-image.dto';
 
@@ -48,13 +48,15 @@ export class ListingController {
 
   @Get()
   getAllListing(@GetUser() user: UserItem): Promise<ListingResponse[]> {
-    if(user.client)
-      return this.listingService.getAllListing();
-    else if(user.agent)
-      return this.listingService.getListingByAgentId(user.agent.userId,user.agent.agency.id)
-    else{
-      const agencyId = this.getAgencyIdFromUser(user)
-      return this.listingService.getListingByAgencyId(agencyId)
+    if (user.client) return this.listingService.getAllListing();
+    else if (user.agent)
+      return this.listingService.getListingByAgentId(
+        user.agent.userId,
+        user.agent.agency.id,
+      );
+    else {
+      const agencyId = this.getAgencyIdFromUser(user);
+      return this.listingService.getListingByAgencyId(agencyId);
     }
   }
 
@@ -119,13 +121,12 @@ export class ListingController {
   }
 
   async findListingOrThrow(listingId: string): Promise<Listing> {
-    const listingResponse =
-      (await this.listingService.getListingById(listingId));
+    const listingResponse = await this.listingService.getListingById(listingId);
 
     if (!listingResponse)
       throw new BadRequestException(`Listing with id ${listingId} not found `);
 
-     const { imageUrls, ...listing } = listingResponse;
+    const { imageUrls, ...listing } = listingResponse;
 
     return listing as Listing;
   }
@@ -143,8 +144,8 @@ export class ListingController {
 
   getAgencyIdFromUser(user: UserItem): string {
     const agencyId =
-      user.agent?.agency.id ||
-      user.manager?.agency.id ||
+      user.agent?.agency.id ??
+      user.manager?.agency.id ??
       user.supportAdmin?.agency.id;
     if (!agencyId) throw new UnauthorizedException();
 

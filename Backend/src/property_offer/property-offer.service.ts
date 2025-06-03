@@ -184,14 +184,12 @@ export class OfferService {
           'Client cannot accept or decline an offer',
         );
       }
-    } else {
+    } else if (
+      !madeByUser &&
+      status == (OfferState.ACCEPTED || OfferState.DECLINED)
+    ) {
       //se l offerta è stata fatta da un agente non può accetare o rifiutare la propria del cliente
-      if (
-        !madeByUser &&
-        status == (OfferState.ACCEPTED || OfferState.DECLINED)
-      ) {
-        throw new UnauthorizedException(' cannot accept or decline an offer');
-      }
+      throw new UnauthorizedException(' cannot accept or decline an offer');
     }
     //l' offerta in ambo i casi puo essere annullata
 
@@ -249,7 +247,7 @@ export class OfferService {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
     });
-    if (!listing) throw new UnauthorizedException('Listing not found');
+    if (!listing) throw new BadRequestException('Listing not found');
 
     this.checkAuthorization(user, listing);
 

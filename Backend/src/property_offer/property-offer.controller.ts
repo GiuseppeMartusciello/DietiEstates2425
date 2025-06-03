@@ -18,8 +18,6 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { UserItem } from 'src/common/types/userItem';
 import { GetUser } from 'src/auth/get-user.decorator';
-import { Listing } from 'src/listing/Listing.entity';
-import { Client } from 'src/client/client.entity';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
 import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
 import { ClientWithLastOfferDto } from './dto/last-offer.dto';

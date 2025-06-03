@@ -4,7 +4,6 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  Unique,
 } from 'typeorm';
 import { Agent } from '../agent/agent.entity';
 import { Listing } from 'src/listing/Listing.entity';

@@ -6,7 +6,6 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
-  Patch,
   Post,
   UnauthorizedException,
   UseGuards,
@@ -42,7 +41,7 @@ export class AgencyController {
     @GetUser() user: UserItem,
     @Body() createAgentDto: CreateAgentDto,
   ) {
-    const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
+    const agencyId = user.manager?.agency?.id ?? user.supportAdmin?.agency?.id;
     if (!agencyId) throw new UnauthorizedException('No agency associated');
 
     return this.agencyService.createAgent(createAgentDto, agencyId);
@@ -55,8 +54,8 @@ export class AgencyController {
     @GetUser() user: UserItem,
     @Param('id', new ParseUUIDPipe()) agentId: string,
   ) {
-    const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
-    if (!agencyId) 
+    const agencyId = user.manager?.agency?.id ?? user.supportAdmin?.agency?.id;
+    if (!agencyId)
       throw new BadRequestException('Nessuna agenzia associata all’utente.');
 
     return this.agencyService.deleteAgentById(agentId, agencyId);
@@ -79,7 +78,7 @@ export class AgencyController {
   @Get('/agents')
   @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   getAgents(@GetUser() user: UserItem) {
-    const agencyId = user.manager?.agency?.id || user.supportAdmin?.agency?.id;
+    const agencyId = user.manager?.agency?.id ?? user.supportAdmin?.agency?.id;
     if (!agencyId) {
       throw new BadRequestException('Nessuna agenzia associata all’utente.');
     }

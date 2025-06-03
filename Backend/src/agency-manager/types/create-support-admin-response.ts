@@ -1,5 +1,3 @@
-import { Agency } from 'src/agency/agency.entity';
-
 export interface CreateSupportAdminResponse {
   message: string;
   supportAdmin: {

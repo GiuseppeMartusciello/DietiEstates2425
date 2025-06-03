@@ -22,8 +22,8 @@ import { PushNotificationService } from './push-notifications/push-notification.
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class NotificationController {
   constructor(
-    private notificationService: NotificationService,
-    private pushNotificationService: PushNotificationService,
+    private readonly notificationService: NotificationService,
+    private readonly pushNotificationService: PushNotificationService,
   ) {}
 
   @Post('/listing/:listingId')

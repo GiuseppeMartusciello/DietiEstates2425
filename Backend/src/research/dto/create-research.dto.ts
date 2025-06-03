@@ -4,14 +4,11 @@ import {
   IsOptional,
   IsInt,
   IsEnum,
-  Validate,
 } from 'class-validator';
 import { ListingCategory } from 'src/common/types/listing-category';
 import { SearchType } from 'src/common/types/searchType.enum';
-import { MunicipalityCoordinatesValidator } from 'src/common/validator/municipality-coordinates.validator';
 
 export class ResearchListingDto {
-
   @IsEnum(SearchType)
   searchType: SearchType;
 
@@ -27,7 +24,7 @@ export class ResearchListingDto {
 
   @IsOptional()
   @IsInt()
-  radius?: number; 
+  radius?: number;
 
   @IsOptional()
   @IsInt()

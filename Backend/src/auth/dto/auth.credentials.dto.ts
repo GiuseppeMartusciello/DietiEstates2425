@@ -1,14 +1,10 @@
-import { Type } from 'class-transformer';
 import {
-  IsDate,
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
 } from 'class-validator';
-import { Gender } from 'src/common/types/gender.enum';
 
 export class AuthCredentialDto {
   @IsNotEmpty()

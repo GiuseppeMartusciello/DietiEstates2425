@@ -4,7 +4,6 @@ import {
   Delete,
   Param,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
