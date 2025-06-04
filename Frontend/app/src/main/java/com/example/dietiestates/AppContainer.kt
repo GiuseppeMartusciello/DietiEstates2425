@@ -43,6 +43,9 @@ object AppContainer {
         agencyRepository = AgencyRepository(retrofit.createAgencyApi())
         authRepository = AuthRepository(retrofit.createAuthApi(), tokenManager)
         offerRepository = OfferRepository(retrofit.createOfferApi(), retrofit.createListingApi())
+        researchRepository = ResearchRepository(retrofit.createResearchApi(), retrofit.createListingApi())
         initialized = true
     }
 }
+
+

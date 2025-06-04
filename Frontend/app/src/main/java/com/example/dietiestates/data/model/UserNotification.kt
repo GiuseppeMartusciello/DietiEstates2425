@@ -1,5 +1,8 @@
-package com.example.dietiestates.data.model.dto
+package com.example.dietiestates.data.model
 
-class UserNotification(
-    
+data class UserNotification(
+    val id: String,
+    val notification: Notification,
+    val user: String,
+    val isRead: Boolean = false
 )

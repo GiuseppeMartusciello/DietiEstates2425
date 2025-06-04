@@ -2,7 +2,6 @@ package com.example.dietiestates.ui.viewModel
 
 import android.content.Intent
 import android.util.Log
-import android.util.Patterns
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dietiestates.AppContainer
+import com.example.dietiestates.AppContainer.authRepository
 
 import com.example.dietiestates.data.model.PostLoginNavigation
 

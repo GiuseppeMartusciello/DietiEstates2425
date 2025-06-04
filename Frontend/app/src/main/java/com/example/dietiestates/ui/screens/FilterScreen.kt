@@ -531,7 +531,7 @@ fun CheckOptionWithIcon(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
+            .clickable { if(enabled) onCheckedChange(!checked) }
             .padding(vertical = 6.dp)
             .alpha(if (enabled) 1f else 0.5f) // effetto visivo "disabilitato"
     ) {

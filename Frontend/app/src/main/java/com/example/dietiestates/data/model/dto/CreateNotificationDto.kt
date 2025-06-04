@@ -1,4 +1,7 @@
 package com.example.dietiestates.data.model.dto
 
-class CreateNotificationDto {
-}
+data class CreateNotificationDto(
+    val category: String,
+    val title: String,
+    val description: String,
+    )
