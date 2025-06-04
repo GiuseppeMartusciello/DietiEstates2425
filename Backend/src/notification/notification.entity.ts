@@ -10,6 +10,7 @@ import { Listing } from 'src/listing/Listing.entity';
 import { NotificationType } from 'src/common/types/notification.enum';
 import { PropertyOffer } from 'src/property_offer/property_offer.entity';
 import { UserNotification } from './user-notification.entity';
+import { User } from 'src/auth/user.entity';
 
 @Entity()
 export class Notification {
@@ -25,7 +26,7 @@ export class Notification {
   @Column('text')
   description: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date: Date;
 
   @ManyToOne(() => Listing, (listing) => listing.notifications, {
@@ -49,5 +50,8 @@ export class Notification {
     (userNotification) => userNotification.notification,
   )
   userNotifications: UserNotification[];
-  //AGGIUNGERE UN RELAZIONE CON L'UTENTE CHE HA CREATO LA NOTIFICA
+
+ @ManyToOne(() => User, {  onDelete: 'CASCADE' })
+  createdBy: User;
+
 }

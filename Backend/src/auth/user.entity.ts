@@ -2,6 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Provider } from 'src/common/types/provider.enum';
 import { UserRoles } from 'src/common/types/user-roles';
 import { UserNotification } from 'src/notification/user-notification.entity';
+import { Notification } from 'src/notification/notification.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -45,4 +46,8 @@ export class User {
     (userNotification) => userNotification.notification,
   )
   userNotifications: UserNotification[];
+
+  @OneToMany(() => Notification, (notification: Notification) => notification.createdBy)
+  createdNotifications: Notification[];
+  
 }

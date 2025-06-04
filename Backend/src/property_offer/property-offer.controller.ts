@@ -32,9 +32,8 @@ export class OfferController {
   @Roles(UserRoles.CLIENT)
   getallOffersByListingId(
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
-    @GetUser() user: UserItem,
   ): Promise<PropertyOffer[]> {
-    return this.offerService.getAllOffersByListingId(listingId, user.id);
+    return this.offerService.getAllOffersByListingId(listingId);
   }
 
   // questo metodo restituisce tutte le offerte fatte (di qualsiasi client) a quel immobile
@@ -62,7 +61,7 @@ export class OfferController {
     @GetUser() user: UserItem,
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
   ): Promise<PropertyOffer[]> {
-    return this.offerService.getAllOffersByListingId(listingId, user.id);
+    return this.offerService.getAllOffersByListingId(listingId);
   }
 
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto

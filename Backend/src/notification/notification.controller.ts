@@ -42,8 +42,8 @@ export class NotificationController {
 
   // lista di tutte le notifiche non lette
   @Get('/Notifications')
-  getNotification(@GetUser() user: UserItem): Promise<Notification[]> {
-    return this.notificationService.getNotifications(user.id);
+  Notifications(@GetUser() user: UserItem): Promise<Notification[]> {
+    return this.notificationService.Notifications(user.id);
   }
 
   //utente clicca su una notifica
@@ -51,19 +51,17 @@ export class NotificationController {
   //è possibile farlo perche in getNotification vengono restituiti gli id di notification
   //si puo e si deve ottenere da lì l id di notification
   @Get('/:notificationId')
-  getNotificationById(
-    @Param('notificationsId') notificationId: string,
+  NotificationById(
+    @Param('notificationId') notificationId: string,
   ): Promise<Notification> {
-    return this.notificationService.getNotificationById(notificationId);
+    return this.notificationService.NotificationById(notificationId);
   }
 
   @Patch('/:notificationId')
   updateNotification(
-    @GetUser() user: UserItem,
     @Param('notificationId') userNotificationId: string,
   ): Promise<void> {
-    return this.notificationService.updateNotification(
-      user,
+    return this.notificationService.Notification(
       userNotificationId,
     );
   }

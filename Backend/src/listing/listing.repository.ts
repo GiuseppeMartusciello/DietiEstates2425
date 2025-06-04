@@ -18,106 +18,106 @@ export class ListingRepository extends Repository<Listing> {
   }
 
   async searchListings(
-  serchListingDto: ResearchListingDto,
-): Promise<Listing[]> {
-  const {
-    searchType,
-    municipality,
-    latitude,
-    longitude,
-    radius,
-    minPrice,
-    maxPrice,
-    numberOfRooms,
-    category,
-    minSize,
-    energyClass,
-    hasElevator,
-    hasAirConditioning,
-    hasGarage,
-  } = serchListingDto;
+    serchListingDto: ResearchListingDto,
+  ): Promise<Listing[]> {
+    const {
+      searchType,
+      municipality,
+      latitude,
+      longitude,
+      radius,
+      minPrice,
+      maxPrice,
+      numberOfRooms,
+      category,
+      minSize,
+      energyClass,
+      hasElevator,
+      hasAirConditioning,
+      hasGarage,
+    } = serchListingDto;
 
 
-  console.log("DTO:",serchListingDto)
 
-  //todo si potrebbe aggiungere anche provincia tra i filtri
-  const energyRank: Record<string, number> = {
-    A: 5,
-    B: 6,
-    C: 7,
-    D: 8,
-    E: 9,
-    F: 10,
-    G: 11,
-  };
+    //todo si potrebbe aggiungere anche provincia tra i filtri
+    const energyRank: Record<string, number> = {
+      A: 5,
+      B: 6,
+      C: 7,
+      D: 8,
+      E: 9,
+      F: 10,
+      G: 11,
+    };
 
-  const query = this.createQueryBuilder('listing');
+    const query = this.createQueryBuilder('listing');
 
-  if (minPrice !== null)
-    query.andWhere('listing.price >= :minPrice', { minPrice });
-
-  if (maxPrice !== null)
-    query.andWhere('listing.price <= :maxPrice', { maxPrice });
-
-  if (numberOfRooms !== null)
-    query.andWhere('listing.numberOfRooms >= :numberOfRooms', { numberOfRooms });
-
-  if ( category !== null)
-    query.andWhere('listing.category = :category', { category });
-
-  if ( minSize !== null)
+    if (minPrice !== null)
+      query.andWhere('listing.price >= :minPrice', { minPrice });
+    if (maxPrice !== null)
+      query.andWhere('listing.price <= :maxPrice', { maxPrice });
+    if (numberOfRooms !== null)
+      query.andWhere('listing.numberOfRooms >= :numberOfRooms', {
+        numberOfRooms,
+      });
+    if (category !== null)
+      query.andWhere('listing.category = :category', { category });
+    if (minSize !== null)
       query.andWhere('CAST(listing.size AS INTEGER) >= :minSize', { minSize });
+    if (hasElevator) query.andWhere('listing.hasElevator = true');
+    if (hasAirConditioning) query.andWhere('listing.hasAirConditioning = true');
+    if (hasGarage) query.andWhere('listing.hasGarage = true');
 
-  if (hasElevator) query.andWhere('listing.hasElevator = true');
-  if (hasAirConditioning) query.andWhere('listing.hasAirConditioning = true');
-  if (hasGarage) query.andWhere('listing.hasGarage = true');
+    let listings = await query.getMany();
 
-  let listings = await query.getMany();
 
-  console.log("Listings before filters:", listings)
 
-  //  Energy class filter
-  if (energyClass && energyRank[energyClass.toUpperCase().trim()] !== undefined) {
-  const threshold = energyRank[energyClass.toUpperCase().trim()];
+    //  Energy class filter
+    if (
+      energyClass &&
+      energyRank[energyClass.toUpperCase().trim()] !== undefined
+    ) {
+      const threshold = energyRank[energyClass.toUpperCase().trim()];
 
-  listings = listings.filter((listing) => {
-    const cls = listing.energyClass?.toUpperCase().trim();
-    return cls && energyRank[cls] !== undefined && energyRank[cls] <= threshold;
-  });
-}
+      listings = listings.filter((listing) => {
+        const cls = listing.energyClass?.toUpperCase().trim();
+        return (
+          cls && energyRank[cls] !== undefined && energyRank[cls] <= threshold
+        );
+      });
+    }
 
-  //  Municipality match
-  if (searchType === SearchType.MUNICIPALITY && municipality?.trim()) {
-    listings = listings.filter((listing) =>
-      listing.municipality?.toLowerCase().includes(municipality.toLowerCase())
-    );
-  }
-
-  //  Coordinates (radius) match
-  if (
-    searchType === SearchType.COORDINATES &&
-    latitude !== undefined &&
-    longitude !== undefined &&
-    radius !== undefined
-  ) {
-    listings = listings.filter((listing) => {
-      const dist = this.geopifyService.calculateDistance(
-        latitude,
-        longitude,
-        listing.latitude,
-        listing.longitude,
+    //  Municipality match
+    if (searchType === SearchType.MUNICIPALITY && municipality?.trim()) {
+      listings = listings.filter((listing) =>
+        listing.municipality
+          ?.toLowerCase()
+          .includes(municipality.toLowerCase()),
       );
-      return dist <= radius;
-    });
+    }
+
+    //  Coordinates (radius) match
+    if (
+      searchType === SearchType.COORDINATES &&
+      latitude !== undefined &&
+      longitude !== undefined &&
+      radius !== undefined
+    ) {
+      listings = listings.filter((listing) => {
+        const dist = this.geopifyService.calculateDistance(
+          latitude,
+          longitude,
+          listing.latitude,
+          listing.longitude,
+        );
+        return dist <= radius;
+      });
+    }
+
+    console.log('Listings after filters:', listings);
+
+    return listings;
   }
-
-  console.log("Listings after filters:", listings)
-
-  
-  return listings;
-}
-
-
 
   async modifyListing(
     listing: Listing,
