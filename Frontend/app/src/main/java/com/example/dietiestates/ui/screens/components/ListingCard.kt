@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -78,17 +79,32 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
             Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)) {
                 Text(listing.title, style = LocalAppTypography.current.listingTitle)
                 Text(
-                    text = listing.address,
+                    text = "${listing.address}, ${listing.municipality}",
                     style = LocalAppTypography.current.listingAddress,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Column(modifier = Modifier.padding(0.dp)) {
-                    Text(
-                        text = "€ ${formatNumberWithDots(listing.price)}",
-                        style = LocalAppTypography.current.listingPrice
-                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = "€ ${formatNumberWithDots(listing.price)}",
+                            style = LocalAppTypography.current.listingPrice
+                        )
+
+                        if (listing.category == "RENT") {
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            Text(
+                                text = "al mese",
+                                style = LocalAppTypography.current.listingPrice.copy(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = Color.DarkGray
+                                )
+                            )
+                        }
+                    }
                     HorizontalDivider(
                         thickness = 1.dp,
                         color = Color(0xFFBDBDBD)

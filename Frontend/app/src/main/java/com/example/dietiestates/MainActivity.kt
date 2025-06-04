@@ -36,6 +36,7 @@ import com.example.dietiestates.ui.screens.RegisterScreen
 import com.example.dietiestates.ui.screens.ModifyListingScreen
 import com.example.dietiestates.ui.screens.MyOffersScreen
 import com.example.dietiestates.ui.screens.OfferScreen
+import com.example.dietiestates.ui.screens.ProfileScreen
 import com.example.dietiestates.ui.screens.ResearchScreen
 import com.example.dietiestates.ui.screens.SearchedListingScreen
 import com.example.dietiestates.ui.theme.CustomTypography
@@ -119,9 +120,13 @@ fun MyApp() {
         }
         composable(route = "logout") {
             authViewModel.logout()
+            LoginScreen(navController = navController)
         }
         composable(route = "offer") {
             MyOffersScreen(navController = navController)
+        }
+        composable(route = "profile") {
+            ProfileScreen(navController)
         }
         composable(
             route = "listing/offer/{listingId}?clientId={clientId}",
@@ -155,7 +160,9 @@ fun MyApp() {
         ) {
             ClientsOfferScreen(navController = navController)
 
-
+        }
+    }
+}
 fun NavGraphBuilder.searchGraph(navController: NavController) {
     navigation(
         startDestination = "researchscreen",
