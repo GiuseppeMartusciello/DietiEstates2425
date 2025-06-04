@@ -30,17 +30,17 @@ export class OfferController {
   // questo restituisce tutte le offerte fatte da un cliente o adall agente per uno specifico immobile
   @Get('/listing/:listingId/offers')
   @Roles(UserRoles.CLIENT)
-  getallOffersByListingId(
+  getOffersByListingAndClient(
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
     @GetUser() user: UserItem,
   ): Promise<PropertyOffer[]> {
-    return this.offerService.getAllOffersByListingId(listingId, user.id);
+    return this.offerService.getOffersByListingAndClient(listingId, user.id);
   }
 
-  // questo metodo restituisce tutte le offerte fatte (di qualsiasi client) a quel immobile
+  // questo metodo restituisce ogni client che ha fatto un offerta insieme alla sua ultima offerta per quell'immobile
   @Get('listing/:listingId/clients')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
-  async getClientsListiningId(
+  async getClientsListingId(
     @GetUser() user: UserItem,
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
   ): Promise<ClientWithLastOfferDto[]> {
@@ -56,14 +56,14 @@ export class OfferController {
     return this.offerService.getExternalOffers(listingId, user);
   }
 
-  @Get('listing/:listingId/all')
-  @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
-  async getAllOffer(
-    @GetUser() user: UserItem,
-    @Param('listingId', new ParseUUIDPipe()) listingId: string,
-  ): Promise<PropertyOffer[]> {
-    return this.offerService.getAllOffersByListingId(listingId, user.id);
-  }
+  // @Get('listing/:listingId/all')
+  // @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  // async getAllOffer(
+  //   @GetUser() user: UserItem,
+  //   @Param('listingId', new ParseUUIDPipe()) listingId: string,
+  // ): Promise<PropertyOffer[]> {
+  //   return this.offerService.getAllOffersByListingId(listingId, user.id);
+  // }
 
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto
   // serve sia l id dell utente sia l id della proprieta

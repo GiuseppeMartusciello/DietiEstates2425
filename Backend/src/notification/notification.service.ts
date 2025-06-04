@@ -1,4 +1,4 @@
-import { Injectable, } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './notification.entity';
@@ -67,8 +67,6 @@ export class NotificationService {
     createNotificationDto: CreateNotificationDto,
     propertyOffer: PropertyOffer,
   ): Promise<Notification> {
-
-
     const result = this.notificationRepository.create({
       ...createNotificationDto,
       date: new Date(),
