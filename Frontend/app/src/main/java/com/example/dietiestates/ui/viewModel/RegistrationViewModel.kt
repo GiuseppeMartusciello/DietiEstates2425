@@ -24,20 +24,17 @@ class RegistrationViewModel: ViewModel() {
     private val _registrationState = MutableStateFlow<RegistrationState>(RegistrationState.Idle)
     val registrationState: StateFlow <RegistrationState> = _registrationState
 
-    val isRegistrated = mutableStateOf(false)
-
+    val isRegistered = mutableStateOf(false)
     var name by mutableStateOf("")
         private set
     var surname by mutableStateOf("")
         private set
-
     var email by mutableStateOf("")
         private set
     var password by mutableStateOf("")
         private set
     var passwordVisible by mutableStateOf(false)
         private set
-
     var phone by mutableStateOf("")
         private set
 
@@ -100,7 +97,7 @@ class RegistrationViewModel: ViewModel() {
     }
 
     fun checkLogin() {
-        isRegistrated.value = AppContainer.tokenManager.isLoggedIn()
+        isRegistered.value = AppContainer.tokenManager.isLoggedIn()
     }
 
     fun register (request: SignUpRequest, onValidationError: (String) -> Unit) {
@@ -113,7 +110,7 @@ class RegistrationViewModel: ViewModel() {
 
             _registrationState.value = when {
                 result.isSuccess -> {
-                    isRegistrated.value = true
+                    isRegistered.value = true
                     RegistrationState.Success
                 }
                 result.isFailure -> {

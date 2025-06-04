@@ -115,7 +115,7 @@ fun HomeScreen(navController: NavController) {
                     "home",
                     Icons.Outlined.Home, Icons.Filled.Home
                 ), NavItem(
-                    "cerca",
+                    "researchScreen",
                     Icons.Outlined.Search, Icons.Filled.Search
                 ), NavItem(
                     "offer",

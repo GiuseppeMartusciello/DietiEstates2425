@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { ResearchService } from './research.service';
 import { Research } from './research.entity';
 import { ResearchListingDto } from './dto/create-research.dto';
@@ -29,7 +39,10 @@ export class ResearchController {
     //elimina una ricerca
     @Delete('/:id')
     @Roles(UserRoles.CLIENT)
-    deleteResearch(@Param('id') id: string, @GetUser() user: UserItem): Promise<void>{
+  deleteResearch(
+    @Param('id') id: string,
+    @GetUser() user: UserItem,
+  ): Promise<void> {
         const client = user.client;
         if(!client)
             throw new UnauthorizedException();
@@ -69,7 +82,8 @@ export class ResearchController {
     updateResearch(
         @GetUser() user: UserItem,
         @Param('id') researchId: string,
-    ): Promise<Research> {
+    ): Promise<Listing[]> {
+        
         const client = user.client;
         if(!client)
             throw new UnauthorizedException();

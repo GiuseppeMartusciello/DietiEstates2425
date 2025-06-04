@@ -25,7 +25,6 @@ class MyOfferViewModel: ViewModel(
     init {
         Log.d("DEBUG", "Imizio fetchListings() da ViewModel")
         fetchListings()
-
     }
 
 

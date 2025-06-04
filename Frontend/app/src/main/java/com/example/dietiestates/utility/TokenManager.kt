@@ -1,12 +1,8 @@
 package com.example.dietiestates.utility
 
 import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.auth0.android.jwt.JWT
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+
 
 class TokenManager(private val context: Context) {
     companion object {

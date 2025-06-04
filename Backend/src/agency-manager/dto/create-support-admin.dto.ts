@@ -6,7 +6,6 @@ import {
   IsNotEmpty,
   IsPhoneNumber,
   IsString,
-  IsStrongPassword,
 } from 'class-validator';
 import { Gender } from 'src/common/types/gender.enum';
 

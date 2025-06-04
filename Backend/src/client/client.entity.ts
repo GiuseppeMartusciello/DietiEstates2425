@@ -2,7 +2,6 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -10,7 +9,6 @@ import {
 import { User } from '../auth/user.entity';
 import { PropertyOffer } from '../property_offer/property_offer.entity';
 import { Research } from '../research/research.entity';
-import { Notification } from '../notification/notification.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity()
@@ -43,6 +41,4 @@ export class Client {
 
   @OneToMany(() => Research, (research) => research.client)
   research: Research[];
-
-
 }

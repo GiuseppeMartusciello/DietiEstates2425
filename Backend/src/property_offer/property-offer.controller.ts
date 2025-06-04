@@ -18,10 +18,9 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { UserItem } from 'src/common/types/userItem';
 import { GetUser } from 'src/auth/get-user.decorator';
-import { Listing } from 'src/listing/Listing.entity';
-import { Client } from 'src/client/client.entity';
 import { CreateExternalOfferDto } from './dto/create-externalOffer.dto';
 import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
+import { ClientWithLastOfferDto } from './dto/last-offer.dto';
 
 @Controller('offer')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -31,27 +30,46 @@ export class OfferController {
   // questo restituisce tutte le offerte fatte da un cliente o adall agente per uno specifico immobile
   @Get('/listing/:listingId/offers')
   @Roles(UserRoles.CLIENT)
-  getallOffersByListingId(
+  getOffersByListingAndClient(
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
     @GetUser() user: UserItem,
   ): Promise<PropertyOffer[]> {
-    return this.offerService.getAllOffersByListingId(listingId, user.id);
+    console.log('Daje Roma');
+    return this.offerService.getOffersByListingAndClient(listingId, user.id);
   }
 
-  // questo metodo restituisce tutte i clienti che hannpo fatto un offerta per uno specifico immobile lato agent
+  // questo metodo restituisce ogni client che ha fatto un offerta insieme alla sua ultima offerta per quell'immobile
   @Get('listing/:listingId/clients')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
-  async getClientsListiningId(
-    @GetUser() agent: UserItem,
+  async getClientsListingId(
+    @GetUser() user: UserItem,
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
-  ): Promise<Client[]> {
-    return this.offerService.getClientsByListinigId(listingId, agent);
+  ): Promise<ClientWithLastOfferDto[]> {
+    return this.offerService.getLatestOffersByListingId(listingId, user);
   }
+
+  @Get('listing/:listingId/external')
+  @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  async getExternalOffer(
+    @GetUser() user: UserItem,
+    @Param('listingId', new ParseUUIDPipe()) listingId: string,
+  ): Promise<ClientWithLastOfferDto[]> {
+    return this.offerService.getExternalOffers(listingId, user);
+  }
+
+  // @Get('listing/:listingId/all')
+  // @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  // async getAllOffer(
+  //   @GetUser() user: UserItem,
+  //   @Param('listingId', new ParseUUIDPipe()) listingId: string,
+  // ): Promise<PropertyOffer[]> {
+  //   return this.offerService.getAllOffersByListingId(listingId, user.id);
+  // }
 
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto
   // serve sia l id dell utente sia l id della proprieta
   //questo è il caso in cui l agente clicca su una chat e vede lo storico di offerte con un cliente
-  @Get('/listing/:listingId/client/:clientId')
+  @Get('/listing/:listingId/client/:clientId/offers')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   async getOffersByAgentId(
     @Param('listingId', new ParseUUIDPipe()) listingId: string,

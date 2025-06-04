@@ -6,7 +6,6 @@ import {
   IsNotEmpty,
   IsPhoneNumber,
   IsString,
-  IsStrongPassword,
   MaxLength,
   MinLength,
 } from 'class-validator';

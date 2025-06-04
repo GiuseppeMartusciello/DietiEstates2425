@@ -6,6 +6,7 @@ import com.example.dietiestates.data.remote.RetrofitClient
 import com.example.dietiestates.data.repository.AgencyRepository
 import com.example.dietiestates.data.repository.AuthRepository
 import com.example.dietiestates.data.repository.ListingRepository
+import com.example.dietiestates.data.repository.ResearchRepository
 import com.example.dietiestates.data.repository.OfferRepository
 import com.example.dietiestates.utility.TokenManager
 
@@ -24,6 +25,9 @@ object AppContainer {
     lateinit var authRepository: AuthRepository
         private set
 
+    lateinit var researchRepository: ResearchRepository
+        private set
+
     lateinit var  offerRepository: OfferRepository
         private  set
 
@@ -39,6 +43,9 @@ object AppContainer {
         agencyRepository = AgencyRepository(retrofit.createAgencyApi())
         authRepository = AuthRepository(retrofit.createAuthApi(), tokenManager)
         offerRepository = OfferRepository(retrofit.createOfferApi(), retrofit.createListingApi())
+        researchRepository = ResearchRepository(retrofit.createResearchApi(), retrofit.createListingApi())
         initialized = true
     }
 }
+
+

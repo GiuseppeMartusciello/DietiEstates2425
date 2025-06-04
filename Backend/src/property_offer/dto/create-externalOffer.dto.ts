@@ -11,4 +11,8 @@ export class CreateExternalOfferDto {
   @IsOptional()
   @IsString()
   guestName?: string;
+
+  @IsOptional()
+  @IsString()
+  guestSurname?: string;
 }

@@ -1,14 +1,10 @@
-import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
   IsPhoneNumber,
   Length,
   IsEmail,
-  IsDate,
-  IsEnum,
 } from 'class-validator';
-import { Gender } from 'src/common/types/gender.enum';
 
 export class CreateAgencyDto {
   @IsNotEmpty()

@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Double, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Listing } from './Listing.entity';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -37,51 +37,73 @@ export class ListingRepository extends Repository<Listing> {
       hasGarage,
     } = serchListingDto;
 
+
+
+    //todo si potrebbe aggiungere anche provincia tra i filtri
+    const energyRank: Record<string, number> = {
+      A: 5,
+      B: 6,
+      C: 7,
+      D: 8,
+      E: 9,
+      F: 10,
+      G: 11,
+    };
+
     const query = this.createQueryBuilder('listing');
 
-    if (minPrice !== undefined)
+    if (minPrice !== null)
       query.andWhere('listing.price >= :minPrice', { minPrice });
-
-    if (maxPrice !== undefined)
+    if (maxPrice !== null)
       query.andWhere('listing.price <= :maxPrice', { maxPrice });
-
-    if (numberOfRooms !== undefined)
+    if (numberOfRooms !== null)
       query.andWhere('listing.numberOfRooms >= :numberOfRooms', {
         numberOfRooms,
       });
-
-    if (category !== undefined)
+    if (category !== null)
       query.andWhere('listing.category = :category', { category });
+    if (minSize !== null)
+      query.andWhere('CAST(listing.size AS INTEGER) >= :minSize', { minSize });
+    if (hasElevator) query.andWhere('listing.hasElevator = true');
+    if (hasAirConditioning) query.andWhere('listing.hasAirConditioning = true');
+    if (hasGarage) query.andWhere('listing.hasGarage = true');
 
-    if (minSize !== undefined)
-      query.andWhere('listing.size >= :minSize', { minSize });
+    let listings = await query.getMany();
 
-    if (energyClass !== undefined)
-      query.andWhere('listing.energyClass <= :energyClass', { energyClass });
 
-    if (hasElevator !== undefined && hasElevator)
-      query.andWhere('listing.hasElevator = true');
 
-    if (hasAirConditioning !== undefined && hasAirConditioning)
-      query.andWhere('listing.hasAirConditioning = true');
+    //  Energy class filter
+    if (
+      energyClass &&
+      energyRank[energyClass.toUpperCase().trim()] !== undefined
+    ) {
+      const threshold = energyRank[energyClass.toUpperCase().trim()];
 
-    if (hasGarage !== undefined && hasGarage)
-      query.andWhere('listing.hasGarage = true');
-
-    if (searchType === SearchType.MUNICIPALITY) {
-      query.andWhere('listing.municipality = :municipality', { municipality });
-      return await query.getMany();
+      listings = listings.filter((listing) => {
+        const cls = listing.energyClass?.toUpperCase().trim();
+        return (
+          cls && energyRank[cls] !== undefined && energyRank[cls] <= threshold
+        );
+      });
     }
 
-    // Se la ricerca è per raggio allora continuo
-    const listings = await query.getMany();
+    //  Municipality match
+    if (searchType === SearchType.MUNICIPALITY && municipality?.trim()) {
+      listings = listings.filter((listing) =>
+        listing.municipality
+          ?.toLowerCase()
+          .includes(municipality.toLowerCase()),
+      );
+    }
 
+    //  Coordinates (radius) match
     if (
+      searchType === SearchType.COORDINATES &&
       latitude !== undefined &&
       longitude !== undefined &&
       radius !== undefined
     ) {
-      return listings.filter((listing) => {
+      listings = listings.filter((listing) => {
         const dist = this.geopifyService.calculateDistance(
           latitude,
           longitude,
@@ -91,6 +113,8 @@ export class ListingRepository extends Repository<Listing> {
         return dist <= radius;
       });
     }
+
+    console.log('Listings after filters:', listings);
 
     return listings;
   }

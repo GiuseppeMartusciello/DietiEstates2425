@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -21,6 +22,7 @@ import { NotificationType } from 'src/common/types/notification.enum';
 import { ListingResponse } from 'src/listing/dto/listing-with-image.dto';
 import { ListingService } from 'src/listing/listing.service';
 import { instanceToPlain } from 'class-transformer';
+import { ClientWithLastOfferDto } from './dto/last-offer.dto';
 
 @Injectable()
 export class OfferService {
@@ -76,35 +78,25 @@ export class OfferService {
     });
     if (!listing) throw new NotFoundException('Listing not found');
 
-    if (listing.price < price)
-      throw new BadRequestException('Price exceeds listing price');
+    await this.checkValidate(listing.id);
 
-    const offer = this.offerRepository.create({
-      price: price,
-      date: new Date(),
-      state: OfferState.PENDING,
-      madeByUser: true,
-      listing: listing,
-      client: { userId: user.id } as Client,
-    });
+    this.checkPrice(listing.price, price);
 
-    await this.offerRepository.save(offer);
+    return this.createOfferEntity(price, listing, user.id, true);
 
     //crea notifica specifica per una nuova offerta
-    const notifica =
-      await this.notificationService.createSpecificNotificationOffer(
-        {
-          title: 'New offer',
-          description: 'New offer for your listing',
-          category: NotificationType.SPECIFIC,
-        },
-        offer,
-      );
+    // const notifica =
+    //   await this.notificationService.createSpecificNotificationOffer(
+    //     {
+    //       title: 'New offer',
+    //       description: 'New offer for your listing',
+    //       category: NotificationType.SPECIFIC,
+    //     },
+    //     offer,
+    //   );
 
-    if (!notifica)
-      throw new InternalServerErrorException('Notification not created');
-
-    return offer;
+    // if (!notifica)
+    //   throw new InternalServerErrorException('Notification not created');
   }
 
   // viene creata un offerta per un immobile da parte dell agente
@@ -123,18 +115,11 @@ export class OfferService {
 
     this.checkAuthorization(user, listing); //controllo permessi
 
-    if (listing.price < price)
-      throw new BadRequestException('Price exceeds listing price');
+    await this.checkValidate(listing.id);
 
-    const offer = this.offerRepository.create({
-      price: price,
-      date: new Date(),
-      state: OfferState.PENDING,
-      madeByUser: false,
-      listing: listing,
-      client: { userId: clientId } as Client,
-    });
-    await this.offerRepository.save(offer);
+    this.checkPrice(listing.price, price);
+
+    const offer = await this.createOfferEntity(price, listing, clientId, false);
 
     //crea notifica specifica per una nuova offerta
     const notifica =
@@ -164,10 +149,15 @@ export class OfferService {
     // cerco l oggetto offerta tramite l id dell offerta
     const offer = await this.offerRepository.findOne({
       where: { id: offerId },
+      relations: ['listing'],
     });
+    if (!offer) throw new NotFoundException('Offer not found');
+
+    if (status === OfferState.ACCEPTED) {
+      await this.checkValidate(offer.listing.id);
+    }
 
     //controllo se l offerta esiste e se è in stato PENDING
-    if (!offer) throw new NotFoundException('Offer not found');
     else if (offer.state !== OfferState.PENDING)
       throw new BadRequestException('Offer already processed');
 
@@ -194,14 +184,12 @@ export class OfferService {
           'Client cannot accept or decline an offer',
         );
       }
-    } else {
+    } else if (
+      !madeByUser &&
+      status == (OfferState.ACCEPTED || OfferState.DECLINED)
+    ) {
       //se l offerta è stata fatta da un agente non può accetare o rifiutare la propria del cliente
-      if (
-        !madeByUser &&
-        status == (OfferState.ACCEPTED || OfferState.DECLINED)
-      ) {
-        throw new UnauthorizedException(' cannot accept or decline an offer');
-      }
+      throw new UnauthorizedException(' cannot accept or decline an offer');
     }
     //l' offerta in ambo i casi puo essere annullata
 
@@ -252,17 +240,94 @@ export class OfferService {
     return offers;
   }
 
-  async getClientsByListinigId(
+  async getExternalOffers(
     listingId: string,
-    agent: UserItem,
-  ): Promise<Client[]> {
+    user: UserItem,
+  ): Promise<ClientWithLastOfferDto[]> {
+    const listing = await this.listingRepository.findOne({
+      where: { id: listingId },
+    });
+    if (!listing) throw new BadRequestException('Listing not found');
+
+    this.checkAuthorization(user, listing);
+
+    const externalOffers = await this.offerRepository
+      .createQueryBuilder('offer')
+      .where('offer.guestName IS NOT NULL')
+      .andWhere('offer.guestSurname IS NOT NULL')
+      .andWhere('offer.guestEmail IS NOT NULL')
+      .orderBy('offer.date', 'DESC')
+      .getMany();
+
+    console.log(externalOffers);
+
+    const result: ClientWithLastOfferDto[] = externalOffers.map((offer) => {
+      // Offerta da utente esterno (ospite)
+      return {
+        userId: null,
+        name: offer.guestName ?? '',
+        surname: offer.guestSurname ?? '',
+        email: offer.guestEmail ?? '',
+        phone: null,
+        lastOffer: {
+          id: offer.id,
+          price: offer.price,
+          date: offer.date,
+          state: offer.state,
+        },
+      };
+    });
+
+    return result;
+  }
+
+  async getLatestOffersByListingId(
+    listingId: string,
+    user: UserItem,
+  ): Promise<ClientWithLastOfferDto[]> {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
     });
     if (!listing) throw new UnauthorizedException('Listing not found');
 
-    this.checkAuthorization(agent, listing); //controllo permessi
+    this.checkAuthorization(user, listing); // controllo permessi
 
+    const offers = await this.offerRepository
+      .createQueryBuilder('offer')
+      .distinctOn(['offer.clientUserId']) // clientUserId è la FK nel DB
+      .innerJoinAndSelect('offer.client', 'client')
+      .leftJoinAndSelect('client.user', 'user')
+      .innerJoinAndSelect('offer.listing', 'listing')
+      .where('offer.listingId = :listingId', { listingId })
+      .andWhere('offer.madeByUser = true')
+      .orderBy('offer.clientUserId', 'ASC')
+      .addOrderBy('offer.date', 'DESC') // prende l'ultima offerta per client
+      .getMany();
+
+    const result: ClientWithLastOfferDto[] = offers.map((offer) => {
+      // Offerta da utente registrato
+      return {
+        userId: offer.client?.userId,
+        name: offer.client?.user?.name ?? '',
+        surname: offer.client?.user?.surname ?? '',
+        email: offer.client?.user?.email ?? '',
+        phone: offer.client?.user?.phone ?? null,
+        lastOffer: {
+          id: offer.id,
+          price: offer.price,
+          date: offer.date,
+          state: offer.state,
+        },
+      };
+    });
+
+    return result;
+  }
+
+  async getClientsByListingId(
+    listingId: string,
+    agent: UserItem,
+  ): Promise<PropertyOffer[]> {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
     const uniqueClients = await this.findClientByListingId(listingId);
@@ -270,14 +335,14 @@ export class OfferService {
     return uniqueClients;
   }
 
-  async getAllOffersByListingId(
+  async getOffersByListingAndClient(
     listingId: string,
     id: string,
   ): Promise<PropertyOffer[]> {
     const offers = await this.offerRepository.find({
       where: {
-        client: { userId: id } as Client,
         listing: { id: listingId },
+        client: { userId: id } as Client,
       },
       relations: ['client', 'listing'],
       order: { date: 'ASC' },
@@ -332,17 +397,51 @@ export class OfferService {
   }
 
   // PRIVATE HELPERS
-  private async findClientByListingId(listingId: string): Promise<Client[]> {
-    const clients = await this.clientRepository
-      .createQueryBuilder('client')
-      .innerJoinAndSelect('client.propertyOffers', 'propertyOffer')
-      .innerJoin('propertyOffer.listing', 'listing')
-      .where('listing.id = :listingId', { listingId })
-      .distinct(true)
-      .getMany();
+  private async findClientByListingId(
+    listingId: string,
+  ): Promise<PropertyOffer[]> {
+    const offers = await this.offerRepository.find({
+      where: {
+        listing: { id: listingId },
+      },
+      relations: ['client', 'listing'],
+      order: { date: 'ASC' },
+    });
 
-    if (!clients) return [] as Client[];
+    return offers;
+  }
+  //agg
+  private async checkValidate(listingId: string) {
+    const exist = await this.offerRepository.findOne({
+      where: { state: OfferState.ACCEPTED, listing: { id: listingId } },
+    });
 
-    return clients;
+    if (exist) throw new ConflictException('An offer accepted already exist');
+  }
+
+  private checkPrice(listingPrice: number, userOffer: number) {
+    if (listingPrice < userOffer)
+      throw new BadRequestException('Price exceeds listing price');
+
+    if (userOffer <= 0)
+      throw new BadRequestException('Price can t be < then 0');
+  }
+
+  private async createOfferEntity(
+    price: number,
+    listing: Listing,
+    clientId: string,
+    madeByUser: boolean,
+  ) {
+    const offer = this.offerRepository.create({
+      price: price,
+      date: new Date(),
+      state: OfferState.PENDING,
+      madeByUser: madeByUser,
+      listing: listing,
+      client: { userId: clientId } as Client,
+    });
+
+    return this.offerRepository.save(offer);
   }
 }

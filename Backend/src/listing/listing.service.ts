@@ -55,7 +55,7 @@ export class ListingService {
 
     const response: ListingResponse[] = listings.map((listing) => ({
       ...(instanceToPlain(listing) as Listing),
-      imageUrls: images[listing.id] || [],
+      imageUrls: images[listing.id] ?? [],
     }));
 
     return response;
@@ -80,7 +80,7 @@ export class ListingService {
 
     const response: ListingResponse[] = listings.map((listing) => ({
       ...(instanceToPlain(listing) as Listing),
-      imageUrls: images[listing.id] || [],
+      imageUrls: images[listing.id] ?? [],
     }));
 
     return response;
@@ -223,12 +223,11 @@ export class ListingService {
       const imageDir = pathModule.join(uploadsDir, listingId);
 
       if (fs.statSync(imageDir).isDirectory()) {
-        try {
-          const images = await this.getImagesForListing(listingId);
+        const images = await this.getImagesForListing(listingId);
+        if (images) {
           results[listingId] = images;
-        } catch (e) {
-          results[listingId] = [];
         }
+        results[listingId] = [];
       }
     }
 

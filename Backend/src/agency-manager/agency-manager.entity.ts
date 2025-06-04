@@ -1,10 +1,4 @@
-import {
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { User } from '../auth/user.entity';
 import { Agency } from '../agency/agency.entity';
 
