@@ -25,18 +25,22 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.screens.ChangePassword
+import com.example.dietiestates.ui.screens.ClientsOfferScreen
 import com.example.dietiestates.ui.screens.CreateListingScreen
 import com.example.dietiestates.ui.screens.FullTextScreen
 import com.example.dietiestates.ui.screens.HomeScreen
 import com.example.dietiestates.ui.screens.ListingScreen
 import com.example.dietiestates.ui.screens.LoginScreen
 import com.example.dietiestates.ui.screens.ModifyListingScreen
+import com.example.dietiestates.ui.screens.MyOffersScreen
+import com.example.dietiestates.ui.screens.OfferScreen
 import com.example.dietiestates.ui.screens.RegisterScreen
 import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.AuthViewModel
 import com.example.dietiestates.ui.viewModel.HomeViewModel
+import com.example.dietiestates.ui.viewModel.ListingOfferViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,12 +119,37 @@ fun MyApp() {
             MyOffersScreen(navController = navController)
         }
         composable(
-            route = "listing/offer/{listingId}",
-            arguments = listOf(navArgument("listingId") { type = NavType.StringType })
+            route = "listing/offer/{listingId}?clientId={clientId}",
+            arguments = listOf(
+                navArgument("listingId") { type = NavType.StringType },
+                navArgument("clientId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) { backStackEntry ->
             OfferScreen(navController = navController)
-
         }
+
+        composable(
+            route = "listing/offer/{listingId}/external",
+            arguments = listOf(
+                navArgument("listingId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            OfferScreen(navController = navController)
+        }
+
+
+        composable(
+            route = "agent/listing/offer/{listingId}",
+            arguments = listOf(navArgument("listingId") { type = NavType.StringType })
+        ) {
+            ClientsOfferScreen(navController = navController)
+        }
+
+
     }
 }
 

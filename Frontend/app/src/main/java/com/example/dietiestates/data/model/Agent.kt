@@ -8,3 +8,11 @@ data class Agent(
     val start_date: Date,
     val languages: List<String> = emptyList()
 )
+
+
+enum class UserRole {
+    CLIENT,
+    AGENT,
+    MANAGER,
+    ADMIN_SUPPORT
+}

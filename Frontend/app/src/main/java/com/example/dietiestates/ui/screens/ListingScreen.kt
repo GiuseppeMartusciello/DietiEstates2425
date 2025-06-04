@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.screens.components.CustomButton
@@ -95,6 +96,8 @@ fun ListingScreen(navController: NavController) {
     val state = viewModel.listingState.value
     val scrollState = rememberScrollState()
     val systemUiController = rememberSystemUiController()
+
+    val userRole = AppContainer.tokenManager.getUserRole()
 
     SideEffect {
         systemUiController.setStatusBarColor(
@@ -194,11 +197,19 @@ fun ListingScreen(navController: NavController) {
                                     text = "€ ${formatNumberWithDots(listing.price)}",
                                     style = LocalAppTypography.current.listingPrice
                                 )
-                                CustomButton(
-                                    onClick = { /*TODO*/ },
-                                    style = "blue",
-                                    text = "Proponi Offerta"
-                                )
+                                if(userRole == "CLIENT")
+                                    CustomButton(
+                                        onClick = { navController.navigate("listing/offer/${listing.id}") },
+                                        style = "blue",
+                                        text = "Proponi Offerta"
+                                    )
+                                else {
+                                    CustomButton(
+                                        onClick = { navController.navigate("agent/listing/offer/${listing.id}") },
+                                        style = "blue",
+                                        text = "Offerte",
+                                    )
+                                }
                             }
                         }//Primo blocco, titolo ecc
 
@@ -367,11 +378,13 @@ fun ListingScreen(navController: NavController) {
 
                     }
 
-
-                    BottomBar(
-                        formatNumberWithDots(listing.price),
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                    )
+                    if( userRole == "CLIENT")
+                        BottomBar(
+                            formatNumberWithDots(listing.price),
+                            listingId = listing.id,
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            navController
+                        )
                 }
         }
     }
@@ -422,7 +435,7 @@ fun Divisore() {
 }
 
 @Composable
-private fun BottomBar(price: String, modifier: Modifier = Modifier) {
+private fun BottomBar(price: String, listingId: String, modifier: Modifier = Modifier, navController: NavController) {
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Surface(
@@ -455,7 +468,8 @@ private fun BottomBar(price: String, modifier: Modifier = Modifier) {
                     text = "Proposta",
                     icon = Icons.Outlined.AttachMoney,
                     style = "white",
-                    onClick = { /*TODO*/ })
+                    onClick = { navController.navigate("listing/offer/${listingId}") },
+                    )
 
             }
         }
