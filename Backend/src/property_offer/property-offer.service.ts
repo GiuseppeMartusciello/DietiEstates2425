@@ -326,6 +326,7 @@ export class OfferService {
 
   async getClientsByListingId(
     listingId: string,
+    agent: UserItem,
   ): Promise<PropertyOffer[]> {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
@@ -336,6 +337,7 @@ export class OfferService {
 
   async getOffersByListingAndClient(
     listingId: string,
+    id: string,
   ): Promise<PropertyOffer[]> {
     const offers = await this.offerRepository.find({
       where: {
