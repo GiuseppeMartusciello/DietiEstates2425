@@ -79,6 +79,13 @@ export class NotificationService {
     createNotificationDto: CreateNotificationDto,
     propertyOffer: PropertyOffer,
   ): Promise<Notification> {
+    const result = this.notificationRepository.create({
+      ...createNotificationDto,
+      date: new Date(),
+      propertyOffer: propertyOffer,
+    });
+
+    const savedNotification = await this.notificationRepository.save(result);
 
     //se l offerta è stata fatta da un cliente viene notificato l agente
     //l agente vien recuperato da propertyOffer e listing

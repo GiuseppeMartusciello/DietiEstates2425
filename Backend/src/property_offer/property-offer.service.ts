@@ -82,7 +82,7 @@ export class OfferService {
 
     this.checkPrice(listing.price, price);
 
-    return this.createOffer2(price, listing, user.id, true);
+    return this.createOfferEntity(price, listing, user.id, true);
 
     //crea notifica specifica per una nuova offerta
     // const notifica =
@@ -119,7 +119,7 @@ export class OfferService {
 
     this.checkPrice(listing.price, price);
 
-    const offer = await this.createOffer2(price, listing, clientId, false);
+    const offer = await this.createOfferEntity(price, listing, clientId, false);
 
     //crea notifica specifica per una nuova offerta
     const notifica =
@@ -334,12 +334,13 @@ export class OfferService {
     return uniqueClients;
   }
 
-  async getAllOffersByListingId(
+  async getOffersByListingAndClient(
     listingId: string,
   ): Promise<PropertyOffer[]> {
     const offers = await this.offerRepository.find({
       where: {
         listing: { id: listingId },
+        client: { userId: id } as Client,
       },
       relations: ['client', 'listing'],
       order: { date: 'ASC' },
@@ -424,7 +425,7 @@ export class OfferService {
       throw new BadRequestException('Price can t be < then 0');
   }
 
-  private async createOffer2(
+  private async createOfferEntity(
     price: number,
     listing: Listing,
     clientId: string,
