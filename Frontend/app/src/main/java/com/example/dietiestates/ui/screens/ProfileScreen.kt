@@ -1,8 +1,9 @@
 package com.example.dietiestates.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
@@ -23,15 +25,13 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -39,12 +39,9 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -121,7 +118,7 @@ fun ProfileScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)),
+                        .background(Color.Gray.copy(alpha = 0.4f)),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color.White)
@@ -143,17 +140,16 @@ fun ProfileScreen(navController: NavController) {
                     Text(text = "Errore nel caricamento del profilo", fontSize = 22.sp)
                 }
             }
+
             else -> {
-                Log.d("output","mostro: ${client}")
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(horizontal = 25.dp)
                         .verticalScroll(scrollState),
                 ) {
 
-                    Image( /* ToDo aggiornare text con il reale valore */
+                    Image(
                         painter = painterResource(R.drawable.profile),
                         contentDescription = null,
                         modifier = Modifier
@@ -174,13 +170,17 @@ fun ProfileScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(20.dp))
 
                     ProfileField("Email", client.email)
-                    ProfileField("Indirizzo", client.address)
-                    ProfileField("Data di nascita", client.birthDate)
+                    ProfileField("Indirizzo", client.address ?: "Non presente")
+                    ProfileField("Data di nascita", client.birthDate ?: "Non presente")
                     ProfileField(
                         "Genere",
-                        if (client.gender == "MALE") "Maschio" else "Femmina"
+                        when (client.gender) {
+                            "MALE" -> "Maschio"
+                            "FEMALE" -> "Femmina"
+                            else -> "Non specificato"
+                        }
                     )
-                    ProfileField("Telefono", "3666404242")
+                    ProfileField("Telefono", client.phone ?: "Non presente")
 
                     ProfileFieldSwitch(
                         label = "Notifiche promozionali",
@@ -203,7 +203,37 @@ fun ProfileScreen(navController: NavController) {
                             viewModel.updateNotification("search", it)
                         }
                     )
+                    Spacer(modifier = Modifier.height(40.dp))
 
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                            .border(
+                                width = 1.dp,
+                                color = Color.LightGray,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clip(RoundedCornerShape(12.dp))
+                            .padding(vertical = 15.dp, horizontal = 20.dp)
+                            .clickable { navController.navigate("logout")},
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Disconnetti",
+                            style = LocalAppTypography.current.featureTitle,
+                            fontSize = 18.sp,
+                            color = Color(0xFF3F51B5)
+                        )
+                        Icon(
+                            imageVector = Icons.Outlined.Logout,
+                            tint = Color(0xFF3F51B5),
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                        )
+
+                    }
                 }
             }
         }
@@ -216,6 +246,7 @@ fun ProfileField(label: String, value: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 20.dp)
     ) {
         Row(
             modifier = Modifier
@@ -247,7 +278,7 @@ fun ProfileField(label: String, value: String) {
 
 @Composable
 fun ProfileFieldSwitch(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
