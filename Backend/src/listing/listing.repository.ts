@@ -52,24 +52,23 @@ export class ListingRepository extends Repository<Listing> {
 
     const query = this.createQueryBuilder('listing');
 
-    if (minPrice !== null)
+    if (minPrice != null)
       query.andWhere('listing.price >= :minPrice', { minPrice });
-    if (maxPrice !== null)
+    if (maxPrice != null)
       query.andWhere('listing.price <= :maxPrice', { maxPrice });
-    if (numberOfRooms !== null)
+    if (numberOfRooms != null)
       query.andWhere('listing.numberOfRooms >= :numberOfRooms', {
         numberOfRooms,
       });
-    if (category !== null)
+    if (category != null)
       query.andWhere('listing.category = :category', { category });
-    if (minSize !== null)
+    if (minSize != null)
       query.andWhere('CAST(listing.size AS INTEGER) >= :minSize', { minSize });
     if (hasElevator) query.andWhere('listing.hasElevator = true');
     if (hasAirConditioning) query.andWhere('listing.hasAirConditioning = true');
     if (hasGarage) query.andWhere('listing.hasGarage = true');
 
     let listings = await query.getMany();
-
 
 
     //  Energy class filter
@@ -114,7 +113,6 @@ export class ListingRepository extends Repository<Listing> {
       });
     }
 
-    console.log('Listings after filters:', listings);
 
     return listings;
   }

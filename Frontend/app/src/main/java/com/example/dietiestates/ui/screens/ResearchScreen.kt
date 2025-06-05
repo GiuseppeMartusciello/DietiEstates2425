@@ -79,10 +79,6 @@ fun ResearchScreen(
         viewModel.isOldResearch = false
         viewModel.resetResearchForm()
     }
-    SideEffect {
-
-    }
-
 
     Scaffold(
         topBar = { AppTopBar(modifier = Modifier) },

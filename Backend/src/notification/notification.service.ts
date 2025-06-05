@@ -78,6 +78,7 @@ export class NotificationService {
   async createSpecificNotificationOffer(
     createNotificationDto: CreateNotificationDto,
     propertyOffer: PropertyOffer,
+    update : boolean,
   ): Promise<Notification> {
 
     //se l offerta è stata fatta da un cliente viene notificato l agente
@@ -85,10 +86,22 @@ export class NotificationService {
     //se l offerta è stata fatta da un agente viene notificato il cliente
     //il cliente viene recuperato da propertyOffer
 
-    const user = propertyOffer.madeByUser
+    //in caso di update la logica è esattamente il contrario
+
+  let user: { userId: string };
+
+  if (!update) {
+    // Caso normale: offerta nuova
+    user = propertyOffer.madeByUser
       ? propertyOffer.listing.agent
       : propertyOffer.client;
-
+  } else {
+    // Caso update: inverti logica
+    user = propertyOffer.madeByUser
+      ? propertyOffer.client
+      : propertyOffer.listing.agent;
+  }
+    
     const result = this.notificationRepository.create({
       ...createNotificationDto,
       date: new Date(),
@@ -97,18 +110,22 @@ export class NotificationService {
     });
 
     const savedNotification = await this.notificationRepository.save(result);
-
+    //viene creata l entita userNotification
     const userNotification = this.userNotificationRepository.create({
       user: { id: user.userId },
       notification: { id: savedNotification.id },
       isRead: false,
     });
+
+    //console.log('Saved Notification:', result);
+    //console.log('UserNotification:', userNotification);
+
     //viene salvata la notifica creata
-    //viene creata l entita userNotification
     await this.userNotificationRepository.save(userNotification);
 
     return savedNotification;
   }
+
 
   //restituisce tutte le notifiche non lette per un utente
   //viene utilizzato una qery builder personalizzata
@@ -119,7 +136,6 @@ export class NotificationService {
       .innerJoin('notification.userNotifications', 'userNotification')
       .innerJoin('userNotification.user', 'user')
       .where('user.id = :userId', { userId })
-      .andWhere('userNotification.isRead = false')
       .orderBy('notification.date', 'DESC')
       .getMany();
 

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
@@ -116,7 +117,7 @@ fun EmptyResearch(paddingValues : PaddingValues, navController : NavController)
 @Composable
 fun ListingScroll(paddingValues : PaddingValues, viewModel : ResearchViewModel , navController : NavController)
 {
-    val viewState by viewModel.searchState
+
 
         Column(
             modifier = Modifier
@@ -134,16 +135,22 @@ fun ListingScroll(paddingValues : PaddingValues, viewModel : ResearchViewModel ,
                 "researchscreen"
             )
 
+            Divider(
+                color = Color.LightGray,
+                thickness = 1.dp,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
             LazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(vertical = 5.dp)
+                    .padding(vertical = 2.dp)
                     .zIndex(2f),
-                contentPadding = PaddingValues(bottom = 80.dp)
+                contentPadding = PaddingValues(bottom = 50.dp)
             ) {
-                items(viewState.listings) { listing ->
+                items(viewModel.searchState.value.listings) { listing ->
                     ListingCard(
                         listing = listing,
                         onClick = { navController.navigate("listingscreen/${listing.id}") },
