@@ -229,6 +229,7 @@ export class OfferService {
   ): Promise<ClientWithLastOfferDto[]> {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
+      relations: ['agent'],
     });
     if (!listing) throw new BadRequestException('Listing not found');
 
