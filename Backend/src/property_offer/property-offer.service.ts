@@ -353,7 +353,7 @@ export class OfferService {
       price,
       date: new Date(),
       state: OfferState.PENDING,
-      madeByUser: false,
+      madeByUser: true,
       guestEmail,
       guestName,
       listing,
