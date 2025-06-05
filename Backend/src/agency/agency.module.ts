@@ -7,7 +7,7 @@ import { Manager } from 'src/agency-manager/agency-manager.entity';
 import { User } from 'src/auth/user.entity';
 import { SupportAdmin } from 'src/support-admin/support-admin.entity';
 import { Agency } from './agency.entity';
-import { Agent } from 'http';
+import { Agent } from '../agent/agent.entity';
 
 @Module({
   controllers: [AgencyController],

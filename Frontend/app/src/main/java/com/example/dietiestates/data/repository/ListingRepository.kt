@@ -45,16 +45,6 @@ class ListingRepository(private val api: ListingApi) {
         }
     }
 
-    suspend fun getListingImages(id: String): List<String> {
-
-        val response = api.getListingImages(id)
-        if (response.isSuccessful) {
-            return response.body()?.map { "$BASE_IMAGE_URL$it" } ?: emptyList()
-        } else {
-            throw Exception("Errore nel caricamento immagini: ${response.code()}")
-        }
-    }
-
     suspend fun uploadImagesToListing(
         context: Context,
         listingId: String,
@@ -69,7 +59,7 @@ class ListingRepository(private val api: ListingApi) {
 
             val requestBody = fileBytes.toRequestBody("image/*".toMediaTypeOrNull())
             MultipartBody.Part.createFormData(
-                name = "images", // deve corrispondere a `@UploadedFiles()` su NestJS
+                name = "images",
                 filename = "photo_$index.jpg",
                 body = requestBody
             )
