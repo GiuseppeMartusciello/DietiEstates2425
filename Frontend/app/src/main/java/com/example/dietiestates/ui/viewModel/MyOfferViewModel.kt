@@ -20,37 +20,58 @@ class MyOfferViewModel: ViewModel(
     private val _uiState = MutableStateFlow<MyOffersState>(MyOffersState.Loading)
     val uiState: StateFlow<MyOffersState> = _uiState
 
+    val userRole = AppContainer.tokenManager.getUserRole()
 
     init {
         Log.d("DEBUG", "Imizio fetchListings() da ViewModel")
         fetchListings()
-
     }
 
+
+//    private fun fetchListings() {
+//        viewModelScope.launch {
+//            _uiState.value = MyOffersState.Loading
+//
+//
+//            val result = AppContainer.offerRepository.getListingsByUser()
+//
+//            _uiState.value = when {
+//                result.isSuccess -> {
+//                    val listings = result.getOrNull().orEmpty().map { listing ->
+//                        listing.copy(imageUrls = listing.imageUrls ?: emptyList())
+//                    }
+//
+//                    MyOffersState.Success(listings) // sono già ListingOffer
+//                }
+//
+//                result.isFailure -> {
+//                    Log.e("DEBUG", "Errore: ${result.exceptionOrNull()?.message}")
+//                    MyOffersState.Error(result.exceptionOrNull()?.message ?: "Errore")
+//                }
+//
+//                else -> MyOffersState.Error("Errore sconosciuto")
+//            }
+//        }
+//    }
 
     private fun fetchListings() {
         viewModelScope.launch {
             _uiState.value = MyOffersState.Loading
-            val result = AppContainer.offerRepository.getListingsByUser()
 
-            _uiState.value = when {
-                result.isSuccess -> {
-                    val listings = result.getOrNull().orEmpty().map { listing ->
-                        listing.copy(imageUrls = listing.imageUrls ?: emptyList())
-                    }
-
-                    MyOffersState.Success(listings) // sono già ListingOffer
+            try {
+                val listings = if (userRole == "CLIENT") {
+                    AppContainer.offerRepository.getListingsByUser().getOrThrow()
+                } else {
+                    AppContainer.listingRepository.getListings()
                 }
 
-                result.isFailure -> {
-                    Log.e("DEBUG", "Errore: ${result.exceptionOrNull()?.message}")
-                    MyOffersState.Error(result.exceptionOrNull()?.message ?: "Errore")
-                }
-
-                else -> MyOffersState.Error("Errore sconosciuto")
+                _uiState.value = MyOffersState.Success(listings)
+            } catch (e: Exception) {
+                _uiState.value = MyOffersState.Error(e.message ?: "Errore")
             }
         }
     }
+
 
 
 }

@@ -1,11 +1,15 @@
 package com.example.dietiestates.ui.screens
 
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -24,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -41,18 +46,8 @@ fun SearchedListingScreen(
     navController: NavController
 ) {
 
-
-
     val viewState by viewmodel.searchState
     val systemUiController = rememberSystemUiController()
-
-    //Per aggiornare in caso di modifica di un listing
-    val currentBackStackEntry = navController.currentBackStackEntry
-    val savedStateHandle = currentBackStackEntry?.savedStateHandle
-
-    LaunchedEffect(Unit) {
-        println("📦 Listings count: ${viewState.listings.size}")
-    }
 
     SideEffect {
         systemUiController.setStatusBarColor(
@@ -61,15 +56,6 @@ fun SearchedListingScreen(
         ) // o false se immagine scura
     }
 
-    //Aggiorna al ritorno della modifica di un listing
-    LaunchedEffect(Unit) {
-        savedStateHandle?.getLiveData<Boolean>("listingModified")?.observeForever { modified ->
-            if (modified == true) {
-                 //todo mettere qui i linsting trovati// 🔄 ricarica la lista dei listing
-                savedStateHandle.set("listingModified", false) // reset
-            }
-        }
-    }
 
     Scaffold(topBar = {
 
@@ -132,37 +118,50 @@ fun ListingScroll(paddingValues : PaddingValues, viewModel : ResearchViewModel ,
 {
     val viewState by viewModel.searchState
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-
-        contentAlignment = Alignment.Center
-    ) {
-        GoBackButton(
+        Column(
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top=0.dp)
-                .padding(horizontal = 10.dp)
-                .zIndex(1f),
-            navController,
-            "researchscreen"
+                .fillMaxWidth()
+                .padding(paddingValues)
         )
+        {
+            GoBackButton(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(top = 0.dp)
+                    .padding(horizontal = 10.dp)
+                    .zIndex(1f),
+                navController,
+                "researchscreen"
+            )
 
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.wrapContentHeight()
-                .padding(vertical = 5.dp),
-        ) {
-            items(viewState.listings) { listing ->
-                ListingCard(
-                    listing = listing,
-                    onClick = { navController.navigate("listingscreen/${listing.id}") },
-                    onClickOptions = {},
-                    onClickDelete = {}
-                )
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 5.dp)
+                    .zIndex(2f),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(viewState.listings) { listing ->
+                    ListingCard(
+                        listing = listing,
+                        onClick = { navController.navigate("listingscreen/${listing.id}") },
+                        onClickOptions = {},
+                        onClickDelete = {}
+                    )
+                }
+                item {
+                    Text(
+                        text = "Non ci sono altri immobili disponibili.",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
-    }
 }
 

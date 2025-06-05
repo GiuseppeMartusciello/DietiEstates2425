@@ -1,13 +1,18 @@
 package com.example.dietiestates.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ListingCardMini
 import com.example.dietiestates.ui.theme.RobotoSerif
@@ -42,6 +48,7 @@ import com.example.dietiestates.ui.theme.RobotoSerif
 fun MyOffersScreen(
     navController: NavController, viewModel: MyOfferViewModel = viewModel()
 ) {
+    val userRole = AppContainer.tokenManager.getUserRole()
 
     Log.d("DEBUG", "MyOffersScreen inizializzata")
 
@@ -51,21 +58,28 @@ fun MyOffersScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            IconButton(
-                modifier = Modifier.padding(top = 26.dp),
-                onClick = { navController.navigate("home") }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Indietro")
 
-            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 30.dp),
-                contentAlignment = Alignment.TopCenter
+                    //.height(30.dp)
+                    .statusBarsPadding()
+//                    .padding(top = 8.dp)
+                    .background(Color(0xFF3F51B5)),
             ) {
+                IconButton(
+                    onClick = { navController.navigate("home") }) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Indietro",
+                        tint = Color.White
+                    )
+
+                }
                 Text(
                     text = "Le mie Offerte", fontFamily = RobotoSerif,
-                    fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color(0xFF3F51B5)
+                    fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White,
+                    modifier = Modifier.align(Alignment.Center)
                 )
 
 
@@ -83,39 +97,59 @@ fun MyOffersScreen(
         ) {
             when (uiState) {
                 is MyOffersState.Loading -> {
-                    CircularProgressIndicator()
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+
                 }
 
                 is MyOffersState.Error -> {
-                    Text(
-                        text = (uiState as MyOffersState.Error).message,
-                        color = Color.Red,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = (uiState as MyOffersState.Error).message,
+                            color = Color.Red,
+                        )
+                    }
+
                 }
 
                 is MyOffersState.Success -> {
                     val listings = (uiState as MyOffersState.Success).listings
                     if (listings.isEmpty())
-                        Text(
-                            text = "Non hai mai fatto ancora nessuna offerta.",
-                            fontFamily = RobotoSerif,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Ancora nessuna offerta.",
+                                fontFamily = RobotoSerif,
+                                fontSize = 25.sp,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
                     else {
                         LazyColumn(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(listings) { listing ->
-                                Log.d("DEBUG", "Rendering listing: ${listing.title}")
+                                Log.d("AJA", "Rendering listing: ${listing.id}")
+
                                 ListingCardMini(listing = listing,
                                     onClick = {
-                                        navController.currentBackStackEntry?.savedStateHandle?.set("listing", listing)
-                                        navController.navigate("listing/offer/${listing.id}")
-
-
+                                        if (userRole == "CLIENT")
+                                            navController.navigate("listing/offer/${listing.id}")
+                                        else
+                                            navController.navigate("agent/listing/offer/${listing.id}")
                                     }
                                 )
 

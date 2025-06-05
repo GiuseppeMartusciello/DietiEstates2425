@@ -1,4 +1,4 @@
-package com.example.dietiestates.data.model
+package com.example.dietiestates.data.model.dto
 
 data class CreateResearchDto(
 val searchType: String,

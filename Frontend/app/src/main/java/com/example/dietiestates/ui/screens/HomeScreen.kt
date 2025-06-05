@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.ListingCard
 import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
@@ -81,7 +82,7 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         savedStateHandle?.getLiveData<Boolean>("listingModified")?.observeForever { modified ->
             if (modified == true) {
-                homeViewModel.fetchListings() // 🔄 ricarica la lista dei listing
+                homeViewModel.fetchListings()
                 savedStateHandle.set("listingModified", false) // reset
             }
         }
@@ -109,25 +110,7 @@ fun HomeScreen(navController: NavController) {
             )
         }
     }, bottomBar = {
-        NavBar(
-            navController = navController, items = listOf(
-                NavItem(
-                    "home",
-                    Icons.Outlined.Home, Icons.Filled.Home
-                ), NavItem(
-                    "cerca",
-                    Icons.Outlined.Search, Icons.Filled.Search
-                ), NavItem(
-                    "offer",
-                    Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
-                ),
-                NavItem(
-                    "logout",
-                    Icons.Outlined.Person, Icons.Filled.Person,
-                )
-
-            )
-        )
+        AppBottomBar(navController = navController)
     }) { paddingValues ->
         when {
             viewState.loading -> {

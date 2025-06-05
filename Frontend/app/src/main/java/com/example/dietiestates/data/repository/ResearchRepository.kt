@@ -1,6 +1,6 @@
 package com.example.dietiestates.data.repository
 
-import com.example.dietiestates.data.model.CreateResearchDto
+import com.example.dietiestates.data.model.dto.CreateResearchDto
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.Research
 import com.example.dietiestates.data.remote.api.ListingApi
@@ -49,16 +49,22 @@ data class ResearchRepository(private val api: ResearchApi, private val apiListi
         }
     }
 
-    suspend fun updateResearch(researchId: String): Research {
+    suspend fun updateResearch(researchId: String): List<Listing> {
         val response = api.updateResearch(researchId)
+        val imagesResponse = apiListing.getAllListingImages()
+
         if (response.isSuccessful) {
-            return response.body() ?: throw Exception("Nessun corpo nella risposta")
+            val body = response.body() ?: emptyList()
+            val imageMap = imagesResponse.body() ?: emptyMap()
+
+            return body.map { listing ->
+                val firstImage = imageMap[listing.id]?.firstOrNull()
+                val fullUrl = firstImage?.let { "$BASE_IMAGE_URL$it" }
+                listing.copy(imageUrls = listOfNotNull(fullUrl))
+            }
         } else {
-            throw Exception("Errore ${response.code()}: ${response.errorBody()?.string()}")
+            val code = if (!response.isSuccessful) response.code() else imagesResponse.code()
+            throw Exception("Errore nel caricamento dei dati: HTTP $code")
         }
     }
-
-
-
-
 }

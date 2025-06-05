@@ -1,6 +1,6 @@
 package com.example.dietiestates.data.remote.api
 
-import com.example.dietiestates.data.model.CreateResearchDto
+import com.example.dietiestates.data.model.dto.CreateResearchDto
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.Research
 import retrofit2.Response
@@ -28,7 +28,7 @@ interface ResearchApi {
     @PATCH("research/{id}")
     suspend fun updateResearch(
         @Path("id") researchId: String
-    ): Response<Research>
+    ): Response<List<Listing>>
 
     @DELETE("research/{id}")
     suspend fun deleteResearch(

@@ -6,33 +6,46 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.screens.ChangePassword
+import com.example.dietiestates.ui.screens.ClientsOfferScreen
 import com.example.dietiestates.ui.screens.CreateListingScreen
+import com.example.dietiestates.ui.screens.FilterScreen
 import com.example.dietiestates.ui.screens.FullTextScreen
 import com.example.dietiestates.ui.screens.HomeScreen
 import com.example.dietiestates.ui.screens.ListingScreen
 import com.example.dietiestates.ui.screens.LoginScreen
+import com.example.dietiestates.ui.screens.ModifyListingScreen
+import com.example.dietiestates.ui.screens.MyOffersScreen
+import com.example.dietiestates.ui.screens.OfferScreen
 import com.example.dietiestates.ui.screens.MapSearchScreen
 import com.example.dietiestates.ui.screens.RegisterScreen
 import com.example.dietiestates.ui.screens.ModifyListingScreen
-import com.example.dietiestates.ui.screens.RegisterScreen
+import com.example.dietiestates.ui.screens.MyOffersScreen
+import com.example.dietiestates.ui.screens.OfferScreen
+import com.example.dietiestates.ui.screens.ProfileScreen
 import com.example.dietiestates.ui.screens.ResearchScreen
+import com.example.dietiestates.ui.screens.SearchedListingScreen
 import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.AuthViewModel
+import com.example.dietiestates.ui.viewModel.HomeViewModel
+import com.example.dietiestates.ui.viewModel.ListingOfferViewModel
+import com.example.dietiestates.ui.viewModel.ResearchViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -66,7 +79,6 @@ fun MyApp() {
     val startDestination = if (authViewModel.isLoggedIn.value) "home" else "loginscreen"
 
     NavHost(navController = navController, startDestination = startDestination) {
-
         composable(route = "loginscreen") {
             LoginScreen(navController)
         }
@@ -108,22 +120,87 @@ fun MyApp() {
         }
         composable(route = "logout") {
             authViewModel.logout()
+            LoginScreen(navController = navController)
         }
         composable(route = "offer") {
             MyOffersScreen(navController = navController)
         }
+        composable(route = "profile") {
+            ProfileScreen(navController)
+        }
         composable(
-            route = "listing/offer/{listingId}",
-            arguments = listOf(navArgument("listingId") { type = NavType.StringType })
+            route = "listing/offer/{listingId}?clientId={clientId}",
+            arguments = listOf(
+                navArgument("listingId") { type = NavType.StringType },
+                navArgument("clientId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) { backStackEntry ->
             OfferScreen(navController = navController)
-        composable("map_search") {
-            MapSearchScreen(navController = navController)
-        }
-        composable(route = "researchscreen") {
-            ResearchScreen(navController = navController)
         }
 
+        composable(
+            route = "listing/offer/{listingId}/external",
+            arguments = listOf(
+                navArgument("listingId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            OfferScreen(navController = navController)
+        }
+        //SottoRoot con viewModel Condiviso
+        searchGraph(navController)
+
+
+        composable(
+            route = "agent/listing/offer/{listingId}",
+            arguments = listOf(navArgument("listingId") { type = NavType.StringType })
+        ) {
+            ClientsOfferScreen(navController = navController)
+
+        }
+    }
+}
+fun NavGraphBuilder.searchGraph(navController: NavController) {
+    navigation(
+        startDestination = "researchscreen",
+        route = "search_root"
+    ) {
+        composable("researchscreen") { entry ->
+            val parentEntry = remember(entry) {
+                navController.getBackStackEntry("search_root")
+            }
+            val viewModel: ResearchViewModel = viewModel(parentEntry)
+            ResearchScreen(viewModel,navController)
+        }
+
+
+
+        composable("mapscreen") { entry ->
+            val parentEntry = remember(entry) {
+                navController.getBackStackEntry("search_root")
+            }
+            val viewModel: ResearchViewModel = viewModel(parentEntry)
+            MapSearchScreen(viewModel,navController)
+        }
+
+        composable("filterScreen") { entry ->
+            val parentEntry = remember(entry) {
+                navController.getBackStackEntry("search_root")
+            }
+            val viewModel: ResearchViewModel = viewModel(parentEntry)
+            FilterScreen(navController, viewModel)
+        }
+
+        composable("searchedscreen") { entry ->
+            val parentEntry = remember(entry) {
+                navController.getBackStackEntry("search_root")
+            }
+            val viewModel: ResearchViewModel = viewModel(parentEntry)
+            SearchedListingScreen(viewModel,navController)
+        }
     }
 }
 
@@ -135,21 +212,6 @@ fun MyApp() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-        }
-    }
-}
 
 
 

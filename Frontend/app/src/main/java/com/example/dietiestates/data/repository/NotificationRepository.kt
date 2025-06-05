@@ -1,4 +1,7 @@
 package com.example.dietiestates.data.repository
 
-class NotificationRepository {
+import com.example.dietiestates.data.remote.api.NotificationApi
+
+class NotificationRepository(private val notificationApi: NotificationApi) {
+
 }

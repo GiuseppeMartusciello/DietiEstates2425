@@ -1,48 +1,48 @@
 package com.example.dietiestates.ui.screens
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.LocalOffer
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.paddingFrom
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.TabRowDefaults.Divider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -54,87 +54,52 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.data.model.Research
-import com.example.dietiestates.ui.theme.RobotoSerif
+import com.example.dietiestates.ui.screens.components.AppBottomBar
+import com.example.dietiestates.ui.screens.components.AppTopBar
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
-import com.example.tuaapp.ui.components.NavBar
-import com.example.tuaapp.ui.components.NavItem
 
 @Composable
 fun ResearchScreen(
+    viewModel: ResearchViewModel,
     navController: NavController,
-    viewModel: ResearchViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
-        // viewModel.fetchResearch10()
+        viewModel.fetchResearch10()
+        viewModel.updateSelectedResearch(null)
+        viewModel.isOldResearch = false
+        viewModel.resetResearchForm()
+    }
+    SideEffect {
+
     }
 
-    Scaffold(topBar = {
-        Column(
+
+    Scaffold(
+        topBar = { AppTopBar(modifier = Modifier) },
+        bottomBar = { AppBottomBar(navController) }
+    ) { paddingValues ->
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(0.dp, 0.dp, 0.dp, 8.dp)
-                .background(Color(0xFF3F51B5)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(paddingValues)
         ) {
-            Text(
-                text = "DietiEstates25", fontFamily = RobotoSerif,
-                fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-            )
-            Text(
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 5.dp),
-                text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-                fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.White
+            Research(
+                navController,
+                viewModel = viewModel
             )
         }
-    }, bottomBar = {
-        NavBar(
-            navController = navController, items = listOf(
-                NavItem(
-                    "home",
-                    Icons.Outlined.Home, Icons.Filled.Home
-                ), NavItem(
-                    "cerca",
-                    Icons.Outlined.Search, Icons.Filled.Search
-                ), NavItem(
-                    "notifiche",
-                    Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
-                ), NavItem(
-                    "logout",
-                    Icons.Outlined.Person, Icons.Filled.Person,
-                )
-            )
-        )
-    }) { paddingValues ->
-
-       Box() {
-
-           Column(
-               modifier = Modifier
-                   .fillMaxWidth()
-                   .fillMaxSize()
-                   .padding(paddingValues)
-                   .padding(vertical = 8.dp)
-           ) {
-               Research(
-                   navController,
-                   viewModel = viewModel
-               )
-           }
-
-       }
     }
 }
-
 
 
 @Composable
@@ -142,190 +107,150 @@ fun Research(
     navController: NavController,
     viewModel: ResearchViewModel = viewModel()
 ) {
-
-    val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
-    var expanded by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
-    var textFieldWidth by remember { mutableStateOf(0) }
 
-    val fakeResearches = listOf(
-        Research(
-            id = "1",
-            searchType = "Comune",
-            date = "2025-05-21",
-            municipality = "Napoli",
-            latitude = 40.8522,
-            longitude = 14.2681
-        ),
-        Research(
-            id = "2",
-            searchType = "Mappa",
-            date = "2025-05-20",
-            municipality = "Fanculo",
-            latitude = 41.9028,
-            longitude = 12.4964
-        ),
-        Research(
-            id = "3",
-            searchType = "Coordinate",
-            date = "2025-05-19",
-            municipality = null,
-            latitude = 45.4642,
-            longitude = 9.19
-        ),
-        Research(
-            id = "1",
-            searchType = "Comune",
-            date = "2025-05-21",
-            municipality = "Salerno",
-            latitude = 40.8522,
-            longitude = 14.2681
-        ),Research(
-            id = "1",
-            searchType = "Comune",
-            date = "2025-05-21",
-            municipality = "Positano",
-            latitude = 40.8522,
-            longitude = 14.2681
-        ),Research(
-            id = "1",
-            searchType = "Comune",
-            date = "2025-05-21",
-            municipality = "Capri",
-            latitude = 40.8522,
-            longitude = 14.2681
-        ),Research(
-            id = "1",
-            searchType = "Comune",
-            date = "2025-05-21",
-            municipality = "Ischia",
-            latitude = 40.8522,
-            longitude = 14.2681
-        ),
-    )
+
 
     Column(modifier = Modifier
         .fillMaxWidth()
         .pointerInput(Unit)
         {
             detectTapGestures(onTap = {
-                expanded = false
                 focusManager.clearFocus()
                 keyboardController?.hide()
             })
         }
     ) {
-        Box {
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                trailingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                },
-                modifier = Modifier
-                    .padding(horizontal = 32.dp)
-                    .fillMaxWidth()
-                    .onGloballyPositioned {
-                        textFieldWidth = it.size.width
-                    }
-                    .focusRequester(focusRequester)
-                    .clickable {
-                        expanded = false
-                        focusRequester.requestFocus()
-                        keyboardController?.show()
-                    },
-                singleLine = true
-            )
-
-        }
-        History(
-            fakeResearches,
-            //researches = viewModel.researchState.value.researches ,
-            onSelect = { selectedText -> query = selectedText },
+        CustomOutlineTextField(
+            viewModel,
+            query,
+            onQueryChange = { query = it },
             navController,
+            keyboardController
+        )
+
+        History(
+            onSelect = { selectedQuery, research ->
+                query = selectedQuery
+                viewModel.updateSelectedResearch(research)
+                viewModel.isOldResearch = true
+            },
+            viewModel
+        )
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        MapButton(
+            viewModel,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 30.dp),
+            navController
         )
     }
 }
 
 
-
 @Composable
-fun History( researches: List<Research>,onSelect: (String) -> Unit,navController: NavController) {
+fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) {
 
+    val state = viewModel.searchState.value
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Cronologia",
+                textAlign = TextAlign.Center,
+                fontFamily = RobotoSlab,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+            )
+            Divider(
+                thickness = 1.dp,
+                color = Color.LightGray,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
+            when {
+                state.loading -> {
+                    // puoi anche usare uno Spacer se vuoi spazio sopra il loader
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
 
-            if (researches.isEmpty()) {
-                item {
+                state.error != null -> {
                     Text(
-                        textAlign = TextAlign.Center,
-                        text = "Ancora nessuna ricerca effettuata",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-            if (!researches.isEmpty()) {
-
-
-            item {
-                
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "Cronologia",
-                    textAlign = TextAlign.Center,
-                    fontFamily = RobotoSlab,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 16.sp,
-                )
-                Divider( // riga orizzontale sopra la lista
-                    thickness = 1.dp,
-                    color = Color.LightGray,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
-            }
-
-                items(researches) { research ->
-                    ResearchItem(research, onClick = onSelect)
-                }
-
-            item{
-                Box(modifier = Modifier.fillMaxWidth()) {
-
-                    MapButton(
+                        text = "Errore: ${state.error}",
+                        color = Color.Red,
                         modifier = Modifier
-                            .align(Alignment.Center)
-                            .shadow(10.dp),
-                        // spazio sopra la bottom bar
-                        navController
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
                     )
                 }
-            }
 
+                viewModel.researchState.value.researches.isEmpty() -> {
+                    Text(
+                        text = "Ancora nessuna ricerca effettuata",
+                        fontFamily = RobotoSlab,
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 100.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        items(viewModel.researchState.value.researches) { research ->
+                            ResearchItem(
+                                research,
+                                onSelect,
+                                onDelete = { id ->
+                                    viewModel.deleteResearch(id);
+                                    viewModel.fetchResearch10()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (state.loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x88000000)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color(0xFF3F51B5))
             }
         }
     }
+
 }
 
 
 @Composable
-fun ResearchItem(research: Research, onClick: (String) -> Unit) {
+fun ResearchItem(
+    research: Research,
+    onSelect: (String, Research) -> Unit,
+    onDelete: (String) -> Unit
+) {
 
     val content = if (!research.municipality.isNullOrBlank()) {
         research.municipality
@@ -334,57 +259,162 @@ fun ResearchItem(research: Research, onClick: (String) -> Unit) {
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth()
-            .clickable(  onClick =  { onClick(content) }),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = { onSelect(content, research) }),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF0FAFE),
         )
     )
     {
-
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.History,
                 contentDescription = "Icona cronologia",
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier
+                    .size(30.dp)
+                    .padding(end = 8.dp)
             )
 
             val text = if (!research.municipality.isNullOrBlank()) research.municipality
-             else "latitudine: ${research.latitude} longitudine: ${research.longitude}"
+            else "latitudine: ${research.latitude} longitudine: ${research.longitude}"
 
+            Box(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = text,
+                    fontFamily = RobotoSlab,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp
+                )
+            }
 
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Rimuovi ricerca",
+                tint = Color.Red,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { onDelete(research.id) }
             )
         }
     }
 }
 
+
 @Composable
 fun MapButton(
+    viewModel: ResearchViewModel,
     modifier: Modifier = Modifier,
     navController: NavController,
-)
-{
+) {
     Button(
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF3F51B5),
             contentColor = Color.White
         ),
         shape = RectangleShape,
-        onClick = {navController.navigate("map_search")},
-        modifier = modifier ,
+        onClick = {
+            viewModel.updateResearchFormState {
+                copy(
+                    municipality = "",
+                    searchType = "COORDINATES"
+                )
+            }
+            navController.navigate("mapscreen")
+        },
+        modifier = modifier
+            .shadow(10.dp),
         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
     )
     {
         Text(
+            fontFamily = RobotoSlab,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
-            text = "Ricerca Avanzata")
+            text = "Ricerca Avanzata"
+        )
+    }
+}
+
+@Composable
+fun CustomOutlineTextField(
+    viewModel: ResearchViewModel,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    navController: NavController,
+    keyboardController: SoftwareKeyboardController?
+) {
+    val focusRequester = remember { FocusRequester() }
+    var textFieldWidth by remember { mutableIntStateOf(0) }
+    var showAlert by remember { mutableStateOf(false) }
+
+    fun onSearch() {
+        if (!query.isBlank()) {
+            viewModel.updateResearchFormState {
+                copy(
+                    searchType = "MUNICIPALITY",
+                    municipality = query,
+                    latitude = "",
+                    longitude = "",
+                    radius = ""
+                )
+            }
+            navController.navigate("filterscreen")
+            keyboardController?.hide()
+        } else {
+            showAlert = true
+        }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    OutlinedTextField(
+        value = query,
+        onValueChange = {
+            onQueryChange(it)
+            viewModel.updateSelectedResearch(null)
+            viewModel.isOldResearch = false
+        },
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onSearch() }),
+
+        trailingIcon = {
+            IconButton(
+                onClick = { onSearch() }) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Cerca"
+                )
+            }
+        },
+        modifier = Modifier
+            .padding(horizontal = 32.dp)
+            .fillMaxWidth()
+            .onGloballyPositioned {
+                textFieldWidth = it.size.width
+            }
+            .focusRequester(focusRequester)
+            .clickable {
+                focusRequester.requestFocus()
+                keyboardController?.show()
+            },
+        singleLine = true
+    )
+
+    if (showAlert) {
+        AlertDialog(
+            onDismissRequest = { showAlert = false },
+            title = { Text("Attenzione") },
+            text = { Text("Inserisci un comune per avviare la ricerca.") },
+            confirmButton = {
+                TextButton(onClick = { showAlert = false }) {
+                    Text("Ok")
+                }
+            }
+        )
     }
 }

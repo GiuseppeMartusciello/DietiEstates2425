@@ -5,6 +5,7 @@ import android.content.Context
 import com.example.dietiestates.data.remote.RetrofitClient
 import com.example.dietiestates.data.repository.AgencyRepository
 import com.example.dietiestates.data.repository.AuthRepository
+import com.example.dietiestates.data.repository.ClientRepository
 import com.example.dietiestates.data.repository.ListingRepository
 import com.example.dietiestates.data.repository.ResearchRepository
 import com.example.dietiestates.data.repository.OfferRepository
@@ -17,8 +18,12 @@ object AppContainer {
     lateinit var tokenManager: TokenManager
         private set
 
+    lateinit var clientRepository: ClientRepository
+        private set
+
     lateinit var listingRepository: ListingRepository
         private set
+
     lateinit var agencyRepository: AgencyRepository
         private set
 
@@ -39,10 +44,14 @@ object AppContainer {
 
         val retrofit = RetrofitClient.create(tokenManager)
 
+        clientRepository= ClientRepository(retrofit.createClientApi())
         listingRepository = ListingRepository(retrofit.createListingApi())
         agencyRepository = AgencyRepository(retrofit.createAgencyApi())
         authRepository = AuthRepository(retrofit.createAuthApi(), tokenManager)
         offerRepository = OfferRepository(retrofit.createOfferApi(), retrofit.createListingApi())
+        researchRepository = ResearchRepository(retrofit.createResearchApi(), retrofit.createListingApi())
         initialized = true
     }
 }
+
+

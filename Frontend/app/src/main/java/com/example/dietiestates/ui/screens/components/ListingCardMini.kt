@@ -69,7 +69,7 @@ fun ListingCardMini(listing: Listing, onClick: () -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
+               .height(150.dp)
                 .padding(8.dp)
         ) {
             Image(
@@ -77,7 +77,9 @@ fun ListingCardMini(listing: Listing, onClick: () -> Unit) {
                 contentDescription = listing.title,
                 modifier = Modifier
                     .width(120.dp)
-                    .height(150.dp),
+                    //.height(150.dp),
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
 
@@ -86,12 +88,14 @@ fun ListingCardMini(listing: Listing, onClick: () -> Unit) {
             Column(
                 verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxHeight()
                     .padding(vertical = 4.dp)
             ) {
                 Text(text = listing.title, style = MaterialTheme.typography.titleMedium, maxLines = 2,  overflow = TextOverflow.Ellipsis)
-                Text(text = listing.address, style = MaterialTheme.typography.bodyMedium)
-                Text(text = "€ ${listing.price.toInt()}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = listing.address, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = "€ ${listing.price.toInt()}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
             }
         }
 
