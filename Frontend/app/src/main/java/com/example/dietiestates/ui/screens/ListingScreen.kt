@@ -1,14 +1,15 @@
 package com.example.dietiestates.ui.screens
 
 
-import android.util.Log
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -28,10 +28,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.outlined.Air
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DirectionsBus
@@ -40,7 +38,6 @@ import androidx.compose.material.icons.outlined.Elevator
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Forest
 import androidx.compose.material.icons.outlined.MeetingRoom
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.RealEstateAgent
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.SolarPower
@@ -65,20 +62,19 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.R
-import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ImageGalleryPager
 import com.example.dietiestates.ui.screens.components.Map
-import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
@@ -96,6 +92,8 @@ fun ListingScreen(navController: NavController) {
     val scrollState = rememberScrollState()
     val systemUiController = rememberSystemUiController()
 
+    val userRole = AppContainer.tokenManager.getUserRole()
+
     SideEffect {
         systemUiController.setStatusBarColor(
             Color.Transparent,
@@ -111,7 +109,7 @@ fun ListingScreen(navController: NavController) {
                     .background(Color.Black.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
-                    CircularProgressIndicator(color = Color.White)
+                CircularProgressIndicator(color = Color.White)
             }
         }
 
@@ -190,15 +188,38 @@ fun ListingScreen(navController: NavController) {
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(
-                                    text = "€ ${formatNumberWithDots(listing.price)}",
-                                    style = LocalAppTypography.current.listingPrice
-                                )
-                                CustomButton(
-                                    onClick = { /*TODO*/ },
-                                    style = "blue",
-                                    text = "Proponi Offerta"
-                                )
+                                Row(verticalAlignment = Alignment.Bottom) {
+                                    Text(
+                                        text = "€ ${formatNumberWithDots(listing.price)}",
+                                        style = LocalAppTypography.current.listingPrice
+                                    )
+
+                                    if (listing.category == "RENT") {
+                                        Spacer(modifier = Modifier.width(4.dp))
+
+                                        Text(
+                                            text = "al mese",
+                                            style = LocalAppTypography.current.listingPrice.copy(
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Normal,
+                                                color = Color.DarkGray
+                                            )
+                                        )
+                                    }
+                                }
+                                if (userRole == "CLIENT")
+                                    CustomButton(
+                                        onClick = { navController.navigate("listing/offer/${listing.id}") },
+                                        style = "blue",
+                                        text = "Proponi Offerta"
+                                    )
+                                else {
+                                    CustomButton(
+                                        onClick = { navController.navigate("agent/listing/offer/${listing.id}") },
+                                        style = "blue",
+                                        text = "Offerte",
+                                    )
+                                }
                             }
                         }//Primo blocco, titolo ecc
 
@@ -261,7 +282,11 @@ fun ListingScreen(navController: NavController) {
 
                         Divisore() //------//
 
-                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp))
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 14.dp)
+                                .fillMaxWidth()
+                        )
                         {
                             Text(
                                 text = "Descrizione",
@@ -278,13 +303,14 @@ fun ListingScreen(navController: NavController) {
                                 color = Color.Black
                             )
                             Spacer(modifier = Modifier.height(15.dp))
-                            /* ToDo bottone mostrato solo se supero le 7 righe */
-                            CustomButton(
-                                onClick = { navController.navigate("listingviewdescriptionscreen/${listing.description}") },
-                                modifier = Modifier.align(Alignment.CenterHorizontally),
-                                style = "blue",
-                                text = "Leggi di più"
-                            )
+                            if (listing.description.length > 250) {
+                                CustomButton(
+                                    onClick = { navController.navigate("listingviewdescriptionscreen/${listing.description}") },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    style = "blue",
+                                    text = "Leggi di più"
+                                )
+                            }
 
                         }//Terzo blocco, descrizione
 
@@ -323,9 +349,13 @@ fun ListingScreen(navController: NavController) {
                                 style = LocalAppTypography.current.sectionTitle
                             )
                             Spacer(modifier = Modifier.height(30.dp))
-                            Column (modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
 
-                                Text( /* ToDo aggiornare text con il reale valore */
+                                Text(
+                                    /* ToDo aggiornare text con il reale valore */
                                     text = "Stefano Rossi, 35",
                                     style = LocalAppTypography.current.featureTitle,
                                     fontSize = 20.sp,
@@ -367,11 +397,14 @@ fun ListingScreen(navController: NavController) {
 
                     }
 
-
-                    BottomBar(
-                        formatNumberWithDots(listing.price),
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                    )
+                    if (userRole == "CLIENT")
+                        BottomBar(
+                            listing.category,
+                            formatNumberWithDots(listing.price),
+                            listingId = listing.id,
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            navController
+                        )
                 }
         }
     }
@@ -382,8 +415,9 @@ fun NearbyPlacesBlock(nearbyPlaces: List<String>) {
     Column(modifier = Modifier.padding(end = 30.dp)) {
         nearbyPlaces.chunked(2).forEach { rowItems ->
             Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 10.dp, end= 20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 rowItems.forEach { item ->
@@ -422,7 +456,13 @@ fun Divisore() {
 }
 
 @Composable
-private fun BottomBar(price: String, modifier: Modifier = Modifier) {
+private fun BottomBar(
+    category: String,
+    price: String,
+    listingId: String,
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Surface(
@@ -439,23 +479,37 @@ private fun BottomBar(price: String, modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(
-                text = "€ ${price}",
-                fontFamily = RobotoSlab,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 25.sp
-            )
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = "€ ${price}",
+                    style = LocalAppTypography.current.listingPrice
+                )
+
+                if (category == "RENT") {
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "al mese",
+                        style = LocalAppTypography.current.listingPrice.copy(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.DarkGray
+                        )
+                    )
+                }
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                CustomButton(icon = Icons.Filled.Call, style = "white", onClick = { /*TODO*/ })
+                CallButton("3242424242") /* ToDo reale numero agente*/
                 Spacer(modifier = Modifier.width(8.dp))
                 CustomButton(
                     text = "Proposta",
                     icon = Icons.Outlined.AttachMoney,
                     style = "white",
-                    onClick = { /*TODO*/ })
+                    onClick = { navController.navigate("listing/offer/${listingId}") },
+                )
 
             }
         }
@@ -534,6 +588,20 @@ fun FullTextScreen(navController: NavController, text: String) {
     }
 }
 
+@Composable
+fun CallButton(phoneNumber: String) {
+    val context = LocalContext.current
 
+    CustomButton(
+        icon = Icons.Filled.Call,
+        style = "white",
+        onClick = { openDialer(context, phoneNumber) })
+}
 
+fun openDialer(context: Context, phoneNumber: String) {
+    val intent = Intent(Intent.ACTION_DIAL).apply {
+        data = Uri.parse("tel:$phoneNumber")
+    }
+    context.startActivity(intent)
+}
 

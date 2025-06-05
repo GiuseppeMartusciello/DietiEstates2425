@@ -2,37 +2,34 @@ package com.example.dietiestates.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.TabRowDefaults.Divider
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -41,9 +38,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -59,6 +58,7 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -82,21 +82,20 @@ fun ResearchScreen(
 
     Scaffold(
         topBar = { AppTopBar(modifier = Modifier) },
-        bottomBar = { AppBottomBar(navController)}
+        bottomBar = { AppBottomBar(navController) }
     ) { paddingValues ->
 
-       Box(
-           modifier = Modifier
-               .padding(paddingValues)
-       ) {
-               Research(
-                   navController,
-                   viewModel = viewModel
-               )
-       }
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
+            Research(
+                navController,
+                viewModel = viewModel
+            )
+        }
     }
 }
-
 
 
 @Composable
@@ -138,24 +137,23 @@ fun Research(
             viewModel
         )
     }
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        MapButton(
+            viewModel,
             modifier = Modifier
-                .fillMaxSize()
-        ){
-            MapButton(
-                viewModel,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 30.dp),
-                navController
-            )
-        }
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 30.dp),
+            navController
+        )
+    }
 }
 
 
-
 @Composable
-fun History(onSelect: (String, Research) -> Unit,viewModel: ResearchViewModel) {
+fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) {
 
     val state = viewModel.searchState.value
 
@@ -188,7 +186,9 @@ fun History(onSelect: (String, Research) -> Unit,viewModel: ResearchViewModel) {
                     Text(
                         text = "Errore: ${state.error}",
                         color = Color.Red,
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -215,8 +215,8 @@ fun History(onSelect: (String, Research) -> Unit,viewModel: ResearchViewModel) {
                             ResearchItem(
                                 research,
                                 onSelect,
-                                onDelete = {
-                                    id -> viewModel.deleteResearch(id);
+                                onDelete = { id ->
+                                    viewModel.deleteResearch(id);
                                     viewModel.fetchResearch10()
                                 }
                             )
@@ -242,7 +242,11 @@ fun History(onSelect: (String, Research) -> Unit,viewModel: ResearchViewModel) {
 
 
 @Composable
-fun ResearchItem(research: Research, onSelect: (String, Research) -> Unit,onDelete: (String) -> Unit) {
+fun ResearchItem(
+    research: Research,
+    onSelect: (String, Research) -> Unit,
+    onDelete: (String) -> Unit
+) {
 
     val content = if (!research.municipality.isNullOrBlank()) {
         research.municipality
@@ -251,8 +255,9 @@ fun ResearchItem(research: Research, onSelect: (String, Research) -> Unit,onDele
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth()
-            .clickable(  onClick =  { onSelect(content,research) }),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = { onSelect(content, research) }),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF0FAFE),
@@ -272,7 +277,7 @@ fun ResearchItem(research: Research, onSelect: (String, Research) -> Unit,onDele
             )
 
             val text = if (!research.municipality.isNullOrBlank()) research.municipality
-             else "latitudine: ${research.latitude} longitudine: ${research.longitude}"
+            else "latitudine: ${research.latitude} longitudine: ${research.longitude}"
 
             Box(modifier = Modifier.weight(1f)) {
                 Text(
@@ -301,8 +306,7 @@ fun MapButton(
     viewModel: ResearchViewModel,
     modifier: Modifier = Modifier,
     navController: NavController,
-)
-{
+) {
     Button(
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF3F51B5),
@@ -312,12 +316,12 @@ fun MapButton(
         onClick = {
             viewModel.updateResearchFormState {
                 copy(
-                    municipality="",
+                    municipality = "",
                     searchType = "COORDINATES"
                 )
             }
             navController.navigate("mapscreen")
-                  },
+        },
         modifier = modifier
             .shadow(10.dp),
         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
@@ -327,7 +331,8 @@ fun MapButton(
             fontFamily = RobotoSlab,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
-            text = "Ricerca Avanzata")
+            text = "Ricerca Avanzata"
+        )
     }
 }
 
@@ -338,26 +343,25 @@ fun CustomOutlineTextField(
     onQueryChange: (String) -> Unit,
     navController: NavController,
     keyboardController: SoftwareKeyboardController?
-)
-{
+) {
     val focusRequester = remember { FocusRequester() }
     var textFieldWidth by remember { mutableIntStateOf(0) }
     var showAlert by remember { mutableStateOf(false) }
 
     fun onSearch() {
-        if(!query.isBlank()){
-            viewModel.updateResearchFormState {copy(
-                searchType = "MUNICIPALITY",
-                municipality = query,
-                latitude = "",
-                longitude = "",
-                radius=""
-            )}
+        if (!query.isBlank()) {
+            viewModel.updateResearchFormState {
+                copy(
+                    searchType = "MUNICIPALITY",
+                    municipality = query,
+                    latitude = "",
+                    longitude = "",
+                    radius = ""
+                )
+            }
             navController.navigate("filterscreen")
             keyboardController?.hide()
-        }
-        else
-        {
+        } else {
             showAlert = true
         }
     }
@@ -376,7 +380,7 @@ fun CustomOutlineTextField(
 
         trailingIcon = {
             IconButton(
-                onClick = {  onSearch() }){
+                onClick = { onSearch() }) {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Cerca"

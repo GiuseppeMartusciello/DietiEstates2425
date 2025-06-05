@@ -32,9 +32,6 @@ export class OfferService {
 
     private readonly listingRepository: ListingRepository,
 
-    @InjectRepository(Client)
-    private readonly clientRepository: Repository<Client>,
-
     private readonly notificationService: NotificationService,
 
     private readonly listingService: ListingService,
@@ -78,11 +75,11 @@ export class OfferService {
     });
     if (!listing) throw new NotFoundException('Listing not found');
 
-    await this.checkValidate(listing.id);
+    //await this.checkValidate(listing.id);
 
     this.checkPrice(listing.price, price);
 
-     return this.createOfferEntity(price, listing, user.id, true);
+    return this.createOfferEntity(price, listing, user.id, true);
   }
 
   // viene creata un offerta per un immobile da parte dell agente
@@ -101,7 +98,7 @@ export class OfferService {
 
     this.checkAuthorization(user, listing); //controllo permessi
 
-    await this.checkValidate(listing.id);
+    //await this.checkValidate(listing.id);
 
     this.checkPrice(listing.price, price);
 
@@ -221,6 +218,7 @@ export class OfferService {
   ): Promise<ClientWithLastOfferDto[]> {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
+      relations: ['agent'],
     });
     if (!listing) throw new BadRequestException('Listing not found');
 
@@ -311,18 +309,16 @@ export class OfferService {
 
   async getOffersByListingAndClient(
     listingId: string,
-    id: string,
+    clientId: string,
   ): Promise<PropertyOffer[]> {
-    const offers = await this.offerRepository.find({
+    return this.offerRepository.find({
       where: {
         listing: { id: listingId },
-        client: { userId: id } as Client,
+        client: { userId: clientId } as Client,
       },
       relations: ['client', 'listing'],
       order: { date: 'ASC' },
     });
-
-    return offers;
   }
 
   async createExternalOffer(
@@ -345,7 +341,7 @@ export class OfferService {
       price,
       date: new Date(),
       state: OfferState.PENDING,
-      madeByUser: false,
+      madeByUser: true,
       guestEmail,
       guestName,
       listing,

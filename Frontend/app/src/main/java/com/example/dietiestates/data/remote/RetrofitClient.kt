@@ -2,6 +2,7 @@ package com.example.dietiestates.data.remote
 
 import com.example.dietiestates.data.remote.api.AgencyApi
 import com.example.dietiestates.data.remote.api.AuthApi
+import com.example.dietiestates.data.remote.api.ClientApi
 import com.example.dietiestates.data.remote.api.ListingApi
 import com.example.dietiestates.data.remote.api.OfferApi
 import com.example.dietiestates.data.remote.api.ResearchApi
@@ -12,12 +13,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RetrofitClient private constructor(retrofit: Retrofit) {
 
+    private val clientApi = retrofit.create(ClientApi::class.java)
     private val listingApi = retrofit.create(ListingApi::class.java)
     private val agencyApi = retrofit.create(AgencyApi::class.java)
     private val authApi = retrofit.create(AuthApi::class.java)
     private val offerApi = retrofit.create(OfferApi::class.java)
     private val researchApi = retrofit.create(ResearchApi::class.java)
 
+    fun createClientApi() = clientApi
     fun createListingApi() = listingApi
     fun createAgencyApi() = agencyApi
     fun createAuthApi() = authApi

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Logout
@@ -80,9 +81,8 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
                 )
             }
 
-            // SPAZIO CENTRALE PER IL FAB
-            if(role == "AGENT" || role == "SUPPORT-ADMIN" || role == "MANAGER")
-                Spacer(modifier = Modifier.weight(0.7f))
+
+            Spacer(modifier = Modifier.weight(0.7f))
 
             items.takeLast(2).forEach { item ->
                 val selected = currentRoute == item.route
@@ -116,32 +116,20 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
                     .align(Alignment.TopCenter)
                     .offset(y = (-20).dp) // Stacca il bottone dalla NavigationBar
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
+                Icon(Icons.Outlined.Add, contentDescription = "Add")
+            }
+        }else{
+            FloatingActionButton(
+                onClick = { navController.navigate("researchScreen") },
+                containerColor = Color(0xFF3F51B5),
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-20).dp)
+            ) {
+                Icon(Icons.Outlined.Search, contentDescription = "Search")
             }
         }
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun test() {
-    val navController = rememberNavController()
-    NavBar(
-        navController = navController, items = listOf(
-            NavItem(
-                "Home",
-                Icons.Outlined.Home, Icons.Filled.Home
-            ), NavItem(
-                "Cerca",
-                Icons.Outlined.Search, Icons.Filled.Search
-            ), NavItem(
-                "Notifiche",
-                Icons.Outlined.LocalOffer, Icons.Outlined.LocalOffer,
-            ), NavItem(
-                "Logout",
-                Icons.Outlined.Person, Icons.Filled.Person,
-            )
-        )
-    )
 }

@@ -76,7 +76,7 @@ export class ListingService {
 
   async getAllListing(): Promise<ListingResponse[]> {
     const listings: Listing[] = await this.listingRepository.find();
-    const images = this.getAllListingImages();
+    const images = await this.getAllListingImages();
 
     const response: ListingResponse[] = listings.map((listing) => ({
       ...(instanceToPlain(listing) as Listing),
@@ -226,8 +226,8 @@ export class ListingService {
         const images = await this.getImagesForListing(listingId);
         if (images) {
           results[listingId] = images;
-        }
-        results[listingId] = [];
+        }else
+          results[listingId] = [];
       }
     }
 
@@ -266,11 +266,6 @@ export class ListingService {
       }
 
       fs.rmdirSync(folderPath);
-      console.log(
-        `Cartella ${folderPath} e tutti i file interni sono stati eliminati.`,
-      );
-    } else {
-      console.log(`Cartella ${folderPath} non trovata.`);
-    }
+    } 
   }
 }
