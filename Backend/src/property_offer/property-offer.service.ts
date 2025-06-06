@@ -237,7 +237,8 @@ export class OfferService {
 
     const externalOffers = await this.offerRepository
       .createQueryBuilder('offer')
-      .where('offer.guestName IS NOT NULL')
+      .where('offer.listingId = :listingId', { listingId })
+      .andWhere('offer.guestName IS NOT NULL')
       .andWhere('offer.guestSurname IS NOT NULL')
       .andWhere('offer.guestEmail IS NOT NULL')
       .orderBy('offer.date', 'ASC')
