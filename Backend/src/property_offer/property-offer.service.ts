@@ -240,7 +240,7 @@ export class OfferService {
       .where('offer.guestName IS NOT NULL')
       .andWhere('offer.guestSurname IS NOT NULL')
       .andWhere('offer.guestEmail IS NOT NULL')
-      .orderBy('offer.date', 'DESC')
+      .orderBy('offer.date', 'ASC')
       .getMany();
 
     console.log(externalOffers);
