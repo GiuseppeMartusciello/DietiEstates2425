@@ -258,6 +258,7 @@ export class OfferService {
           price: offer.price,
           date: offer.date,
           state: offer.state,
+          madeByUser: offer.madeByUser,
         },
       };
     });
@@ -301,6 +302,7 @@ export class OfferService {
           price: offer.price,
           date: offer.date,
           state: offer.state,
+          madeByUser: offer.madeByUser,
         },
       };
     });
