@@ -58,12 +58,12 @@ export class OfferController {
   }
 
   // @Get('listing/:listingId/all')
-  // @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  // // @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   // async getAllOffer(
   //   @GetUser() user: UserItem,
   //   @Param('listingId', new ParseUUIDPipe()) listingId: string,
   // ): Promise<PropertyOffer[]> {
-  //   return this.offerService.getAllOffersByListingId(listingId, user.id);
+  //   return this.offerService.getAllOffersByListingId(listingId);
   // }
 
   // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto

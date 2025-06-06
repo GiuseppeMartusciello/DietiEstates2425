@@ -333,14 +333,24 @@ export class OfferService {
     });
   }
 
+  // async getAllOffersByListingId(listingId: string): Promise<PropertyOffer[]> {
+  //   return this.offerRepository.find({
+  //     where: {
+  //       listing: { id: listingId },
+  //     },
+  //     relations: ['client', 'listing'],
+  //     order: { date: 'ASC' },
+  //   });
+  // }
+
   async createExternalOffer(
     dto: CreateExternalOfferDto,
     user: UserItem,
     listingId: string,
   ): Promise<PropertyOffer> {
-    const { price, guestEmail, guestName } = dto;
-    if (!guestEmail && !guestName)
-      throw new BadRequestException('Guest email or name is required');
+    const { price, guestEmail, guestName, guestSurname } = dto;
+    if (!guestEmail && !guestName && !guestSurname)
+      throw new BadRequestException('Email, name and surname are required');
 
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
@@ -356,6 +366,7 @@ export class OfferService {
       madeByUser: true,
       guestEmail,
       guestName,
+      guestSurname,
       listing,
     });
 
