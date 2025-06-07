@@ -130,17 +130,16 @@ export class NotificationService {
   //restituisce tutte le notifiche non lette per un utente
   //viene utilizzato una qery builder personalizzata
 
-  async Notifications(userId: string): Promise<Notification[]> {
-    const notifications = await this.notificationRepository
-      .createQueryBuilder('notification')
-      .innerJoin('notification.userNotifications', 'userNotification')
-      .innerJoin('userNotification.user', 'user')
-      .where('user.id = :userId', { userId })
-      .orderBy('notification.date', 'DESC')
-      .getMany();
+ async Notifications(userId: string): Promise<Notification[]> {
+  const notifications = await this.notificationRepository
+    .createQueryBuilder('notification')
+    .innerJoinAndSelect('notification.userNotifications', 'userNotification', 'userNotification.user.id = :userId', { userId })
+    .orderBy('notification.date', 'DESC')
+    .getMany();
 
-    return notifications;
-  }
+  return notifications;
+}
+
 
   async NotificationById(notificationId: string): Promise<Notification> {
     const notification = await this.notificationRepository.findOneOrFail({

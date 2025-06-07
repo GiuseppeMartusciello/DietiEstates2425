@@ -226,10 +226,11 @@ export class OfferService {
 
     const externalOffers = await this.offerRepository
       .createQueryBuilder('offer')
-      .where('offer.guestName IS NOT NULL')
+      .where('offer.listingId = :listingId', { listingId })
+      .andWhere('offer.guestName IS NOT NULL')
       .andWhere('offer.guestSurname IS NOT NULL')
       .andWhere('offer.guestEmail IS NOT NULL')
-      .orderBy('offer.date', 'DESC')
+      .orderBy('offer.date', 'ASC')
       .getMany();
 
     console.log(externalOffers);
@@ -247,6 +248,7 @@ export class OfferService {
           price: offer.price,
           date: offer.date,
           state: offer.state,
+          madeByUser: offer.madeByUser,
         },
       };
     });
@@ -290,6 +292,7 @@ export class OfferService {
           price: offer.price,
           date: offer.date,
           state: offer.state,
+          madeByUser: offer.madeByUser,
         },
       };
     });
@@ -321,14 +324,24 @@ export class OfferService {
     });
   }
 
+  // async getAllOffersByListingId(listingId: string): Promise<PropertyOffer[]> {
+  //   return this.offerRepository.find({
+  //     where: {
+  //       listing: { id: listingId },
+  //     },
+  //     relations: ['client', 'listing'],
+  //     order: { date: 'ASC' },
+  //   });
+  // }
+
   async createExternalOffer(
     dto: CreateExternalOfferDto,
     user: UserItem,
     listingId: string,
   ): Promise<PropertyOffer> {
-    const { price, guestEmail, guestName } = dto;
-    if (!guestEmail && !guestName)
-      throw new BadRequestException('Guest email or name is required');
+    const { price, guestEmail, guestName, guestSurname } = dto;
+    if (!guestEmail && !guestName && !guestSurname)
+      throw new BadRequestException('Email, name and surname are required');
 
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
@@ -344,6 +357,7 @@ export class OfferService {
       madeByUser: true,
       guestEmail,
       guestName,
+      guestSurname,
       listing,
     });
 
