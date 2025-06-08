@@ -19,6 +19,7 @@ import { Provider } from 'src/common/types/provider.enum';
 import { GoogleUser } from 'src/common/types/google-user';
 import * as crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
+import { error } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -105,9 +106,11 @@ export class AuthService {
     }
 
     if (user.provider && user.provider !== Provider.LOCAL) {
-      throw new BadRequestException(
-        `This account is linked with ${user.provider}. Please use ${user.provider} login.`,
-      );
+      throw new BadRequestException({
+        message: `This account is linked with ${user.provider}. Please use ${user.provider} login.`,
+        error: 'ProviderMismatch',
+        provider: user.provider,
+      });
     }
 
     if (!(await bcrypt.compare(password, user.password))) {
