@@ -75,6 +75,11 @@ class AuthViewModel : ViewModel() {
         email = newEmail
     }
 
+    fun resetLoginState() {
+        _loginState.value = LoginState.Idle
+    }
+
+
     fun onPasswordChanged(newPassword: String) {
         password = newPassword
     }
