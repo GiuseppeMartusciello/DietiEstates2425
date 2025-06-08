@@ -105,18 +105,6 @@ export class OfferService {
     const offer = await this.createOfferEntity(price, listing, clientId, false);
 
     //crea notifica specifica per una nuova offerta
-    const notifica =
-      await this.notificationService.createSpecificNotificationOffer(
-        {
-          title: 'New offer',
-          description: 'New offer for your listing',
-          category: NotificationType.SPECIFIC,
-        },
-        offer,
-      );
-
-    if (!notifica)
-      throw new InternalServerErrorException('Notification not created');
 
     return offer;
   }
@@ -185,11 +173,12 @@ export class OfferService {
     const notifica =
       await this.notificationService.createSpecificNotificationOffer(
         {
-          title: 'Your offer has been' + status + '!',
-          description: 'check out the your offer',
+          title: 'Your offer has been updated !',
+          description: 'check out the your offer for' + offer.listing.title + ' the state is now ' + status,
           category: NotificationType.SPECIFIC,
         },
         offer,
+        true
       );
 
     if (!notifica)
@@ -313,7 +302,6 @@ export class OfferService {
 
   async getClientsByListingId(
     listingId: string,
-    agent: UserItem,
   ): Promise<PropertyOffer[]> {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
@@ -438,6 +426,24 @@ export class OfferService {
       client: { userId: clientId } as Client,
     });
 
-    return this.offerRepository.save(offer);
+
+
+    await this.offerRepository.save(offer);
+    //crea notifica specifica per una nuova offerta
+     const notifica =
+       await this.notificationService.createSpecificNotificationOffer(
+         {
+           title: 'Offer for ' + listing.title,
+           description: `A new offer of ${price}€ has been made for the property ${listing.title}.`,
+           category: NotificationType.SPECIFIC,
+         },
+         offer,
+         false,
+       );
+
+     if (!notifica)
+       throw new InternalServerErrorException('Notification not created');
+
+     return offer;
   }
 }
