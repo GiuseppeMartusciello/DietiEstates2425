@@ -2,15 +2,14 @@ package com.example.dietiestates.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.data.model.Notification
-import com.example.dietiestates.data.repository.NotificationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
     
 
 class NotificationViewModel(
-    private val repository: NotificationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<NotificationState>(NotificationState.Loading)
@@ -23,7 +22,7 @@ class NotificationViewModel(
         viewModelScope.launch {
             _uiState.value = NotificationState.Loading
             try {
-                val result = repository.notifications()
+                val result = AppContainer.notificationRepository.notifications()
                 _uiState.value = NotificationState.Notifications(result)
             } catch (e: Exception) {
                 _uiState.value = NotificationState.Error(e.message ?: "Errore sconosciuto")
@@ -34,7 +33,7 @@ class NotificationViewModel(
     fun getNotificationById(id: String) {
         viewModelScope.launch {
             try {
-                val notification = repository.getNotificationById(id)
+                val notification = AppContainer.notificationRepository.getNotificationById(id)
                 _selectedNotification.value = notification
             } catch (e: Exception) {
                 _selectedNotification.value = null
@@ -46,7 +45,7 @@ class NotificationViewModel(
     fun markAsRead(userNotificationId: String) {
         viewModelScope.launch {
             try {
-                repository.markNotificationAsRead(userNotificationId)
+                AppContainer.notificationRepository.markNotificationAsRead(userNotificationId)
                 loadNotifications() // ricarica la lista dopo aggiornamento
             } catch (e: Exception) {
                 _uiState.value = NotificationState.Error(e.message ?: "Errore nella marcatura come letta")

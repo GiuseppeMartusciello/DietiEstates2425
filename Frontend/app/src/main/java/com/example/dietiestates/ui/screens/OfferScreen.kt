@@ -22,11 +22,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,7 +53,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,10 +65,8 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OfferScreen(
-    navController: NavController,
-    viewModel: ListingOfferViewModel = viewModel()
-) {
+fun OfferScreen(navController: NavController,
+                viewModel: ListingOfferViewModel = viewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -80,7 +74,7 @@ fun OfferScreen(
     val clientId = savedStateHandle.get<String>("clientId")
 
 
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by  viewModel.uiState.collectAsState()
     val listing = viewModel.listing.value
 
     val isWriting = viewModel.isWritingOffer.value
@@ -338,6 +332,7 @@ fun OfferScreen(
                         ListingCardMini(
                             listing = it,
                             onClick = { navController.navigate("listingscreen/${it.id}") })
+
 
 
                     }

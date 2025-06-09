@@ -7,6 +7,7 @@ import com.example.dietiestates.data.repository.AgencyRepository
 import com.example.dietiestates.data.repository.AuthRepository
 import com.example.dietiestates.data.repository.ClientRepository
 import com.example.dietiestates.data.repository.ListingRepository
+import com.example.dietiestates.data.repository.NotificationRepository
 import com.example.dietiestates.data.repository.ResearchRepository
 import com.example.dietiestates.data.repository.OfferRepository
 import com.example.dietiestates.utility.TokenManager
@@ -36,6 +37,9 @@ object AppContainer {
     lateinit var  offerRepository: OfferRepository
         private  set
 
+    lateinit var notificationRepository: NotificationRepository
+        private set
+
 
     fun init(context: Context) {
         if (initialized) return
@@ -49,6 +53,7 @@ object AppContainer {
         agencyRepository = AgencyRepository(retrofit.createAgencyApi())
         authRepository = AuthRepository(retrofit.createAuthApi(), tokenManager)
         offerRepository = OfferRepository(retrofit.createOfferApi(), retrofit.createListingApi())
+        notificationRepository = NotificationRepository(retrofit.createNotificationApi())
         researchRepository = ResearchRepository(retrofit.createResearchApi(), retrofit.createListingApi())
         initialized = true
     }

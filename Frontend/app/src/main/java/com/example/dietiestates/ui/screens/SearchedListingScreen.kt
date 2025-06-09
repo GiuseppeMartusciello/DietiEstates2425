@@ -60,7 +60,7 @@ fun SearchedListingScreen(
 
     Scaffold(topBar = {
 
-        AppTopBar(modifier = Modifier)
+        AppTopBar()
 
     }) { paddingValues ->
         when {
@@ -88,14 +88,7 @@ fun EmptyResearch(paddingValues : PaddingValues, navController : NavController)
             .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
-        GoBackButton(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top=10.dp)
-                .padding(horizontal = 10.dp),
-            navController,
-            "researchscreen"
-        )
+        GoBackButton(navController)
 
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -125,15 +118,7 @@ fun ListingScroll(paddingValues : PaddingValues, viewModel : ResearchViewModel ,
                 .padding(paddingValues)
         )
         {
-            GoBackButton(
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(top = 0.dp)
-                    .padding(horizontal = 10.dp)
-                    .zIndex(1f),
-                navController,
-                "researchscreen"
-            )
+            GoBackButton(navController,"researchScreen")
 
             Divider(
                 color = Color.LightGray,

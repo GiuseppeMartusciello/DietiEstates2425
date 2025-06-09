@@ -55,7 +55,7 @@ fun MapSearchScreen(
     val context = LocalContext.current
 
     Scaffold(
-        topBar = { AppTopBar(modifier = Modifier) }
+        topBar = { AppTopBar() }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -78,13 +78,7 @@ fun MapSearchScreen(
                 }
             }
 
-            GoBackButton(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(top=10.dp)
-                    .padding(horizontal = 10.dp),
-                navController,
-                "researchscreen")
+            GoBackButton(navController)
 
             CostumeButton(
                 modifier = Modifier
