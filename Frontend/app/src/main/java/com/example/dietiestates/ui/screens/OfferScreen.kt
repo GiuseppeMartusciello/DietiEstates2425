@@ -62,13 +62,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.SavedStateHandle
 import com.example.dietiestates.AppContainer
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.utility.TokenManager
 import kotlinx.coroutines.launch
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OfferScreen(navController: NavController,
-                viewModel: ListingOfferViewModel = viewModel()) {
+fun OfferScreen(
+    navController: NavController,
+    viewModel: ListingOfferViewModel = viewModel()
+) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -76,12 +80,11 @@ fun OfferScreen(navController: NavController,
     val clientId = savedStateHandle.get<String>("clientId")
 
 
-    val uiState by  viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val listing = viewModel.listing.value
 
     val isWriting = viewModel.isWritingOffer.value
     val price = viewModel.offerPrice.value
-
 
 
     val listState = rememberLazyListState()
@@ -89,21 +92,14 @@ fun OfferScreen(navController: NavController,
     val userRole = AppContainer.tokenManager.getUserRole()
 
 
-    val guestName = mutableStateOf("")
-    val guestSurname = mutableStateOf("")
-    val guestEmail = mutableStateOf("")
-    val guestOffer = mutableStateOf("")
-
-
-
-
-
     LaunchedEffect(uiState.offers.size) {
-        Log.d("CHIAMATA",
-                "Chiamata OfferScreen" +
-            "Listing: ${listing}," +
-                "ClientID: ${clientId}" +
-                "")
+        Log.d(
+            "CHIAMATA",
+            "Chiamata OfferScreen" +
+                    "Listing: ${listing}," +
+                    "ClientID: ${clientId}" +
+                    ""
+        )
 
         // Scrolla all'ultima offerta (se ce n'è almeno una)
         if (uiState.offers.isNotEmpty()) {
@@ -118,15 +114,6 @@ fun OfferScreen(navController: NavController,
             }
         }
     }
-
-
-//    SideEffect (uiState.error)  {
-//
-//
-//
-//    }
-//
-
 
 
     val textFieldColors = OutlinedTextFieldDefaults.colors(
@@ -150,7 +137,7 @@ fun OfferScreen(navController: NavController,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
-                    //.align(Alignment.TopCenter)
+                //.align(Alignment.TopCenter)
             )
         },
         topBar = {
@@ -162,18 +149,7 @@ fun OfferScreen(navController: NavController,
                     .background(Color(0xFF3F51B5)),
             ) {
 
-                Row {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Indietro")
-
-                    }
-                    Text(
-                        text = "Le mie Offerte", fontFamily = RobotoSerif,
-                        fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-                    )
-
-
-                }
+                TopBarOffer(navController = navController, modifier = Modifier)
 
             }
         },
@@ -208,7 +184,8 @@ fun OfferScreen(navController: NavController,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 30.sp,
                                 color = Color(0xFF3F51B5)
-                            ) },
+                            )
+                        },
                         text = {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedTextField(
@@ -253,6 +230,7 @@ fun OfferScreen(navController: NavController,
                         }
                     )
                 }
+
                 !isWriting -> {
                     Box(
                         modifier = Modifier
@@ -271,10 +249,10 @@ fun OfferScreen(navController: NavController,
                                     .align(Alignment.Center),
                                 text = "Proponi offerta"
                             )
-                        }
-                        else {
+                        } else {
                             CustomButton(
-                                onClick = { viewModel.showExternalOfferDialog.value = true
+                                onClick = {
+                                    viewModel.showExternalOfferDialog.value = true
                                 },
                                 style = "blue",
                                 modifier = Modifier
@@ -286,10 +264,11 @@ fun OfferScreen(navController: NavController,
                         }
                     }
                 }
+
                 else -> {
                     Row(
                         Modifier
-                            .padding(bottom = 40.dp)
+                            .padding(16.dp)
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -305,6 +284,7 @@ fun OfferScreen(navController: NavController,
                             shape = RoundedCornerShape(12.dp),
                             textStyle = MaterialTheme.typography.bodyLarge,
                             colors = textFieldColors,
+
                         )
 
                         IconButton(
@@ -360,7 +340,6 @@ fun OfferScreen(navController: NavController,
                             onClick = { navController.navigate("listingscreen/${it.id}") })
 
 
-
                     }
                     LazyColumn(
                         state = listState,
@@ -377,49 +356,78 @@ fun OfferScreen(navController: NavController,
                             key = { "${it.id}_${it.state}" }
                         ) { offer ->
 
+                            Log.d("OFFER_ITEM", "Rendering offer: ${offer}")
+
+
 //                        Text("Offerta: € ${offer.price} - Stato: ${offer.state} - Data: ${offer.date}")
                             if (userRole == "CLIENT") {
                                 if (!offer.madeByUser) {
                                     OfferBubble(
                                         offer = offer,
-                                        onAccept = { viewModel.updateOfferStatus(offer.id, "ACCEPTED") },
-                                        onDecline = { viewModel.updateOfferStatus(offer.id, "DECLINED") }
+                                        onAccept = {
+                                            viewModel.updateOfferStatus(
+                                                offer.id,
+                                                "ACCEPTED"
+                                            )
+                                        },
+                                        onDecline = {
+                                            viewModel.updateOfferStatus(
+                                                offer.id,
+                                                "DECLINED"
+                                            )
+                                        }
                                     )
-                                }
-                                else {
+                                } else {
                                     OfferBubble(
                                         offer = offer
                                     )
                                 }
-                            }
-                            else {
+                            } else {
                                 if (offer.madeByUser) {
-                                    if(viewModel.isExternalMode)
+                                    if (viewModel.isExternalMode)
                                         OfferBubble(
                                             offer = offer,
-                                            onAccept = { viewModel.updateOfferStatus(offer.id, "ACCEPTED") },
-                                            onDecline = { viewModel.updateOfferStatus(offer.id, "DECLINED") },
+                                            onAccept = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "ACCEPTED"
+                                                )
+                                            },
+                                            onDecline = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "DECLINED"
+                                                )
+                                            },
                                             name = offer.guestName,
-                                            surname = offer.guestName,
-                                            email = offer.guestSurname
+                                            surname = offer.guestSurname,
+                                            email = offer.guestEmail
 
 
                                         )
                                     else {
                                         OfferBubble(
                                             offer = offer,
-                                            onAccept = { viewModel.updateOfferStatus(offer.id, "ACCEPTED") },
-                                            onDecline = { viewModel.updateOfferStatus(offer.id, "DECLINED") }
+                                            onAccept = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "ACCEPTED"
+                                                )
+                                            },
+                                            onDecline = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "DECLINED"
+                                                )
+                                            }
                                         )
                                     }
-                                }
-                                else {
+                                } else {
                                     OfferBubble(
                                         offer = offer
                                     )
                                 }
                             }
-
 
 
                         }
