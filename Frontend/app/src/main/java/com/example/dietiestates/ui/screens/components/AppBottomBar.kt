@@ -36,6 +36,7 @@ fun AppBottomBar(navController: NavController) {
                 Icons.Outlined.Notifications, Icons.Filled.Notifications
             ),
             if (userRole == "CLIENT") {
+
                 NavItem(
                     "profile",
                     Icons.Outlined.Person, Icons.Filled.Person,

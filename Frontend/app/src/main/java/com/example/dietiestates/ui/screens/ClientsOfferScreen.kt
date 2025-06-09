@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
@@ -54,6 +55,7 @@ import com.example.dietiestates.AppContainer.init
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ListingCardMini
 import com.example.dietiestates.ui.screens.components.OfferBubble
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.customBlue
 import com.example.dietiestates.ui.viewModel.ClientsOfferViewModel
@@ -123,77 +125,29 @@ fun ClientsOfferScreen(
                     .background(Color(0xFF3F51B5)),
             ) {
 
-                Row {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Indietro")
-
-                    }
-                    Text(
-                        text = "Le mie Offerte", fontFamily = RobotoSerif,
-                        fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-                    )
-
-
-                }
+                TopBarOffer(navController, Modifier, "Offerte")
 
             }
         },
         bottomBar = {
 //            if (!isWriting) {
-                Column(
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .navigationBarsPadding(),
+                //verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                CustomButton(
+                    onClick = { navController.navigate("listing/offer/${listing?.id}/external") },
+                    style = "blue",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .navigationBarsPadding(),
-                    //verticalArrangement = Arrangement.spacedBy(12.dp)
-                ){
-
-                    CustomButton(
-                        onClick = {   navController.navigate("listing/offer/${listing?.id}/external")},
-                        style = "blue",
-                        modifier = Modifier
-                            .fillMaxWidth()
 //                            .padding(bottom = 30.dp)
-                        ,
-                        text = "Offerte esterne"
-                    )
-//                }
-//            } else {
-//                Row(
-//                    Modifier
-//                        .padding(bottom = 40.dp)
-//                        .fillMaxWidth(),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    OutlinedTextField(
-//                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-//                        value = price,
-//                        onValueChange = { viewModel.offerPrice.value = it },
-//                        placeholder = { Text("€ Inserisci offerta") },
-//                        modifier = Modifier
-//                            .weight(1f)
-//                            .width(20.dp),
-//                        singleLine = true,
-//                        shape = RoundedCornerShape(12.dp),
-//                        textStyle = MaterialTheme.typography.bodyLarge,
-//                        colors = textFieldColors,
-//                    )
-//
-//
-//
-//
-//                    IconButton(
-//                        onClick = {
-//                            listing?.id?.let { id ->
-//                                viewModel.submitExternalOffer()
-//                                viewModel.isWritingOffer.value = false
-//                                viewModel.offerPrice.value = ""
-//                            }
-//                        }
-//                    ) {
-//                        Icon(Icons.Default.Send, contentDescription = "Invia")
-//                    }
-//                }
+                    ,
+                    text = "Offerte esterne"
+                )
             }
 
         }
@@ -247,28 +201,20 @@ fun ClientsOfferScreen(
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp),
                             ) {
-//                                Text(
-//                                    "Nome",
-//                                    modifier = Modifier.weight(1f),
-//                                    fontWeight = FontWeight.Bold
-//                                )
-//                                Text(
-//                                    "Cognome",
-//                                    modifier = Modifier.weight(1f),
-//                                    fontWeight = FontWeight.Bold
-//                                )
+
                                 Text(
                                     "Email",
-                                    modifier = Modifier.weight(2f),
+                                    modifier = Modifier.weight(3f),
                                     fontFamily = RobotoSerif,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color(0xFF3F51B5),
-                                    fontSize = 14.sp
+                                    fontSize = 14.sp,
 
-                                )
+
+                                    )
                                 Text(
                                     "Data",
-                                    modifier = Modifier.weight(2f),
+                                    modifier = Modifier.weight(1.2f),
                                     fontFamily = RobotoSerif,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color(0xFF3F51B5),
@@ -277,7 +223,7 @@ fun ClientsOfferScreen(
                                 )
                                 Text(
                                     "Offerta",
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(0.8f),
                                     fontFamily = RobotoSerif,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color(0xFF3F51B5),
@@ -313,25 +259,27 @@ fun ClientsOfferScreen(
 
                                     Text(
                                         offer.email,
-                                        modifier = Modifier.weight(2f),
+                                        modifier = Modifier.weight(3f),
                                         maxLines = 1,
-                                        fontSize = 12.sp
+                                        fontSize = 12.sp,
+                                        overflow = TextOverflow.Ellipsis
                                     )
 
                                     val parsedDate =
-                                        offer.lastOffer.date.toString()
-                                            .split('G')[0] // "2025-05-27"
+                                        offer.lastOffer.date
+                                            .split('T')[0] // "2025-05-27"
                                     Text(
                                         parsedDate,
-                                        modifier = Modifier.weight(2f),
+                                        modifier = Modifier.weight(1.2f),
                                         fontSize = 12.sp
                                     )
 
                                     Text(
                                         "${String.format("${offer.lastOffer.price.toInt()}")}€",
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier.weight(0.8f),
                                         maxLines = 1,
-                                        fontSize = 12.sp
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
 
@@ -346,7 +294,6 @@ fun ClientsOfferScreen(
             }
         }
     }
-
 
 
 }

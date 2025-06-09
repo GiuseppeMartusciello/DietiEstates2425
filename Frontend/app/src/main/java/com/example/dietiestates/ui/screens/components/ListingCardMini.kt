@@ -93,7 +93,7 @@ fun ListingCardMini(listing: Listing, onClick: () -> Unit) {
                     .padding(vertical = 4.dp)
             ) {
                 Text(text = listing.title, style = MaterialTheme.typography.titleMedium, maxLines = 2,  overflow = TextOverflow.Ellipsis)
-                Text(text = listing.address, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(text = "${listing.address}, ${listing.municipality}", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = "€ ${listing.price.toInt()}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
             }

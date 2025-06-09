@@ -1,6 +1,7 @@
 package com.example.dietiestates.ui.screens.components
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun OfferBubble(
     offer: PropertyOffer,
@@ -36,17 +38,10 @@ fun OfferBubble(
     val userRole = AppContainer.tokenManager.getUserRole()
 
 
-//    val formattedDate = try {
-//        val parsedDate = OffsetDateTime.parse(offer.date)
-//        parsedDate.format(
-//            DateTimeFormatter.ofPattern("HH:mm - dd MMM yyyy", Locale("it", "IT"))
-//        )
-//    } catch (e: Exception) {
-//        offer.date // fallback in caso di errore
-//    }
 
-    val formattedDate = offer.date.toString().split('G')[0].split("T")
-    val date = formattedDate[0] + " " + formattedDate[1].split(".")[0]
+
+    val formattedDate = offer.date.split("T")[0]
+
 
 
 
@@ -90,12 +85,15 @@ fun OfferBubble(
 //            if(userRole != "CLIENT") {
 //                Text(text = "Autore Offerta", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
 //            }
+
+            if (name != null && surname != null && email != null) {
+                Text(text = "$name $surname", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                Text(text = "${email}", style = MaterialTheme.typography.bodyLarge)
+            }
             Text(text = "€ ${offer.price}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
 
             Text(text = "$stato", style = MaterialTheme.typography.bodySmall)
-            Text(text = date, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-            Text(text = offer.madeByUser.toString(), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-
+            Text(text = formattedDate, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
 
             if( offer.state == "PENDENT") {
                 if(userRole == "CLIENT") {

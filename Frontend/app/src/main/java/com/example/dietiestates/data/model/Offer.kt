@@ -42,8 +42,9 @@ data class ClientsOffer (
 data class LastOfferDto (
     val id: String,
     val price: Double,
-    val date: Date,
+    val date: String,
     val state: String,
+    val madeByUser: Boolean
 )
 
 data class Guest (
