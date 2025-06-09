@@ -1,8 +1,11 @@
 package com.example.dietiestates
 
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -20,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.dietiestates.ui.screens.AgencyProfileScreen
 import com.example.dietiestates.ui.screens.ChangePassword
 import com.example.dietiestates.ui.screens.ClientsOfferScreen
 import com.example.dietiestates.ui.screens.CreateListingScreen
@@ -69,6 +73,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyApp() {
     //SetStatusBarColor(Color(0xFF3F51B5), darkIcons = false)
@@ -127,6 +132,9 @@ fun MyApp() {
         }
         composable(route = "profile") {
             ProfileScreen(navController)
+        }
+        composable(route = "agencyProfile") {
+            AgencyProfileScreen(navController)
         }
         composable(
             route = "listing/offer/{listingId}?clientId={clientId}",

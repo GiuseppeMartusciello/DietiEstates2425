@@ -40,6 +40,11 @@ fun AppBottomBar(navController: NavController) {
                     "profile",
                     Icons.Outlined.Person, Icons.Filled.Person,
                 )
+            } else if(userRole == "MANAGER"){
+                NavItem(
+                    "agencyProfile",
+                    Icons.Outlined.Person, Icons.Filled.Person,
+                )
             } else{
                 NavItem(
                     "logout",
