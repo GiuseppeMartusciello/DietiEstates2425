@@ -134,6 +134,8 @@ export class NotificationService {
   const notifications = await this.notificationRepository
     .createQueryBuilder('notification')
     .innerJoinAndSelect('notification.userNotifications', 'userNotification', 'userNotification.user.id = :userId', { userId })
+     .leftJoinAndSelect('notification.listing', 'listing')
+    .leftJoinAndSelect('notification.offer', 'offer')
     .orderBy('notification.date', 'DESC')
     .getMany();
 
