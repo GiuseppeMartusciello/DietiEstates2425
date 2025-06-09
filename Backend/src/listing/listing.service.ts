@@ -251,7 +251,7 @@ export class ListingService {
       throw new NotFoundException('Immagine non trovata');
     }
 
-    fs.unlinkSync(filePath);
+     fs.unlinkSync(filePath);
 
     return { success: true };
   }

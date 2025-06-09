@@ -105,18 +105,6 @@ export class OfferService {
     const offer = await this.createOfferEntity(price, listing, clientId, false);
 
     //crea notifica specifica per una nuova offerta
-    const notifica =
-      await this.notificationService.createSpecificNotificationOffer(
-        {
-          title: 'New offer',
-          description: 'New offer for your listing',
-          category: NotificationType.SPECIFIC,
-        },
-        offer,
-      );
-
-    if (!notifica)
-      throw new InternalServerErrorException('Notification not created');
 
     return offer;
   }
@@ -185,11 +173,12 @@ export class OfferService {
     const notifica =
       await this.notificationService.createSpecificNotificationOffer(
         {
-          title: 'Your offer has been' + status + '!',
-          description: 'check out the your offer',
+          title: 'Your offer has been updated !',
+          description: 'check out the your offer for' + offer.listing.title + ' the state is now ' + status,
           category: NotificationType.SPECIFIC,
         },
         offer,
+        true
       );
 
     if (!notifica)
@@ -229,6 +218,7 @@ export class OfferService {
   ): Promise<ClientWithLastOfferDto[]> {
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
+      relations: ['agent'],
     });
     if (!listing) throw new BadRequestException('Listing not found');
 
@@ -236,10 +226,11 @@ export class OfferService {
 
     const externalOffers = await this.offerRepository
       .createQueryBuilder('offer')
-      .where('offer.guestName IS NOT NULL')
+      .where('offer.listingId = :listingId', { listingId })
+      .andWhere('offer.guestName IS NOT NULL')
       .andWhere('offer.guestSurname IS NOT NULL')
       .andWhere('offer.guestEmail IS NOT NULL')
-      .orderBy('offer.date', 'DESC')
+      .orderBy('offer.date', 'ASC')
       .getMany();
 
     console.log(externalOffers);
@@ -257,6 +248,7 @@ export class OfferService {
           price: offer.price,
           date: offer.date,
           state: offer.state,
+          madeByUser: offer.madeByUser,
         },
       };
     });
@@ -300,6 +292,7 @@ export class OfferService {
           price: offer.price,
           date: offer.date,
           state: offer.state,
+          madeByUser: offer.madeByUser,
         },
       };
     });
@@ -309,7 +302,6 @@ export class OfferService {
 
   async getClientsByListingId(
     listingId: string,
-    agent: UserItem,
   ): Promise<PropertyOffer[]> {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
@@ -332,14 +324,24 @@ export class OfferService {
     });
   }
 
+  // async getAllOffersByListingId(listingId: string): Promise<PropertyOffer[]> {
+  //   return this.offerRepository.find({
+  //     where: {
+  //       listing: { id: listingId },
+  //     },
+  //     relations: ['client', 'listing'],
+  //     order: { date: 'ASC' },
+  //   });
+  // }
+
   async createExternalOffer(
     dto: CreateExternalOfferDto,
     user: UserItem,
     listingId: string,
   ): Promise<PropertyOffer> {
-    const { price, guestEmail, guestName } = dto;
-    if (!guestEmail && !guestName)
-      throw new BadRequestException('Guest email or name is required');
+    const { price, guestEmail, guestName, guestSurname } = dto;
+    if (!guestEmail && !guestName && !guestSurname)
+      throw new BadRequestException('Email, name and surname are required');
 
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
@@ -352,9 +354,10 @@ export class OfferService {
       price,
       date: new Date(),
       state: OfferState.PENDING,
-      madeByUser: false,
+      madeByUser: true,
       guestEmail,
       guestName,
+      guestSurname,
       listing,
     });
 
@@ -423,6 +426,24 @@ export class OfferService {
       client: { userId: clientId } as Client,
     });
 
-    return this.offerRepository.save(offer);
+
+
+    await this.offerRepository.save(offer);
+    //crea notifica specifica per una nuova offerta
+     const notifica =
+       await this.notificationService.createSpecificNotificationOffer(
+         {
+           title: 'Offer for ' + listing.title,
+           description: `A new offer of ${price}€ has been made for the property ${listing.title}.`,
+           category: NotificationType.SPECIFIC,
+         },
+         offer,
+         false,
+       );
+
+     if (!notifica)
+       throw new InternalServerErrorException('Notification not created');
+
+     return offer;
   }
 }

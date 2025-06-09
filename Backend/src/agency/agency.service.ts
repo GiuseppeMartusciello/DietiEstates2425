@@ -221,6 +221,14 @@ export class AgencyService {
     return agents;
   }
 
+  async getAgency(agencyId: string) {
+    const agency = this.agencyRepository.find({
+      where: { id: agencyId } },
+    );
+
+    return agency;
+  }
+
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt();
     return bcrypt.hash(password, salt);

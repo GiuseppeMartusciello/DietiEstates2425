@@ -39,6 +39,7 @@ import com.example.dietiestates.ui.screens.MapSearchScreen
 import com.example.dietiestates.ui.screens.RegisterScreen
 import com.example.dietiestates.ui.screens.ModifyListingScreen
 import com.example.dietiestates.ui.screens.MyOffersScreen
+import com.example.dietiestates.ui.screens.NotificationScreen
 import com.example.dietiestates.ui.screens.OfferScreen
 import com.example.dietiestates.ui.screens.ProfileScreen
 import com.example.dietiestates.ui.screens.ResearchScreen
@@ -158,8 +159,13 @@ fun MyApp() {
         ) { backStackEntry ->
             OfferScreen(navController = navController)
         }
+
         //SottoRoot con viewModel Condiviso
         searchGraph(navController)
+
+        composable(route = "notification") {
+            NotificationScreen(navController = navController)
+        }
 
 
         composable(
@@ -167,10 +173,11 @@ fun MyApp() {
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) {
             ClientsOfferScreen(navController = navController)
-
         }
     }
 }
+
+
 fun NavGraphBuilder.searchGraph(navController: NavController) {
     navigation(
         startDestination = "researchscreen",
@@ -183,8 +190,6 @@ fun NavGraphBuilder.searchGraph(navController: NavController) {
             val viewModel: ResearchViewModel = viewModel(parentEntry)
             ResearchScreen(viewModel,navController)
         }
-
-
 
         composable("mapscreen") { entry ->
             val parentEntry = remember(entry) {

@@ -3,6 +3,7 @@ export class LastOfferDto {
   price: number;
   date: Date;
   state: string;
+  madeByUser: boolean;
 }
 
 export class ClientWithLastOfferDto {

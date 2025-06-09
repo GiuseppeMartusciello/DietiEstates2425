@@ -2,6 +2,7 @@ package com.example.dietiestates.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,8 +38,14 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.dietiestates.R
 import com.example.dietiestates.data.model.PostLoginNavigation
+import com.example.dietiestates.ui.screens.components.GoogleSignInButton
 import com.example.dietiestates.ui.theme.customBlue
 import com.example.dietiestates.utility.GoogleSignInUtil
 
@@ -100,6 +107,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                             popUpTo("loginscreen") { inclusive = true }
                         }
                     }
+
                     PostLoginNavigation.CHANGE_PASSWORD -> {
                         navController.navigate("changepasswordscreen") {
                             popUpTo("loginscreen") { inclusive = true }
@@ -135,29 +143,51 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
             ) {
                 Spacer(modifier = Modifier.height(32.dp))
 
-
-
-                Box(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .weight(1f),
-                    contentAlignment = Alignment.TopCenter
-
+                        .fillMaxSize()
+                    //.padding(24.dp)
+                    ,
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-                    Text(
-                        text = "DietiEstates25", fontFamily = RobotoSerif,
-                        fontWeight = FontWeight.SemiBold, fontSize = 45.sp, color = Color(0xFF3F51B5)
+                    Image(
+                        painter = painterResource(R.drawable.logodieti),
+                        contentDescription = "Logo",
+                        modifier = Modifier
+                            .height(200.dp)
+                            .width(200.dp)
+                        //.padding(6.dp)
                     )
                     Text(
-                        modifier = Modifier
-                            .padding(0.dp, 55.dp, 0.dp, 0.dp),
-                        text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-                        fontWeight = FontWeight.Normal, fontSize = 18.sp, color = Color(0xFF3F51B5)
+                        text = "DietiEstates25",
+                        fontFamily = RobotoSerif,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 45.sp,
+                        color = Color(0xFF3F51B5),
+                        //letterSpacing = 1.5.sp
                     )
 
                 }
+
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 8.dp)
+//                        .weight(1f),
+//                    contentAlignment = Alignment.TopCenter
+//
+//                ) {
+//
+//
+//                    Text(
+//                       modifier = Modifier
+//                            .padding(0.dp, 55.dp, 0.dp, 0.dp),
+//                        text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
+//                        fontWeight = FontWeight.Normal, fontSize = 18.sp, color = Color(0xFF3F51B5)
+//                    )
+//
+//                }
 
 
                 Column(
@@ -215,7 +245,8 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                     CustomButton(
                         onClick = {
                             if (viewModel.validateInputs { message ->
-                                    coroutineScope.launch { snackbarHostState.showSnackbar(message);
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(message);
                                         //Toast.makeText(context, "Hello", Toast.LENGTH_SHORT ).show()
                                     }
                                 }) viewModel.login(email, password)
@@ -250,24 +281,34 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom
                 ) {
-
-                    CustomButton(
-                        onClick = {
-                            googleSignInClient.signOut().addOnCompleteListener {
-                                launcher.launch(googleSignInClient.signInIntent)
-                            }
-                        },
-                        style = "white",
-                        text = "ACCEDI CON GOOGLE",
-                        icon = Icons.Outlined.AccountCircle,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
+//                    val googleIcon = ImageVector.vectorResource(id = R.drawable.android_light_rd_na)
+//
+//                    CustomButton(
+//                        onClick = {
+//                            googleSignInClient.signOut().addOnCompleteListener {
+//                                launcher.launch(googleSignInClient.signInIntent)
+//                            }
+//                        },
+//                        style = "white",
+//                        text = "ACCEDI CON GOOGLE",
+//                        icon = googleIcon
+//                        ,
+////                        icon = Icons.Outlined.AccountCircle,
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+                    GoogleSignInButton(onClick = {
+                        googleSignInClient.signOut().addOnCompleteListener {
+                            launcher.launch(googleSignInClient.signInIntent)
+                        }
+                    })
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     CustomButton(
-                        onClick = { navController.navigate("registerscreen") },
+                        onClick = {
+                            viewModel.resetLoginState()
+                            navController.navigate("registerscreen");
+                        },
                         style = "white",
                         text = "REGISTRATI",
                         modifier = Modifier.fillMaxWidth()
@@ -327,8 +368,6 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 }
             }
         )
-
-
 
 
     }

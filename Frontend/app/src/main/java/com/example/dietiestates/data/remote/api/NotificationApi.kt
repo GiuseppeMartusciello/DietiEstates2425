@@ -16,7 +16,7 @@ interface NotificationApi {
 
     //  Restituisce le notifiche non lette per l’utente autenticato
     @GET("notification/Notifications")
-    suspend fun getUnreadNotifications(): Response<List<Notification>>
+    suspend fun notifications(): Response<List<Notification>>
 
     // Restituisce una notifica specifica
     @GET("notification/{notificationId}")

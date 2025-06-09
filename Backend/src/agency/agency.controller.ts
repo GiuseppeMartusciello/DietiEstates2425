@@ -25,6 +25,17 @@ import { CreateAgentDto } from '../agency-manager/dto/create-agent.dto';
 export class AgencyController {
   constructor(private readonly agencyService: AgencyService) {}
 
+  @Get('')
+  @Roles(UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
+  getAgency(@GetUser() user: UserItem) {
+    const agencyId = user.manager?.agency?.id ?? user.supportAdmin?.agency?.id;
+    if (!agencyId) {
+      throw new BadRequestException('Nessuna agenzia associata all’utente.');
+    }
+    return this.agencyService.getAgency(agencyId);
+  }
+
+
   @Post('/support-admin')
   @Roles(UserRoles.MANAGER)
   createSupportAdmin(

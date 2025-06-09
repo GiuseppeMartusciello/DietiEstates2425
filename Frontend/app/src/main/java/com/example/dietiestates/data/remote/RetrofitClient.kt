@@ -4,6 +4,7 @@ import com.example.dietiestates.data.remote.api.AgencyApi
 import com.example.dietiestates.data.remote.api.AuthApi
 import com.example.dietiestates.data.remote.api.ClientApi
 import com.example.dietiestates.data.remote.api.ListingApi
+import com.example.dietiestates.data.remote.api.NotificationApi
 import com.example.dietiestates.data.remote.api.OfferApi
 import com.example.dietiestates.data.remote.api.ResearchApi
 import com.example.dietiestates.utility.TokenManager
@@ -19,12 +20,14 @@ class RetrofitClient private constructor(retrofit: Retrofit) {
     private val authApi = retrofit.create(AuthApi::class.java)
     private val offerApi = retrofit.create(OfferApi::class.java)
     private val researchApi = retrofit.create(ResearchApi::class.java)
+    private val notificationApi = retrofit.create(NotificationApi::class.java)
 
     fun createClientApi() = clientApi
     fun createListingApi() = listingApi
     fun createAgencyApi() = agencyApi
     fun createAuthApi() = authApi
     fun createOfferApi () = offerApi
+    fun createNotificationApi() = notificationApi
     fun createResearchApi() = researchApi
 
     companion object {
