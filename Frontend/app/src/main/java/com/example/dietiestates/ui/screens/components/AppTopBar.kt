@@ -19,26 +19,35 @@ import com.example.dietiestates.ui.theme.RobotoSlab
 
 
 @Composable
-fun AppTopBar(modifier: Modifier) {
+fun AppTopBar() {
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(0.dp, 0.dp, 0.dp, 8.dp)
+            .padding(0.dp, 0.dp, 0.dp, 0.dp)
             .background(Color(0xFF3F51B5)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "DietiEstates25", fontFamily = RobotoSerif,
-            fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
+            text = "DietiEstates25",
+            fontFamily = RobotoSerif,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 40.sp,
+            color = Color.White
         )
         Text(
             modifier = Modifier
-                .padding(0.dp, 0.dp, 0.dp, 5.dp),
-            text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-            fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.White
+                .padding(bottom = 5.dp),
+            text = "Perchè perder tempo quando ci siamo noi?",
+            fontFamily = RobotoSlab,
+            fontWeight = FontWeight.Normal,
+            fontSize = 16.sp,
+            color = Color.White
         )
-    }
+        }
 }
+
+
+
