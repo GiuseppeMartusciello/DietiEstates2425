@@ -15,9 +15,6 @@ class NotificationViewModel(
     private val _uiState = MutableStateFlow<NotificationState>(NotificationState.Loading)
     val uiState: StateFlow<NotificationState> get() = _uiState
 
-    private val _selectedNotification = MutableStateFlow<Notification?>(null)
-    val selectedNotification: StateFlow<Notification?> get() = _selectedNotification
-
     fun loadNotifications() {
         viewModelScope.launch {
             _uiState.value = NotificationState.Loading
@@ -30,22 +27,11 @@ class NotificationViewModel(
         }
     }
 
-    fun getNotificationById(id: String) {
-        viewModelScope.launch {
-            try {
-                val notification = AppContainer.notificationRepository.getNotificationById(id)
-                _selectedNotification.value = notification
-            } catch (e: Exception) {
-                _selectedNotification.value = null
-                _uiState.value = NotificationState.Error(e.message ?: "Errore nel caricamento della notifica")
-            }
-        }
-    }
 
     fun markAsRead(userNotificationId: String) {
         viewModelScope.launch {
             try {
-                AppContainer.notificationRepository.markNotificationAsRead(userNotificationId)
+                AppContainer.notificationRepository.updateNotification(userNotificationId)
                 loadNotifications() // ricarica la lista dopo aggiornamento
             } catch (e: Exception) {
                 _uiState.value = NotificationState.Error(e.message ?: "Errore nella marcatura come letta")
@@ -53,9 +39,6 @@ class NotificationViewModel(
         }
     }
 
-    fun clearSelectedNotification() {
-        _selectedNotification.value = null
-    }
 }
 
 sealed class NotificationState {
