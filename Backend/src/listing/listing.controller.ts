@@ -166,6 +166,14 @@ export class ListingController {
     return this.listingService.handleUploadedImages(listingId, files);
   }
 
+  @Get('/:id/agent')
+  async getAgentOfListing(
+    @Param('id', new ParseUUIDPipe()) listingId: string,
+    @GetUser() user: UserItem,
+  ) {
+    return this.listingService.getAgentOfListing(listingId);
+  }
+  
   @Get('/:id/images')
   async getListingImages(
     @Param('id', new ParseUUIDPipe()) listingId: string,

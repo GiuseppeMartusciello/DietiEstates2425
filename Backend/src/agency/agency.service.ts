@@ -222,7 +222,7 @@ export class AgencyService {
   }
 
   async getAgency(agencyId: string) {
-    const agency = this.agencyRepository.find({
+    const agency = this.agencyRepository.findOne({
       where: { id: agencyId } },
     );
 
