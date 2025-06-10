@@ -4,6 +4,9 @@ package com.example.dietiestates.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,12 +85,16 @@ import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ListingViewModel
 import com.example.dietiestates.utility.formatNumberWithDots
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import java.time.LocalDate
+import java.time.Period
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ListingScreen(navController: NavController) {
 
     val viewModel: ListingViewModel = viewModel()
     val listing = viewModel.listingState.value.listing
+    val agent = viewModel.listingState.value.agent
     val state = viewModel.listingState.value
     val scrollState = rememberScrollState()
     val systemUiController = rememberSystemUiController()
@@ -98,11 +105,11 @@ fun ListingScreen(navController: NavController) {
         systemUiController.setStatusBarColor(
             Color.Transparent,
             darkIcons = true
-        ) // o false se immagine scura
+        )
     }
 
     when {
-        state.loading -> {
+        state.loadingListing || state.loadingAgent -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -113,7 +120,7 @@ fun ListingScreen(navController: NavController) {
             }
         }
 
-        state.listing == null -> {
+        state.listing == null || state.agent == null-> {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -353,23 +360,32 @@ fun ListingScreen(navController: NavController) {
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-
+                                val birthDateLocal = agent?.birthDate?.toInstant()?.atZone(java.time.ZoneId.systemDefault())
+                                    ?.toLocalDate()
+                                val startDateLocal = agent?.start_date?.toInstant()?.atZone(java.time.ZoneId.systemDefault())
+                                    ?.toLocalDate()
+                                val currentDate = LocalDate.now()
+                                Log.d("output","${birthDateLocal} - ${startDateLocal}")
+                                val yearsOld = Period.between(birthDateLocal, currentDate).years
+                                val yearsExperience = Period.between(startDateLocal, currentDate).years
                                 Text(
-                                    /* ToDo aggiornare text con il reale valore */
-                                    text = "Stefano Rossi, 35",
+                                    text = "${agent?.name} ${agent?.surname}, $yearsOld",
                                     style = LocalAppTypography.current.featureTitle,
                                     fontSize = 20.sp,
                                     lineHeight = 12.sp,
                                 )
-                                Text( /* ToDo aggiornare text con il reale valore */
-                                    text = "10 anni di esperienza",
-                                    fontFamily = Roboto,
-                                    fontWeight = FontWeight.ExtraLight,
-                                    fontSize = 14.sp,
-                                    lineHeight = 10.sp,
-                                    color = Color.Black
-                                )
-                                Image( /* ToDo aggiornare text con il reale valore */
+
+                                if(yearsExperience > 2) {
+                                    Text(
+                                        text = "$yearsExperience anni di esperienza",
+                                        fontFamily = Roboto,
+                                        fontWeight = FontWeight.ExtraLight,
+                                        fontSize = 14.sp,
+                                        lineHeight = 10.sp,
+                                        color = Color.Black
+                                    )
+                                }
+                                Image(
                                     painter = painterResource(R.drawable.person),
                                     contentDescription = null,
                                     modifier = Modifier
@@ -378,13 +394,13 @@ fun ListingScreen(navController: NavController) {
                                         .padding(5.dp),
                                     contentScale = ContentScale.Crop
                                 )
-                                Text(  /* ToDo aggiornare text con il reale valore */
-                                    text = "Tecnocasa S.R.L",
+                                Text(
+                                    text = "${agent?.agencyName}",
                                     style = LocalAppTypography.current.featureTitle,
                                     fontSize = 14.sp
                                 )
-                                Text( /* ToDo aggiornare text con il reale valore */
-                                    text = "Sede Legale Via blblblbl, Milano",
+                                Text(
+                                    text = "${agent?.agencyAddress}",
                                     fontFamily = Roboto,
                                     fontWeight = FontWeight.ExtraLight,
                                     fontSize = 12.sp,

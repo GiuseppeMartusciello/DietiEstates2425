@@ -31,6 +31,7 @@ data class ListingEditUiState(
 )
 data class ListingUiState(
     val agents: List<Agent> = emptyList(),
+    val loading: Boolean = true,
     val selectedAgentId: String? = null,
 )
 
@@ -81,10 +82,10 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
     private fun loadAgents(){
         viewModelScope.launch {
                 try {
+                    uiState.value = uiState.value.copy(loading = true)
                     val agents = AppContainer.agencyRepository.getAgents()
 
-                    uiState.value = uiState.value.copy(agents = agents)
-                    Log.d("output","agenti: $agents")
+                    uiState.value = uiState.value.copy(agents = agents, loading = false, selectedAgentId = agents.first().userId)
                 } catch (e: Exception) {
                     //eccezione da gestire
                 }
@@ -191,6 +192,7 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
                 operation = EditOperation.POST
             )
             try {
+                Log.d("output",dto.toString())
                 val createdListing = AppContainer.listingRepository.postListing(dto)
                 uploadListingImages(context, createdListing.id, selectedImages)
                 _listingState.value = _listingState.value.copy(listing = createdListing)
@@ -211,6 +213,9 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
             }
         }
     }
+    fun resetFormErrors(){
+        formErrors = ListingFormErrors()
+    }
     fun setSelectedAgent(agentId: String) {
         uiState.value = uiState.value.copy(selectedAgentId = agentId)
     }
@@ -229,16 +234,16 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
 
     fun validateAndBuildDto(): ModifyOrCreateListingDto? {
         val errors = ListingFormErrors(
-            address = if (formState.address.isBlank()) "Campo obbligatorio" else null,
-            title = if (formState.title.isBlank()) "Campo obbligatorio" else null,
-            municipality = if (formState.municipality.isBlank()) "Campo obbligatorio" else null,
-            postalCode = if (formState.postalCode.isBlank()) "Campo obbligatorio" else null,
-            province = if (formState.province.isBlank()) "Campo obbligatorio" else null,
-            size = if (formState.size.isBlank()) "Campo obbligatorio" else null,
-            description = if (formState.description.isBlank()) "Campo obbligatorio" else null,
+            address = if (formState.address.isBlank()) "L'indirizzo è obbligatorio" else null,
+            title = if (formState.title.isBlank()) "Il titolo è obbligatorio" else null,
+            municipality = if (formState.municipality.isBlank()) "Il comune è obbligatorio" else null,
+            postalCode = if (formState.postalCode.isBlank()) "Il codice postale è obbligatorio" else null,
+            province = if (formState.province.isBlank()) "La provincia è obbligatoria" else null,
+            size = if (formState.size.isBlank()) "La dimensione è obbligatoria" else null,
+            description = if (formState.description.isBlank()) "La descrizione è obbligatoria" else null,
             price = if (formState.price.toLongOrNull()?.let { it > 0 } == true) null else "Prezzo non valido" ,
-            images = if (selectedImages.size < 2) "Seleziona almeno 2 immagini" else null
-
+            images = if (selectedImages.size < 2) "Devi aver caricato almeno 2 immagini" else null,
+            agentId = if(uiState.value.selectedAgentId == null ) "Devi selezionare un agente" else null
         )
 
         formErrors = errors
@@ -265,7 +270,8 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
             floor = formState.floor,
             hasElevator = formState.hasElevator,
             hasAirConditioning = formState.hasAirConditioning,
-            hasGarage = formState.hasGarage
+            hasGarage = formState.hasGarage,
+            agentId = uiState.value.selectedAgentId!!
         )
     }
 

@@ -15,6 +15,7 @@ data class ModifyOrCreateListingDto(
     val floor: String,
     val hasElevator: Boolean,
     val hasAirConditioning: Boolean,
-    val hasGarage: Boolean
+    val hasGarage: Boolean,
+    val agentId: String
 )
 

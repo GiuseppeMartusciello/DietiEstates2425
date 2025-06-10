@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.R
+import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
@@ -93,25 +94,7 @@ fun ProfileScreen(navController: NavController) {
             )
         }
     }, bottomBar = {
-        NavBar(
-            navController = navController, items = listOf(
-                NavItem(
-                    "home",
-                    Icons.Outlined.Home, Icons.Filled.Home
-                ), NavItem(
-                    "notification",
-                    Icons.Outlined.Notifications, Icons.Filled.Notifications
-                ), NavItem(
-                    "offer",
-                    Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
-                ),
-                NavItem(
-                    "profile",
-                    Icons.Outlined.Person, Icons.Filled.Person,
-                )
-
-            )
-        )
+        AppBottomBar(navController = navController)
     }) { paddingValues ->
         when {
             state.loading -> {

@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.dietiestates.AppContainer
+import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ListingCardMini
 import com.example.dietiestates.ui.screens.components.TopBarOffer
@@ -61,7 +62,9 @@ fun MyOffersScreen(
         topBar = {
             var text = if (userRole == "CLIENT") "Le mie offerte" else "Offerte"
             TopBarOffer(navController = navController, modifier = Modifier, text)
-        }
+        },
+        bottomBar = {
+            AppBottomBar(navController = navController) }
     ) { innerPadding ->
         Box(
             modifier = Modifier

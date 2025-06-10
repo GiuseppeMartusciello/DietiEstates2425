@@ -58,7 +58,7 @@ class AgencyProfileViewModel() : ViewModel() {
                 _createResult.value = "success"
             } catch (e: HttpException) {
                 val code = e.code()
-                val message = when (code) {
+                var message = when (code) {
                     400 -> "Richiesta non valida. Controlla i campi inseriti."
                     401 -> "Non autorizzato. Effettua nuovamente il login."
                     403 -> "Accesso negato. Non hai i permessi per questa azione."
@@ -70,13 +70,14 @@ class AgencyProfileViewModel() : ViewModel() {
                 }
 
                 val errorBody = e.response()?.errorBody()?.string()
-                val detailedMessage = if (!errorBody.isNullOrBlank()) "$message\nDettagli: $errorBody" else message
+                if(code == 400 && !errorBody.isNullOrBlank())
+                    if(errorBody.contains("phone must be a valid phone number"))
+                        message += "Il numero di telefono non è un numero valido"
 
-                _createResult.value = detailedMessage
-                Log.e("AgentViewModel", "HttpException: $detailedMessage", e)
+
+                _createResult.value = message
             } catch (e: Exception) {
                 _createResult.value = "Errore sconosciuto: ${e.localizedMessage ?: e.toString()}"
-                Log.e("AgentViewModel", "Unknown error", e)
             }
         }
     }
@@ -107,10 +108,8 @@ class AgencyProfileViewModel() : ViewModel() {
 
 
                 _createResult.value = message
-                Log.e("AgentViewModel", "HttpException: $errorBody", e)
             } catch (e: Exception) {
                 _createResult.value = "Errore sconosciuto: ${e.localizedMessage ?: e.toString()}"
-                Log.e("AgentViewModel", "Unknown error", e)
             }
         }
     }
@@ -172,7 +171,7 @@ class AgencyProfileViewModel() : ViewModel() {
         return when {
             dto.licenseNumber.length !in 6..12 -> "Il numero di licenza deve essere tra 6 e 12 caratteri"
             startDateParsed.isAfter(today) -> "La data di inizio non può essere futura"
-            dto.languages.isEmpty() || dto.languages.any { it.isBlank() } -> "Le lingue non possono essere vuote"
+            dto.languages.isEmpty() || dto.languages.any { it.isBlank() } -> "Devi inserire almeno una lingua parlata"
             else -> null
         }
     }

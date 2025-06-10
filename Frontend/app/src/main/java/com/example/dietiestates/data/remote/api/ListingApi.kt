@@ -1,5 +1,6 @@
 package com.example.dietiestates.data.remote.api
 
+import com.example.dietiestates.data.model.Agent
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.dto.ModifyOrCreateListingDto
 import okhttp3.MultipartBody
@@ -20,8 +21,8 @@ interface ListingApi {
     @GET("listing/{id}")
     suspend fun getListing(@Path("id") id: String): Response<Listing>
 
-    @GET("listing/{id}/images")
-    suspend fun getListingImages(@Path("id") id: String): Response<List<String>>
+    @GET("listing/{id}/agent")
+    suspend fun getAgentOfListing(@Path("id") id: String): Response<Agent>
 
     @GET("listing/all-images")
     suspend fun getAllListingImages(): Response<Map<String, List<String>>>

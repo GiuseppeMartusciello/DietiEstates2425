@@ -92,6 +92,7 @@ import androidx.navigation.NavController
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.dto.CreateAgentDto
 import com.example.dietiestates.data.model.dto.CreateSupportAdminDto
+import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.LabeledNumberField
 import com.example.dietiestates.ui.screens.components.LabeledTextField
@@ -139,26 +140,7 @@ fun AgencyProfileScreen(navController: NavController) {
             )
         }
     }, bottomBar = {
-        NavBar(
-            navController = navController, items = listOf(
-                NavItem(
-                    "home",
-                    Icons.Outlined.Home, Icons.Filled.Home
-                ), NavItem(
-                    "notification",
-                    Icons.Outlined.Notifications, Icons.Filled.Notifications
-                ), NavItem(
-                    "offer",
-                    Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
-                ),
-                NavItem(
-                    "profile",
-                    Icons.Outlined.Person, Icons.Filled.Person,
-                )
-
-            )
-        )
-    }) {
+        AppBottomBar(navController = navController) }) {
         paddingValues ->
         when {
             state.loading -> {
@@ -301,7 +283,7 @@ fun CreateAgentButtonAndForm(type: String) {
                             .fillMaxHeight(0.9f)
                             .verticalScroll(rememberScrollState())
                             .imePadding()
-                            .navigationBarsPadding()
+
                             .padding(paddingValues)
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
@@ -463,7 +445,6 @@ fun CreateAgentFormModal(
     onClose: () -> Unit,
     viewModel: AgencyProfileViewModel = viewModel(),
     snackbarHostState: SnackbarHostState
-
 ) {
     var licenseNumber by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -476,10 +457,7 @@ fun CreateAgentFormModal(
     var languages by remember { mutableStateOf("") }
 
     val genderOptions = listOf("Maschio", "Femmina")
-    val context = LocalContext.current
     val createResult by viewModel.createResult.collectAsState()
-
-    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(createResult) {
         createResult?.let {

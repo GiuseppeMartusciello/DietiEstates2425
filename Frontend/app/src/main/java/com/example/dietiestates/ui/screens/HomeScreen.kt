@@ -56,7 +56,7 @@ fun HomeScreen(navController: NavController) {
         systemUiController.setStatusBarColor(
             Color(0xFF3F51B5),
             darkIcons = true
-        ) // o false se immagine scura
+        )
     }
 
     //Aggiorna al ritorno della modifica di un listing
@@ -102,7 +102,7 @@ fun HomeScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    contentAlignment = Alignment.Center // centra il contenuto nel Box
+                    contentAlignment = Alignment.TopCenter // centra il contenuto nel Box
                 ) {
                     LazyColumn(
                         horizontalAlignment = Alignment.CenterHorizontally, // per centrare gli elementi dentro

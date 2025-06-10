@@ -6,11 +6,13 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RealEstateAgent
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.RealEstateAgent
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.example.dietiestates.AppContainer
@@ -44,7 +46,7 @@ fun AppBottomBar(navController: NavController) {
             } else if(userRole == "MANAGER"){
                 NavItem(
                     "agencyProfile",
-                    Icons.Outlined.Person, Icons.Filled.Person,
+                    Icons.Outlined.RealEstateAgent, Icons.Filled.RealEstateAgent,
                 )
             } else{
                 NavItem(

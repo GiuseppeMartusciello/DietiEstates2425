@@ -3,6 +3,7 @@ package com.example.dietiestates.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.dietiestates.data.model.Agent
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.dto.ModifyOrCreateListingDto
 import com.example.dietiestates.data.remote.api.ListingApi
@@ -36,10 +37,21 @@ class ListingRepository(private val api: ListingApi) {
 
         if (response.isSuccessful) {
             val listing = response.body() ?: null
-            Log.d("output",listing.toString())
             return listing?.copy(
                 imageUrls = listing.imageUrls.map { "$BASE_IMAGE_URL$it" }
             )
+        } else {
+            throw Exception("Errore HTTP: ${response.code()}")
+        }
+    }
+
+    suspend fun getAgentOfListing(id: String): Agent? {
+        val response = api.getAgentOfListing(id)
+
+        if (response.isSuccessful) {
+            val agent = response.body() ?: null
+
+            return agent
         } else {
             throw Exception("Errore HTTP: ${response.code()}")
         }
