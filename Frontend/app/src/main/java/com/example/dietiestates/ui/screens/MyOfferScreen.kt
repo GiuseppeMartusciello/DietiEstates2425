@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.example.dietiestates.AppContainer
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ListingCardMini
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSerif
 
 @Composable
@@ -58,34 +59,8 @@ fun MyOffersScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    //.height(30.dp)
-                    .statusBarsPadding()
-//                    .padding(top = 8.dp)
-                    .background(Color(0xFF3F51B5)),
-            ) {
-                IconButton(
-                    onClick = { navController.navigate("home") }) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = "Indietro",
-                        tint = Color.White
-                    )
-
-                }
-                Text(
-                    text = "Le mie Offerte", fontFamily = RobotoSerif,
-                    fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-
-
-            }
-
-
+            var text = if (userRole == "CLIENT") "Le mie offerte" else "Offerte"
+            TopBarOffer(navController = navController, modifier = Modifier, text)
         }
     ) { innerPadding ->
         Box(
@@ -164,3 +139,4 @@ fun MyOffersScreen(
         }
     }
 }
+

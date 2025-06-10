@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -17,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
@@ -64,6 +67,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
 import com.example.dietiestates.data.model.SignUpRequest
 import com.example.dietiestates.ui.screens.components.CustomButton
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.LoginState
@@ -134,17 +138,32 @@ fun RegisterScreen(navController: NavController, viewModel: RegistrationViewMode
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
 
         topBar = {
-
-            Column(modifier = Modifier.padding(vertical = 22.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { navController.navigate("loginscreen") }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Torna indietro")
-                    }
-                }
-            }
-
-
+            TopBarOffer(navController = navController, modifier = Modifier, text = "Registrazione")
         },
+
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .navigationBarsPadding(),
+                //verticalArrangement = Arrangement.spacedBy(12.dp)
+            ){
+                CustomButton(
+                    onClick = {
+
+                        viewModel.register(SignUpRequest(name, surname, email, password, phone),
+                            { errorMessage ->
+
+
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(errorMessage)
+                                }
+                            })
+                    }, style = "Blue", text = "REGISTRATI", modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
     ) { innerPadding ->
 
 
@@ -278,21 +297,7 @@ fun RegisterScreen(navController: NavController, viewModel: RegistrationViewMode
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                    CustomButton(
-                        onClick = {
 
-                            viewModel.register(SignUpRequest(name, surname, email, password, phone),
-                                { errorMessage ->
-
-
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(errorMessage)
-                                    }
-                                })
-                        }, style = "Blue", text = "Registrati", modifier = Modifier.fillMaxWidth()
-                    )
-                }
 
             }
 

@@ -65,7 +65,7 @@ fun FilterScreen(
 
     Scaffold(
         topBar = {
-            AppTopBar(modifier = Modifier)
+            AppTopBar()
         }
     ) { paddingValues ->
         Box (
@@ -74,15 +74,7 @@ fun FilterScreen(
                 .padding(paddingValues)
                 .padding(vertical = 0.dp)
         ) {
-            GoBackButton(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .zIndex(1f)
-                    .padding(top = 0.dp)
-                    .padding(horizontal = 10.dp),
-                navController,
-                "researchscreen"
-            )
+            GoBackButton(navController,)
 
             Filtering(viewModel,navController)
 

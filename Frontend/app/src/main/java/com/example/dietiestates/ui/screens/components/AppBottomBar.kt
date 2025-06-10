@@ -6,13 +6,11 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.example.dietiestates.AppContainer
@@ -28,14 +26,17 @@ fun AppBottomBar(navController: NavController) {
             NavItem(
                 "home",
                 Icons.Outlined.Home, Icons.Filled.Home
-            ), NavItem(
-                "notification",
-                Icons.Outlined.Notifications, Icons.Filled.Notifications
-            ), NavItem(
+            ),
+            NavItem(
                 "offer",
                 Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
             ),
+            NavItem(
+                "notification",
+                Icons.Outlined.Notifications, Icons.Filled.Notifications
+            ),
             if (userRole == "CLIENT") {
+
                 NavItem(
                     "profile",
                     Icons.Outlined.Person, Icons.Filled.Person,
