@@ -96,6 +96,7 @@ import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.LabeledNumberField
 import com.example.dietiestates.ui.screens.components.LabeledTextField
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.screens.components.dropDownMenu
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.Roboto
@@ -118,29 +119,9 @@ fun AgencyProfileScreen(navController: NavController) {
     val state = viewModel.agencyState.value
     val scrollState = rememberScrollState()
 
-    Scaffold(topBar = {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(0.dp, 0.dp, 0.dp, 8.dp)
-                .background(Color(0xFF3F51B5)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "DietiEstates25", fontFamily = RobotoSerif,
-                fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-            )
-            Text(
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 5.dp),
-                text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-                fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.White
-            )
-        }
-    }, bottomBar = {
-        AppBottomBar(navController = navController) }) {
+    Scaffold(
+        topBar = { TopBarOffer(navController = navController, modifier = Modifier, "Profilo Agenzia") },
+        bottomBar = { AppBottomBar(navController = navController) }) {
         paddingValues ->
         when {
             state.loading -> {
@@ -283,7 +264,6 @@ fun CreateAgentButtonAndForm(type: String) {
                             .fillMaxHeight(0.9f)
                             .verticalScroll(rememberScrollState())
                             .imePadding()
-
                             .padding(paddingValues)
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {

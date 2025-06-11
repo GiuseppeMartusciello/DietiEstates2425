@@ -64,6 +64,7 @@ import androidx.navigation.NavController
 import com.example.dietiestates.data.model.Research
 import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.AppTopBar
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
 
@@ -80,13 +81,16 @@ fun ResearchScreen(
     }
 
     Scaffold(
-        topBar = { AppTopBar() },
+        topBar = {
+            TopBarOffer(navController = navController, modifier = Modifier, "Ricerca")
+        },
         bottomBar = { AppBottomBar(navController) }
     ) { paddingValues ->
 
         Box(
             modifier = Modifier
                 .padding(paddingValues)
+                .background(Color.White)
         ) {
             Research(
                 navController,

@@ -1,5 +1,7 @@
 package com.example.dietiestates.ui.screens.components
 
+import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +65,8 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
             .fillMaxWidth()
             .padding(15.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp)
+        border = BorderStroke(1.dp, Color.LightGray),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
 
     ) {
         Column(modifier = Modifier.background(Color(0xFFF3F3F3))) {

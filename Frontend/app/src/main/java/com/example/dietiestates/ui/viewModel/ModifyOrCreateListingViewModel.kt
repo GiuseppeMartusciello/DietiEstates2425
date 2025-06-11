@@ -192,7 +192,6 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
                 operation = EditOperation.POST
             )
             try {
-                Log.d("output",dto.toString())
                 val createdListing = AppContainer.listingRepository.postListing(dto)
                 uploadListingImages(context, createdListing.id, selectedImages)
                 _listingState.value = _listingState.value.copy(listing = createdListing)

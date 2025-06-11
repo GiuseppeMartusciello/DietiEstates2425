@@ -53,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.R
 import com.example.dietiestates.ui.screens.components.AppBottomBar
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
@@ -72,28 +73,9 @@ fun ProfileScreen(navController: NavController) {
         viewModel.getMe()
     }
 
-    Scaffold(topBar = {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(0.dp, 0.dp, 0.dp, 8.dp)
-                .background(Color(0xFF3F51B5)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "DietiEstates25", fontFamily = RobotoSerif,
-                fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-            )
-            Text(
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 5.dp),
-                text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-                fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.White
-            )
-        }
-    }, bottomBar = {
+    Scaffold(
+        topBar = { TopBarOffer(navController = navController, modifier = Modifier, "Profilo") },
+        bottomBar = {
         AppBottomBar(navController = navController)
     }) { paddingValues ->
         when {
@@ -129,6 +111,7 @@ fun ProfileScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
+                        .background(Color.White)
                         .verticalScroll(scrollState),
                 ) {
 

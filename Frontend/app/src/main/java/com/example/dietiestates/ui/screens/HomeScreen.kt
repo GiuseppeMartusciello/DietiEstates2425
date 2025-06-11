@@ -101,6 +101,7 @@ fun HomeScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues),
                     contentAlignment = Alignment.TopCenter // centra il contenuto nel Box
                 ) {

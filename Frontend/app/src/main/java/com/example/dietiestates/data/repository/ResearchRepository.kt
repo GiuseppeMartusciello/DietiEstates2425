@@ -7,7 +7,7 @@ import com.example.dietiestates.data.remote.api.ListingApi
 import com.example.dietiestates.data.remote.api.ResearchApi
 
 data class ResearchRepository(private val api: ResearchApi, private val apiListing: ListingApi) {
-    private val BASE_IMAGE_URL = "http://10.0.2.2:3000"
+    private val BASE_IMAGE_URL = "http://dietiestates.duckdns.org:3000"
 
     suspend fun getLast10Researches(): List<Research> {
         val response = api.getLast10Researches()

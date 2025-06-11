@@ -45,7 +45,8 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
                 val selected = currentRoute == item.route
                 NavigationBarItem(
                     selected = selected,
-                    onClick = { navController.navigate(item.route) },
+                    onClick = { navController.navigate(item.route){
+                        launchSingleTop = true } },
                     icon = {
                         Icon(
                             imageVector = if (selected) item.iconFilled else item.iconOutlined,
@@ -70,7 +71,9 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
                 val selected = currentRoute == item.route
                 NavigationBarItem(
                     selected = selected,
-                    onClick = { navController.navigate(item.route) },
+                    onClick = { navController.navigate(item.route){
+                        launchSingleTop = true
+                    } },
                     icon = {
                         Icon(
                             imageVector = if (selected) item.iconFilled else item.iconOutlined,

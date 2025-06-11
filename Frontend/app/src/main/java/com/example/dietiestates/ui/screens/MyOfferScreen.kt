@@ -63,12 +63,12 @@ fun MyOffersScreen(
             var text = if (userRole == "CLIENT") "Le mie offerte" else "Offerte"
             TopBarOffer(navController = navController, modifier = Modifier, text)
         },
-        bottomBar = {
-            AppBottomBar(navController = navController) }
+        bottomBar = { AppBottomBar(navController = navController) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
                 .padding(innerPadding),
             contentAlignment = Alignment.TopCenter
 
@@ -116,7 +116,7 @@ fun MyOffersScreen(
                         }
                     else {
                         LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
+                            contentPadding = PaddingValues(8.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(listings) { listing ->
