@@ -1,5 +1,6 @@
 package com.example.dietiestates.data.remote
 
+import android.util.Log
 import com.example.dietiestates.data.remote.api.AgencyApi
 import com.example.dietiestates.data.remote.api.AuthApi
 import com.example.dietiestates.data.remote.api.ClientApi
@@ -33,7 +34,7 @@ class RetrofitClient private constructor(retrofit: Retrofit) {
     companion object {
         fun create(tokenManager: TokenManager): RetrofitClient {
             val client = OkHttpClient.Builder()
-                .addInterceptor(AuthInterceptor(tokenManager))
+                .addInterceptor(AuthInterceptor())
                 .build()
 
             val retrofit = Retrofit.Builder()

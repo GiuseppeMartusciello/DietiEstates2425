@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,11 +21,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -74,6 +77,8 @@ fun ModifyListingScreen(navController: NavController) {
 
     val form = viewModel.formState
     val errors = viewModel.formErrors
+
+    var showErrorsDialog by remember { mutableStateOf(false) }
     SideEffect {
         systemUiController.setStatusBarColor(
             Color.Transparent,
@@ -113,6 +118,46 @@ fun ModifyListingScreen(navController: NavController) {
             }
         }
     }
+
+    val errorMessages = listOfNotNull(
+        errors.address,
+        errors.title,
+        errors.municipality,
+        errors.postalCode,
+        errors.province,
+        errors.size,
+        errors.description,
+        errors.price,
+        errors.images,
+        errors.agentId
+    )
+
+    LaunchedEffect(errorMessages) {
+        if (errorMessages.isNotEmpty()) {
+            showErrorsDialog = true
+        }
+    }
+
+    if (showErrorsDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorsDialog = false },
+            title = { Text("Errori nel form") },
+            text = {
+                Column {
+                    errorMessages.forEach {
+                        Text(text = "• $it")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showErrorsDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+
+    }
+
     LaunchedEffect(listing) {
         if (listing != null) {
             viewModel.loadListingForEdit(listing)
@@ -151,7 +196,9 @@ fun ModifyListingScreen(navController: NavController) {
                             .padding(bottom = 100.dp)
                     ) {
                         Column() {
-                            ImageGalleryPager(images = listing.imageUrls)
+                            listing.imageUrls?.let { images ->
+                                ImageGalleryPager(images = images)
+                            }
 
                             CustomButton(
                                 onClick = { showPhotoEditor = true },
@@ -333,7 +380,7 @@ fun ModifyListingScreen(navController: NavController) {
                     BottomBar(
                         navController,
                         onClick = {
-                            val dto = viewModel.validateAndBuildDto()
+                            val dto = viewModel.validateAndBuildModifyDto()
                             if (dto != null)
                                 viewModel.updateListing(
                                     listingId = listing.id,

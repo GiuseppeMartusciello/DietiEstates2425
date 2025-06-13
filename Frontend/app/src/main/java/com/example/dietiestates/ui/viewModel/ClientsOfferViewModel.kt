@@ -36,7 +36,6 @@ class ClientsOfferViewModel  (savedStateHandle: SavedStateHandle): ViewModel(){
 
     init {
         val listingId = savedStateHandle.get<String>("listingId")
-        Log.d("ClientsOfferViewModel", "Param listingId = $listingId")
 
         if (listingId == null) {
             _uiState.value = _uiState.value.copy(error = "ID listing mancante", loading = false)

@@ -64,6 +64,7 @@ import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.EditOperation
 import com.example.dietiestates.ui.viewModel.ModifyOrCreateListingViewModel
+import com.example.dietiestates.utility.TokenManager
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
@@ -116,7 +117,6 @@ fun CreateListingScreen(navController: NavController) {
             }
 
             editState.error != null -> {
-                Log.d("output",editState.error)
                 val errorMessage = when (editState.operation) {
                     EditOperation.POST -> "❌ Errore durante il caricamento"
                     else -> "❌ Errore generico"
@@ -426,7 +426,7 @@ fun CreateListingScreen(navController: NavController) {
                                 }
                             }
                         )
-                        if (AppContainer.tokenManager.getUserRole() == "MANAGER" || AppContainer.tokenManager.getUserRole() == "SUPPORT_ADMIN") {
+                        if (TokenManager.getUserRole() == "MANAGER" || TokenManager.getUserRole() == "SUPPORT_ADMIN") {
                             Column(
                                 modifier = Modifier
                                     .padding(vertical = 10.dp)
@@ -509,7 +509,7 @@ fun CreateListingScreen(navController: NavController) {
                 BottomBar(
                     navController,
                     onClick = {
-                        val dto = viewModel.validateAndBuildDto()
+                        val dto = viewModel.validateAndBuildCreateDto()
                         if (dto != null) {
                             viewModel.postListing(
                                 dto = dto,

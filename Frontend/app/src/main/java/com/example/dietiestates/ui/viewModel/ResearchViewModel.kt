@@ -2,22 +2,19 @@ package com.example.dietiestates.ui.viewModel
 
 import android.util.Log
 import androidx.compose.runtime.State
-
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dietiestates.AppContainer
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import com.example.dietiestates.data.model.dto.CreateResearchDto
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.Research
+import com.example.dietiestates.data.model.dto.CreateResearchDto
 import kotlinx.coroutines.launch
 
 
-
-class ResearchViewModel: ViewModel() {
+class ResearchViewModel : ViewModel() {
 
     //TODO 2 (il problema è del front end) ci sta un problema se il prezzo minimo è maggiore del prezzo piu alto di tutti gli immobili
 
@@ -42,6 +39,7 @@ class ResearchViewModel: ViewModel() {
     //gestisce le ricerche ripetute tramite History component
     var selectedResearch by mutableStateOf<Research?>(null)
         private set
+
     //serve per gestire la ricerca vecchia
     var isOldResearch by mutableStateOf(false)
 
@@ -67,7 +65,6 @@ class ResearchViewModel: ViewModel() {
                 _searchState.value = _searchState.value.copy(loading = true, error = null)
 
                 val dto = validateAndBuildDto() ?: run {
-                    Log.d("CreateResearch", "❌ Form non valido: $researchFormErrors")
                     return@launch
                 }
 
@@ -140,7 +137,7 @@ class ResearchViewModel: ViewModel() {
         }
     }
 
-    fun updateResearch()  {
+    fun updateResearch() {
         viewModelScope.launch {
             try {
                 _searchState.value = _searchState.value.copy(loading = true, error = null)
@@ -170,8 +167,6 @@ class ResearchViewModel: ViewModel() {
 
 
     fun validateAndBuildDto(): CreateResearchDto? {
-
-        Log.d("CreateResearch", " Stato attuale del form: $researchFormState")
 
         val errors = ResearchFormErrors(
             search = if (researchFormState.searchType.isBlank()) "Campo Obbligatorio" else null,
@@ -231,15 +226,9 @@ class ResearchViewModel: ViewModel() {
     }
 
     fun checkOldResearch() {
-        Log.d("CheckOldResearch", "✅ Entrato nel blocco di aggiornamento")
-
 
         val selected = this.selectedResearch
         if (selected != null) {
-
-
-            Log.d("CheckOldResearch", "🔍 isOldResearch: , selectedResearch: ${selected.numberOfRooms.toString()} in numero ${selected.numberOfRooms?.toInt() ?: 1}")
-                Log.d("CheckOldResearch", "✅ Entrato nel blocco di aggiornamento")
 
             this.updateResearchFormState {
                 copy(
@@ -259,14 +248,18 @@ class ResearchViewModel: ViewModel() {
                     hasGarage = selected.hasGarage == true,
                 )
             }
-            this.updateResearchFormState { copy(numberOfRooms = selected.numberOfRooms?.toInt() ?: 1) }
+            this.updateResearchFormState {
+                copy(
+                    numberOfRooms = selected.numberOfRooms?.toInt() ?: 1
+                )
+            }
         }
     }
 
 }
 
 
-    data class ResearchState(
+data class ResearchState(
     val loading: Boolean = true,
     val researches: List<Research> = emptyList(),
     val error: String? = null
@@ -279,7 +272,7 @@ data class SearchedState(
 )
 
 data class ResearchFormErrors(
-    val category: String?= null,
+    val category: String? = null,
     val search: String? = null,
     val municipality: String? = null,
     val radius: String? = null,

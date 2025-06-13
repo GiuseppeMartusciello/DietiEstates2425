@@ -33,12 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.AppTopBar
 import com.example.dietiestates.ui.screens.components.ListingCard
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.HomeViewModel
+import com.example.tuaapp.ui.components.NavBar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -74,7 +74,7 @@ fun HomeScreen(navController: NavController) {
             AppTopBar()
         },
         bottomBar = {
-            AppBottomBar(navController = navController) })
+            NavBar(navController = navController) })
     { paddingValues ->
         when {
             viewState.loading -> {

@@ -62,11 +62,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.data.model.Research
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.AppTopBar
 import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
+import com.example.tuaapp.ui.components.NavBar
 
 @Composable
 fun ResearchScreen(
@@ -84,7 +84,7 @@ fun ResearchScreen(
         topBar = {
             TopBarOffer(navController = navController, modifier = Modifier, "Ricerca")
         },
-        bottomBar = { AppBottomBar(navController) }
+        bottomBar = { NavBar(navController = navController) }
     ) { paddingValues ->
 
         Box(
@@ -100,7 +100,6 @@ fun ResearchScreen(
     }
 }
 
-
 @Composable
 fun Research(
     navController: NavController,
@@ -110,7 +109,6 @@ fun Research(
     val focusManager = LocalFocusManager.current
 
     var query by remember { mutableStateOf("") }
-
 
 
     Column(modifier = Modifier

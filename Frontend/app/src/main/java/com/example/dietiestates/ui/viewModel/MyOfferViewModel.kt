@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dietiestates.AppContainer
 import com.example.dietiestates.data.model.Listing
+import com.example.dietiestates.utility.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -20,10 +21,9 @@ class MyOfferViewModel: ViewModel(
     private val _uiState = MutableStateFlow<MyOffersState>(MyOffersState.Loading)
     val uiState: StateFlow<MyOffersState> = _uiState
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
 
     init {
-        Log.d("DEBUG", "Imizio fetchListings() da ViewModel")
         fetchListings()
     }
 

@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.viewModel
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 
@@ -13,6 +14,7 @@ import com.example.dietiestates.AppContainer
 import com.example.dietiestates.AppContainer.authRepository
 
 import com.example.dietiestates.data.model.PostLoginNavigation
+import com.example.dietiestates.utility.TokenManager
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
@@ -89,16 +91,17 @@ class AuthViewModel : ViewModel() {
     }
 
     fun checkLogin() {
-        isLoggedIn.value = AppContainer.tokenManager.isLoggedIn()
+        isLoggedIn.value = TokenManager.isLoggedIn()
     }
 
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, context: Context) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             val result = authRepository.login(email, password)
 
             _loginState.value = when {
                 result.isSuccess -> {
+                    AppContainer.reInit(context)
                     isLoggedIn.value = true
                     val authResult = result.getOrNull()
                     postLoginNavigation.value = if (authResult?.mustChangePassword == true) {
@@ -107,9 +110,8 @@ class AuthViewModel : ViewModel() {
                         PostLoginNavigation.HOME
                     }
                     LoginState.Success
-
-
                 }
+
 
                 result.isFailure -> {
                     val message = result.exceptionOrNull()?.message ?: "Errore"
@@ -122,18 +124,13 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun logout() {
-        AppContainer.tokenManager.clearSession()
-        isLoggedIn.value = false
-    }
-
-    fun handleGoogleSignInResult(data: Intent?) {
+    fun handleGoogleSignInResult(data: Intent?, context: Context) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
         try {
             val account = task.getResult(ApiException::class.java)
             val idToken = account.idToken
             if (idToken != null) {
-                loginWithGoogle(idToken)
+                loginWithGoogle(idToken,context)
             } else {
                 Log.e("GoogleLogin", "ID Token null")
             }
@@ -143,13 +140,14 @@ class AuthViewModel : ViewModel() {
 
     }
 
-    fun loginWithGoogle(idToken: String) {
+    fun loginWithGoogle(idToken: String, context: Context) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             val result = authRepository.loginWithGoogle(idToken)
 
             _loginState.value = when {
                 result.isSuccess -> {
+                    //AppContainer.reInit(context)
                     isLoggedIn.value = true
                     LoginState.Success
                 }

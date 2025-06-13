@@ -50,6 +50,7 @@ import com.example.dietiestates.AppContainer
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.theme.LocalAppTypography
+import com.example.dietiestates.utility.TokenManager
 import com.example.dietiestates.utility.formatNumberWithDots
 
 @Composable
@@ -128,7 +129,7 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
                             value = listing.energyClass.toString()
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        val role = AppContainer.tokenManager.getUserRole()
+                        val role = TokenManager.getUserRole()
                         if(role == "AGENT" || role == "SUPPORT-ADMIN" || role == "MANAGER") {
                             EditDeleteMenu(
                                 onEditClick = { onClickOptions() },

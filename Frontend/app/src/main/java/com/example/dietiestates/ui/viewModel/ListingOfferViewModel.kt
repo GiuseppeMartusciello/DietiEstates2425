@@ -10,6 +10,7 @@ import com.example.dietiestates.AppContainer
 import com.example.dietiestates.data.model.Guest
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.PropertyOffer
+import com.example.dietiestates.utility.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,7 +38,7 @@ class ListingOfferViewModel(
     val isWritingOffer = mutableStateOf(false)
     val offerPrice = mutableStateOf("")
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
 
     val listingId = savedStateHandle.get<String>("listingId")
     val clientId = savedStateHandle.get<String>("clientId")
@@ -55,11 +56,6 @@ class ListingOfferViewModel(
 
 
     init {
-        Log.d("DEBUG", "UserRole: ${userRole}")
-        Log.d("DEBUG", "ListingID: ${listingId}")
-        Log.d("DEBUG", "ClientID: ${clientId}")
-
-
         if (listingId == null) {
             _uiState.value = _uiState.value.copy(error = "ID listing mancante", loading = false)
 
@@ -237,7 +233,6 @@ class ListingOfferViewModel(
 
                 // Poi fai la chiamata al server
                 val updatedOffer = AppContainer.offerRepository.updateOfferState(offerId, status)
-                Log.d("DEBUG", "Offerta aggiornata: ${updatedOffer.state}")
 
                 // Ricarica dal server per essere sicuri che tutto sia sincronizzato
                 fetchOffers()

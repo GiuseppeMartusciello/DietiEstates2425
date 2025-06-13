@@ -89,7 +89,7 @@ fun OfferScreen(
 
     val listState = rememberLazyListState()
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
 
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -102,14 +102,6 @@ fun OfferScreen(
 
 
     LaunchedEffect(uiState.offers.size) {
-        Log.d(
-            "CHIAMATA",
-            "Chiamata OfferScreen" +
-                    "Listing: ${listing}," +
-                    "ClientID: ${clientId}" +
-                    ""
-        )
-
         // Scrolla all'ultima offerta (se ce n'è almeno una)
         if (uiState.offers.isNotEmpty()) {
             listState.animateScrollToItem(uiState.offers.size - 1)
@@ -319,8 +311,6 @@ fun OfferScreen(
 
                         IconButton(
                             onClick = {
-                                Log.d("Submit", "ListingID: ${listing?.id}, ClientId: ${clientId}")
-
                                 listing?.id?.let { id ->
                                     coroutineScope.launch {
                                         var success = viewModel.submitOffer()
@@ -395,8 +385,6 @@ fun OfferScreen(
                             uiState.offers,
                             key = { "${it.id}_${it.state}" }
                         ) { offer ->
-
-                            Log.d("OFFER_ITEM", "Rendering offer: ${offer}")
 
 
 //                        Text("Offerta: € ${offer.price} - Stato: ${offer.state} - Data: ${offer.date}")

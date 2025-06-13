@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.dietiestates.AppContainer
 import com.example.dietiestates.data.model.PropertyOffer
+import com.example.dietiestates.utility.TokenManager
 
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -35,7 +36,7 @@ fun OfferBubble(
     onDecline: (() -> Unit)? = null
 ) {
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
 
 
 
