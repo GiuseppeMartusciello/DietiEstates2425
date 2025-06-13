@@ -161,18 +161,21 @@ class ListingOfferViewModel(
         }
     }
 
-    fun submitOffer() {
-        val listingId = listingId!!
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
 
-        viewModelScope.launch {
-            try {
+
+    suspend fun submitOffer(): Boolean {
+        val listingId = listingId!!
+        return try {
                 val price = offerPrice.value.toDouble()
 
                 val listingPrice = listing.value?.price
                 if (listingPrice == null) {
                     _uiState.value =
                         _uiState.value.copy(error = "Errore: prezzo dell'immobile non disponibile")
-                    return@launch
+                    return false
                 }
 
                 // 🔒 Check: offerta almeno al 50% del prezzo dell'immobile
@@ -181,7 +184,7 @@ class ListingOfferViewModel(
                     _uiState.value = _uiState.value.copy(
                         error = "L'offerta deve essere almeno il 50% del prezzo dell'immobile (€${minimumPrice.toInt()})"
                     )
-                    return@launch
+                    return false
                 }
 
 
@@ -195,21 +198,22 @@ class ListingOfferViewModel(
                         _uiState.value = _uiState.value.copy(
                             error = "Errore interno: clientId mancante per l'agente"
                         )
-                        return@launch
+                        return false
                     }
                     AppContainer.offerRepository.postOfferAgent(listingId, clientId, price)
                 }
                 // aggiorna UI o refetcha lista offerte
 
                 fetchOffers()
-
+                return true
             } catch (e: Exception) {
                 Log.e("OFFER_ERROR", "Errore: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
                     error = e.message ?: "Errore sconosciuto"
                 )
+                return false
             }
-        }
+
     }
 
     fun updateOfferStatus(offerId: String, status: String) {
@@ -288,11 +292,9 @@ class ListingOfferViewModel(
         }
     }
 
-    fun submitExternalOffer() {
-        val listingId = listing.value?.id ?: return
-
-        viewModelScope.launch {
-            try {
+    suspend fun submitExternalOffer() : Boolean{
+        val listingId = listing.value?.id ?: return false
+       return try {
                 val name = guestName.value
                 val surname = guestSurname.value
                 val email = guestEmail.value
@@ -301,13 +303,15 @@ class ListingOfferViewModel(
                 if (name.isBlank() || surname.isBlank() || email.isBlank() || price == null) {
                     _uiState.value =
                         _uiState.value.copy(error = "Compila tutti i campi correttamente")
-                    return@launch
+                    return false
                 }
 
-//                val listingPrice = listing.value?.price ?: 0.0
-//                if (price < listingPrice * 0.5) {
+//                val listingPrice = listing.value?.price.value.toDoubleOrNull()
+//                val minimumPrice = listingPrice * 0.5
+//
+//                if (price <  minimumPrice) {
 //                    _uiState.value = _uiState.value.copy(error = "Offerta inferiore al 50% del prezzo")
-//                    return@launch
+//                    return false
 //                }
 
                 val guest = Guest(name, surname, email)
@@ -319,12 +323,15 @@ class ListingOfferViewModel(
                 guestEmail.value = ""
                 guestOffer.value = ""
                 fetchOffers()
+                return true
+
+
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(error = "Errore: ${e.message}")
+                return false
             }
+
+
         }
-    }
-
-
 }
 

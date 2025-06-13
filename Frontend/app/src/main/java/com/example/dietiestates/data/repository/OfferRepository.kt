@@ -136,7 +136,7 @@ class OfferRepository (private val offerApi: OfferApi, private val listingApi: L
             return response.body()!!
         } else {
             if (response.code() == 409)
-                throw Exception("Impossibile accettare offerta perche' ne e' stata gia accettata un'altra")
+                throw Exception("Impossibile accettare quest'offerta perche' ne e' stata gia accettata precedentemente.")
             else
                 throw Exception(" ${response.message()}")
         }
