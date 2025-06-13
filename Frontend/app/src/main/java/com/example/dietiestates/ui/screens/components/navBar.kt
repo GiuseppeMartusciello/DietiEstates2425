@@ -8,7 +8,19 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RealEstateAgent
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.RealEstateAgent
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.dietiestates.AppContainer
+import com.example.dietiestates.utility.TokenManager
 
 data class NavItem(
     val route: String,
@@ -28,12 +41,17 @@ data class NavItem(
 )
 
 @Composable
-fun NavBar(navController: NavController, items: List<NavItem>) {
+fun NavBar(navController: NavController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val role = AppContainer.tokenManager.getUserRole()
+    val role = TokenManager.getUserRole()
 
-    Box(
-    ) {
+    val items = listOf(
+        NavItem("home", Icons.Outlined.Home, Icons.Filled.Home),
+        NavItem("offer", Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer),
+        NavItem("notification", Icons.Outlined.Notifications, Icons.Filled.Notifications)
+    )
+
+    Box{
         NavigationBar(
             containerColor = Color(0xFF303F9F),
             tonalElevation = 8.dp,
@@ -45,8 +63,11 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
                 val selected = currentRoute == item.route
                 NavigationBarItem(
                     selected = selected,
-                    onClick = { navController.navigate(item.route){
-                        launchSingleTop = true } },
+                    onClick = {
+                        if (currentRoute != item.route)
+                            navController.navigate(item.route){
+                                launchSingleTop = true }
+                              },
                     icon = {
                         Icon(
                             imageVector = if (selected) item.iconFilled else item.iconOutlined,
@@ -67,13 +88,18 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
 
             Spacer(modifier = Modifier.weight(0.7f))
 
-            items.takeLast(2).forEach { item ->
+            val thirdItem = items.getOrNull(2)
+            thirdItem?.let { item ->
                 val selected = currentRoute == item.route
                 NavigationBarItem(
                     selected = selected,
-                    onClick = { navController.navigate(item.route){
-                        launchSingleTop = true
-                    } },
+                    onClick = {
+                        if (currentRoute != item.route) {
+                            navController.navigate(item.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    },
                     icon = {
                         Icon(
                             imageVector = if (selected) item.iconFilled else item.iconOutlined,
@@ -90,6 +116,44 @@ fun NavBar(navController: NavController, items: List<NavItem>) {
                     )
                 )
             }
+
+            val userRole = TokenManager.getUserRole()
+            val dynamicItem = when (userRole) {
+                "CLIENT" -> NavItem("profile", Icons.Outlined.Person, Icons.Filled.Person)
+                "MANAGER" -> NavItem("agencyProfile", Icons.Outlined.RealEstateAgent, Icons.Filled.RealEstateAgent)
+                else -> NavItem("logout", Icons.Outlined.Logout, Icons.Filled.Logout)
+            }
+
+            val selectedDynamic = currentRoute == dynamicItem.route
+            NavigationBarItem(
+                selected = selectedDynamic,
+                onClick = {
+                    if (dynamicItem.route == "logout") {
+                        TokenManager.clearSession()
+                        navController.navigate("loginscreen") {
+                            popUpTo(0) // Rimuove tutto lo stack di navigazione
+                        }
+                    } else if (currentRoute != dynamicItem.route) {
+                        navController.navigate(dynamicItem.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector = if (selectedDynamic) dynamicItem.iconFilled else dynamicItem.iconOutlined,
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp)
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.White,
+                    selectedTextColor = Color.White,
+                    indicatorColor = Color.Transparent,
+                    unselectedIconColor = Color.White.copy(alpha = 1f),
+                    unselectedTextColor = Color.White.copy(alpha = 1f)
+                )
+            )
         }
         if(role == "AGENT" || role == "SUPPORT-ADMIN" || role == "MANAGER") {
             FloatingActionButton(

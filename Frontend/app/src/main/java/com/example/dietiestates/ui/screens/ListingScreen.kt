@@ -83,6 +83,7 @@ import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ListingViewModel
+import com.example.dietiestates.utility.TokenManager
 import com.example.dietiestates.utility.formatNumberWithDots
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate
@@ -99,7 +100,7 @@ fun ListingScreen(navController: NavController) {
     val scrollState = rememberScrollState()
     val systemUiController = rememberSystemUiController()
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
 
     SideEffect {
         systemUiController.setStatusBarColor(
@@ -365,7 +366,6 @@ fun ListingScreen(navController: NavController) {
                                 val startDateLocal = agent?.start_date?.toInstant()?.atZone(java.time.ZoneId.systemDefault())
                                     ?.toLocalDate()
                                 val currentDate = LocalDate.now()
-                                Log.d("output","${birthDateLocal} - ${startDateLocal}")
                                 val yearsOld = Period.between(birthDateLocal, currentDate).years
                                 val yearsExperience = Period.between(startDateLocal, currentDate).years
                                 Text(

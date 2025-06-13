@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,13 +53,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.R
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ProfileViewModel
+import com.example.dietiestates.utility.TokenManager
 import com.example.tuaapp.ui.components.NavBar
 import com.example.tuaapp.ui.components.NavItem
 
@@ -76,7 +77,7 @@ fun ProfileScreen(navController: NavController) {
     Scaffold(
         topBar = { TopBarOffer(navController = navController, modifier = Modifier, "Profilo") },
         bottomBar = {
-        AppBottomBar(navController = navController)
+        NavBar(navController = navController)
     }) { paddingValues ->
         when {
             state.loading -> {
@@ -182,7 +183,9 @@ fun ProfileScreen(navController: NavController) {
                             )
                             .clip(RoundedCornerShape(12.dp))
                             .padding(vertical = 15.dp, horizontal = 20.dp)
-                            .clickable { navController.navigate("logout")},
+                            .clickable {
+                                TokenManager.clearSession()
+                                navController.navigate("loginscreen")},
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {

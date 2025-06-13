@@ -83,18 +83,10 @@ fun OfferScreen(navController: NavController,
 
     val listState = rememberLazyListState()
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
 
 
     LaunchedEffect(uiState.offers.size) {
-        Log.d(
-            "CHIAMATA",
-            "Chiamata OfferScreen" +
-                    "Listing: ${listing}," +
-                    "ClientID: ${clientId}" +
-                    ""
-        )
-
         // Scrolla all'ultima offerta (se ce n'è almeno una)
         if (uiState.offers.isNotEmpty()) {
             listState.animateScrollToItem(uiState.offers.size - 1)
@@ -283,8 +275,6 @@ fun OfferScreen(navController: NavController,
 
                         IconButton(
                             onClick = {
-                                Log.d("Submit", "ListingID: ${listing?.id}, ClientId: ${clientId}")
-
                                 listing?.id?.let { id ->
                                     viewModel.submitOffer()
                                     viewModel.isWritingOffer.value = false
@@ -350,8 +340,6 @@ fun OfferScreen(navController: NavController,
                             uiState.offers,
                             key = { "${it.id}_${it.state}" }
                         ) { offer ->
-
-                            Log.d("OFFER_ITEM", "Rendering offer: ${offer}")
 
 
 //                        Text("Offerta: € ${offer.price} - Stato: ${offer.state} - Data: ${offer.date}")

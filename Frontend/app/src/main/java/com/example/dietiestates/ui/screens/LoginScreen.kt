@@ -66,7 +66,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        viewModel.handleGoogleSignInResult(result.data)
+        viewModel.handleGoogleSignInResult(result.data,context)
     }
 
 
@@ -244,7 +244,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                                         snackbarHostState.showSnackbar(message);
                                         //Toast.makeText(context, "Hello", Toast.LENGTH_SHORT ).show()
                                     }
-                                }) viewModel.login(email, password)
+                                }) viewModel.login(email, password,context)
                         },
                         style = "blue",
                         enabled = loginState !is LoginState.Loading,
