@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,12 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.AppTopBar
 import com.example.dietiestates.ui.screens.components.ListingCard
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.HomeViewModel
+import com.example.tuaapp.ui.components.NavBar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -56,7 +57,7 @@ fun HomeScreen(navController: NavController) {
         systemUiController.setStatusBarColor(
             Color(0xFF3F51B5),
             darkIcons = true
-        ) // o false se immagine scura
+        )
     }
 
     //Aggiorna al ritorno della modifica di un listing
@@ -74,7 +75,7 @@ fun HomeScreen(navController: NavController) {
             AppTopBar()
         },
         bottomBar = {
-            AppBottomBar(navController = navController) })
+            NavBar(navController = navController) })
     { paddingValues ->
         when {
             viewState.loading -> {
@@ -101,8 +102,9 @@ fun HomeScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues),
-                    contentAlignment = Alignment.Center // centra il contenuto nel Box
+                    contentAlignment = Alignment.TopCenter // centra il contenuto nel Box
                 ) {
                     LazyColumn(
                         horizontalAlignment = Alignment.CenterHorizontally, // per centrare gli elementi dentro

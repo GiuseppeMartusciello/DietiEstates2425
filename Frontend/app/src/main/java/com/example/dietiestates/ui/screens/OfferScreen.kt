@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -56,6 +57,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.SavedStateHandle
 import com.example.dietiestates.AppContainer
 import com.example.dietiestates.ui.screens.components.TopBarOffer
@@ -65,8 +69,10 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OfferScreen(navController: NavController,
-                viewModel: ListingOfferViewModel = viewModel()) {
+fun OfferScreen(
+    navController: NavController,
+    viewModel: ListingOfferViewModel = viewModel()
+) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -74,7 +80,7 @@ fun OfferScreen(navController: NavController,
     val clientId = savedStateHandle.get<String>("clientId")
 
 
-    val uiState by  viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val listing = viewModel.listing.value
 
     val isWriting = viewModel.isWritingOffer.value
@@ -83,28 +89,32 @@ fun OfferScreen(navController: NavController,
 
     val listState = rememberLazyListState()
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
+
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(isWriting) {
+        if (isWriting) {
+            focusRequester.requestFocus()
+        }
+    }
 
 
     LaunchedEffect(uiState.offers.size) {
-        Log.d(
-            "CHIAMATA",
-            "Chiamata OfferScreen" +
-                    "Listing: ${listing}," +
-                    "ClientID: ${clientId}" +
-                    ""
-        )
-
         // Scrolla all'ultima offerta (se ce n'è almeno una)
         if (uiState.offers.isNotEmpty()) {
             listState.animateScrollToItem(uiState.offers.size - 1)
         }
+
+
     }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let { errorMessage ->
             coroutineScope.launch {
                 snackbarHostState.showSnackbar("Errore: ${errorMessage}")
+                viewModel.clearError()
             }
         }
     }
@@ -157,8 +167,19 @@ fun OfferScreen(navController: NavController,
                                 text = "Invia",
                                 style = "blue",
                                 onClick = {
-                                    viewModel.submitExternalOffer()
-                                    viewModel.showExternalOfferDialog.value = false
+
+                                    coroutineScope.launch {
+                                        val success = viewModel.submitExternalOffer()
+                                        viewModel.isWritingOffer.value = false
+                                        viewModel.offerPrice.value = ""
+                                        viewModel.showExternalOfferDialog.value = false
+                                        if (success) {
+                                            snackbarHostState.showSnackbar("Offerta esterna inserita con successo.")
+                                        }
+                                        else {
+                                            Log.d("DIALOG", "Errore, non chiudo il dialogo")                                        }
+                                    }
+
                                 }
                             )
                         },
@@ -230,6 +251,7 @@ fun OfferScreen(navController: NavController,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .imePadding()
                             .navigationBarsPadding(), // <-- per evitare che venga tagliato
                         contentAlignment = Alignment.Center
                         //.background(Color.Gray)
@@ -243,6 +265,8 @@ fun OfferScreen(navController: NavController,
                                     .align(Alignment.Center),
                                 text = "Proponi offerta"
                             )
+
+
                         } else {
                             CustomButton(
                                 onClick = {
@@ -257,13 +281,18 @@ fun OfferScreen(navController: NavController,
                             )
                         }
                     }
+
                 }
 
                 else -> {
+
+
                     Row(
                         Modifier
                             .padding(16.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            //.imePadding() // <-- evita che venga coperto dalla tastiera
+                            .navigationBarsPadding(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedTextField(
@@ -273,7 +302,7 @@ fun OfferScreen(navController: NavController,
                             placeholder = { Text("€ Inserisci offerta") },
                             modifier = Modifier
                                 .weight(1f)
-                                .width(20.dp),
+                                .focusRequester(focusRequester),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             textStyle = MaterialTheme.typography.bodyLarge,
@@ -283,12 +312,20 @@ fun OfferScreen(navController: NavController,
 
                         IconButton(
                             onClick = {
-                                Log.d("Submit", "ListingID: ${listing?.id}, ClientId: ${clientId}")
-
                                 listing?.id?.let { id ->
-                                    viewModel.submitOffer()
-                                    viewModel.isWritingOffer.value = false
-                                    viewModel.offerPrice.value = ""
+                                    coroutineScope.launch {
+                                        var success = viewModel.submitOffer()
+                                        viewModel.isWritingOffer.value = false
+                                        viewModel.offerPrice.value = ""
+                                        if(success) {
+                                            snackbarHostState.showSnackbar("Offerta inviata con successo.")
+                                        }
+
+                                    }
+
+                                    focusManager.clearFocus()
+
+
                                 }
                             }
                         ) {
@@ -321,6 +358,7 @@ fun OfferScreen(navController: NavController,
             else -> {
                 Column(
                     Modifier
+                        .fillMaxSize()
                         .padding(
                             top = padding.calculateTopPadding(),
                             bottom = padding.calculateBottomPadding()
@@ -332,7 +370,6 @@ fun OfferScreen(navController: NavController,
                         ListingCardMini(
                             listing = it,
                             onClick = { navController.navigate("listingscreen/${it.id}") })
-
 
 
                     }
@@ -350,8 +387,6 @@ fun OfferScreen(navController: NavController,
                             uiState.offers,
                             key = { "${it.id}_${it.state}" }
                         ) { offer ->
-
-                            Log.d("OFFER_ITEM", "Rendering offer: ${offer}")
 
 
 //                        Text("Offerta: € ${offer.price} - Stato: ${offer.state} - Data: ${offer.date}")

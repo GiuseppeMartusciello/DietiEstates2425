@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,11 +53,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.R
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ProfileViewModel
+import com.example.dietiestates.utility.TokenManager
 import com.example.tuaapp.ui.components.NavBar
 import com.example.tuaapp.ui.components.NavItem
 
@@ -71,47 +74,10 @@ fun ProfileScreen(navController: NavController) {
         viewModel.getMe()
     }
 
-    Scaffold(topBar = {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(0.dp, 0.dp, 0.dp, 8.dp)
-                .background(Color(0xFF3F51B5)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "DietiEstates25", fontFamily = RobotoSerif,
-                fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-            )
-            Text(
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 5.dp),
-                text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-                fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.White
-            )
-        }
-    }, bottomBar = {
-        NavBar(
-            navController = navController, items = listOf(
-                NavItem(
-                    "home",
-                    Icons.Outlined.Home, Icons.Filled.Home
-                ), NavItem(
-                    "notification",
-                    Icons.Outlined.Notifications, Icons.Filled.Notifications
-                ), NavItem(
-                    "offer",
-                    Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer,
-                ),
-                NavItem(
-                    "profile",
-                    Icons.Outlined.Person, Icons.Filled.Person,
-                )
-
-            )
-        )
+    Scaffold(
+        topBar = { TopBarOffer(navController = navController, modifier = Modifier, "Profilo") },
+        bottomBar = {
+        NavBar(navController = navController)
     }) { paddingValues ->
         when {
             state.loading -> {
@@ -146,6 +112,7 @@ fun ProfileScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
+                        .background(Color.White)
                         .verticalScroll(scrollState),
                 ) {
 
@@ -216,7 +183,9 @@ fun ProfileScreen(navController: NavController) {
                             )
                             .clip(RoundedCornerShape(12.dp))
                             .padding(vertical = 15.dp, horizontal = 20.dp)
-                            .clickable { navController.navigate("logout")},
+                            .clickable {
+                                TokenManager.clearSession()
+                                navController.navigate("loginscreen")},
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {

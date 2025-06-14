@@ -1,5 +1,6 @@
 package com.example.dietiestates.data.remote
 
+import android.util.Log
 import com.example.dietiestates.data.remote.api.AgencyApi
 import com.example.dietiestates.data.remote.api.AuthApi
 import com.example.dietiestates.data.remote.api.ClientApi
@@ -7,6 +8,7 @@ import com.example.dietiestates.data.remote.api.ListingApi
 import com.example.dietiestates.data.remote.api.NotificationApi
 import com.example.dietiestates.data.remote.api.OfferApi
 import com.example.dietiestates.data.remote.api.ResearchApi
+import com.example.dietiestates.utility.ApiConstants
 import com.example.dietiestates.utility.TokenManager
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -33,14 +35,14 @@ class RetrofitClient private constructor(retrofit: Retrofit) {
     companion object {
         fun create(tokenManager: TokenManager): RetrofitClient {
             val client = OkHttpClient.Builder()
-                .addInterceptor(AuthInterceptor(tokenManager))
+                .addInterceptor(AuthInterceptor())
                 .build()
 
             val retrofit = Retrofit.Builder()
                     //todo leva i commenti e modifica manifest
                  //.baseUrl("http://10.0.2.2:3000/")
                 //.baseUrl("http://192.168.1.2:3000/")
-                 .baseUrl("http://dietiestates.duckdns.org:3000/")
+                 .baseUrl("${ApiConstants.BASE_URL}/")
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()

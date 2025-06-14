@@ -173,8 +173,8 @@ export class OfferService {
     const notifica =
       await this.notificationService.createSpecificNotificationOffer(
         {
-          title: 'Your offer has been updated !',
-          description: 'check out the your offer for' + offer.listing.title + ' the state is now ' + status,
+          title: 'Un offerta è stata cambiata !',
+          description: 'Controlla l offerta per :' + offer.listing.title + 'il suo nuovo stato adesso è' + status,
           category: NotificationType.SPECIFIC,
         },
         offer,
@@ -430,8 +430,8 @@ export class OfferService {
      const notifica =
        await this.notificationService.createSpecificNotificationOffer(
          {
-           title: 'Offer for ' + listing.title,
-           description: `A new offer of ${price}€ has been made for the property ${listing.title}.`,
+           title: 'Nuova offerta per ' + listing.title,
+           description: `Ti è stata proposta una offerta di ${price}€ per l immobile: ${listing.title}.`,
            category: NotificationType.SPECIFIC,
          },
          offer,

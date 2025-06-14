@@ -3,23 +3,27 @@ package com.example.dietiestates.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.dietiestates.AppContainer
+import com.example.dietiestates.data.model.Agent
 import com.example.dietiestates.data.model.Listing
-import com.example.dietiestates.data.model.dto.ModifyOrCreateListingDto
+import com.example.dietiestates.data.model.dto.CreateListingDto
+import com.example.dietiestates.data.model.dto.ModifyListingDto
 import com.example.dietiestates.data.remote.api.ListingApi
+import com.example.dietiestates.utility.ApiConstants
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 class ListingRepository(private val api: ListingApi) {
-    private val BASE_IMAGE_URL = "http://dietiestates.duckdns.org:3000"
 
     suspend fun getListings(): List<Listing> {
+
         val listingsResponse = api.getListings()
 
         if (listingsResponse.isSuccessful ) {
             val listing = listingsResponse.body()?.map { listing ->
                 listing.copy(
-                    imageUrls = listing.imageUrls.map { "$BASE_IMAGE_URL$it" }
+                    imageUrls = listing.imageUrls.map { "${ApiConstants.BASE_URL}$it" }
                 )
             } ?: emptyList()
 
@@ -36,10 +40,21 @@ class ListingRepository(private val api: ListingApi) {
 
         if (response.isSuccessful) {
             val listing = response.body() ?: null
-            Log.d("output",listing.toString())
             return listing?.copy(
-                imageUrls = listing.imageUrls.map { "$BASE_IMAGE_URL$it" }
+                imageUrls = listing.imageUrls.map { "${ApiConstants.BASE_URL}$it" }
             )
+        } else {
+            throw Exception("Errore HTTP: ${response.code()}")
+        }
+    }
+
+    suspend fun getAgentOfListing(id: String): Agent? {
+        val response = api.getAgentOfListing(id)
+
+        if (response.isSuccessful) {
+            val agent = response.body() ?: null
+
+            return agent
         } else {
             throw Exception("Errore HTTP: ${response.code()}")
         }
@@ -91,7 +106,7 @@ class ListingRepository(private val api: ListingApi) {
             throw Exception("Errore durante l'eliminazione: ${response.code()}")
         }
     }
-    suspend fun modifyListing(listingId: String, dto: ModifyOrCreateListingDto): Listing {
+    suspend fun modifyListing(listingId: String, dto: ModifyListingDto): Listing {
         val response = api.modifyListing(listingId, dto)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Nessun corpo nella risposta")
@@ -101,7 +116,7 @@ class ListingRepository(private val api: ListingApi) {
     }
 
 
-    suspend fun postListing(dto: ModifyOrCreateListingDto): Listing {
+    suspend fun postListing(dto: CreateListingDto): Listing {
         val response = api.postListing(dto)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Nessun corpo nella risposta")

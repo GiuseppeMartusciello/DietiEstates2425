@@ -1,15 +1,18 @@
 package com.example.dietiestates
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -20,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.dietiestates.ui.screens.AgencyProfileScreen
 import com.example.dietiestates.ui.screens.ChangePassword
 import com.example.dietiestates.ui.screens.ClientsOfferScreen
 import com.example.dietiestates.ui.screens.CreateListingScreen
@@ -33,10 +37,7 @@ import com.example.dietiestates.ui.screens.MyOffersScreen
 import com.example.dietiestates.ui.screens.OfferScreen
 import com.example.dietiestates.ui.screens.MapSearchScreen
 import com.example.dietiestates.ui.screens.RegisterScreen
-import com.example.dietiestates.ui.screens.ModifyListingScreen
-import com.example.dietiestates.ui.screens.MyOffersScreen
 import com.example.dietiestates.ui.screens.NotificationScreen
-import com.example.dietiestates.ui.screens.OfferScreen
 import com.example.dietiestates.ui.screens.ProfileScreen
 import com.example.dietiestates.ui.screens.ResearchScreen
 import com.example.dietiestates.ui.screens.SearchedListingScreen
@@ -44,12 +45,12 @@ import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.AuthViewModel
-import com.example.dietiestates.ui.viewModel.HomeViewModel
-import com.example.dietiestates.ui.viewModel.ListingOfferViewModel
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
+import com.example.dietiestates.utility.TokenManager
 
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppContainer.init(applicationContext)
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     // A surface container using the 'background' color from the theme
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
+                        color = Color.White
                     ) {
                         MyApp()
                     }
@@ -70,14 +71,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyApp() {
     //SetStatusBarColor(Color(0xFF3F51B5), darkIcons = false)
 
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
-    authViewModel.checkLogin()
-    val startDestination = if (authViewModel.isLoggedIn.value) "home" else "loginscreen"
+    val startDestination = if (authViewModel.checkLogin()) "home" else "loginscreen"
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(route = "loginscreen") {
@@ -98,36 +99,45 @@ fun MyApp() {
             route = "listingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) { backStackEntry ->
-            ListingScreen(navController)
+            if (checkLogin(navController,authViewModel))
+                ListingScreen(navController)
         }
         composable(
             route = "modifylistingscreen/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) { backStackEntry ->
-            ModifyListingScreen(navController)
+            if (checkLogin(navController,authViewModel))
+                ModifyListingScreen(navController)
         }
         composable(
             route = "listingviewdescriptionscreen/{text}",
             arguments = listOf(navArgument("text") { type = NavType.StringType })
         ) { backStackEntry ->
             val text = backStackEntry.arguments?.getString("text") ?: ""
-            FullTextScreen(navController, text = text)
+            if (checkLogin(navController,authViewModel))
+                FullTextScreen(navController, text = text)
+
         }
         composable(route = "createlistingscreen") {
-            CreateListingScreen(navController)
+            if (checkLogin(navController,authViewModel))
+             CreateListingScreen(navController)
+
         }
         composable(route = "home") {
-            HomeScreen(navController)
-        }
-        composable(route = "logout") {
-            authViewModel.logout()
-            LoginScreen(navController = navController)
+            if (checkLogin(navController,authViewModel))
+                HomeScreen(navController)
         }
         composable(route = "offer") {
-            MyOffersScreen(navController = navController)
+            if (checkLogin(navController,authViewModel))
+                MyOffersScreen(navController = navController)
         }
         composable(route = "profile") {
-            ProfileScreen(navController)
+            if (checkLogin(navController,authViewModel))
+                ProfileScreen(navController)
+        }
+        composable(route = "agencyProfile") {
+            if (checkLogin(navController,authViewModel))
+                AgencyProfileScreen(navController)
         }
         composable(
             route = "listing/offer/{listingId}?clientId={clientId}",
@@ -140,7 +150,8 @@ fun MyApp() {
                 }
             )
         ) { backStackEntry ->
-            OfferScreen(navController = navController)
+            if (checkLogin(navController,authViewModel))
+                OfferScreen(navController = navController)
         }
 
         composable(
@@ -149,14 +160,16 @@ fun MyApp() {
                 navArgument("listingId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            OfferScreen(navController = navController)
+            if (checkLogin(navController,authViewModel))
+                OfferScreen(navController = navController)
         }
 
         //SottoRoot con viewModel Condiviso
         searchGraph(navController)
 
         composable(route = "notification") {
-            NotificationScreen(navController = navController)
+            if (checkLogin(navController,authViewModel))
+                NotificationScreen(navController = navController)
         }
 
 
@@ -164,7 +177,8 @@ fun MyApp() {
             route = "agent/listing/offer/{listingId}",
             arguments = listOf(navArgument("listingId") { type = NavType.StringType })
         ) {
-            ClientsOfferScreen(navController = navController)
+            if (checkLogin(navController,authViewModel))
+                ClientsOfferScreen(navController = navController)
         }
     }
 }
@@ -209,6 +223,15 @@ fun NavGraphBuilder.searchGraph(navController: NavController) {
     }
 }
 
+fun checkLogin(navController: NavController,authViewModel: AuthViewModel): Boolean{
+    if (!authViewModel.checkLogin()){
+        TokenManager.clearSession()
+        navController.navigate("loginscreen")
+        return false;
+    }
+
+    return true;
+}
 
 
 

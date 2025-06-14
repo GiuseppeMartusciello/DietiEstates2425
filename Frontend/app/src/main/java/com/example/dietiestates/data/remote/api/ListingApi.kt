@@ -1,7 +1,9 @@
 package com.example.dietiestates.data.remote.api
 
+import com.example.dietiestates.data.model.Agent
 import com.example.dietiestates.data.model.Listing
-import com.example.dietiestates.data.model.dto.ModifyOrCreateListingDto
+import com.example.dietiestates.data.model.dto.CreateListingDto
+import com.example.dietiestates.data.model.dto.ModifyListingDto
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -20,8 +22,8 @@ interface ListingApi {
     @GET("listing/{id}")
     suspend fun getListing(@Path("id") id: String): Response<Listing>
 
-    @GET("listing/{id}/images")
-    suspend fun getListingImages(@Path("id") id: String): Response<List<String>>
+    @GET("listing/{id}/agent")
+    suspend fun getAgentOfListing(@Path("id") id: String): Response<Agent>
 
     @GET("listing/all-images")
     suspend fun getAllListingImages(): Response<Map<String, List<String>>>
@@ -43,12 +45,12 @@ interface ListingApi {
     @PATCH("listing/{id}")
     suspend fun modifyListing(
         @Path("id") listingId: String,
-        @Body listingDto: ModifyOrCreateListingDto
+        @Body listingDto: ModifyListingDto
     ): Response<Listing>
 
     @POST("listing/")
     suspend fun postListing(
-        @Body listingDto: ModifyOrCreateListingDto
+        @Body listingDto: CreateListingDto
     ): Response<Listing>
 
     @DELETE("listing/{id}")

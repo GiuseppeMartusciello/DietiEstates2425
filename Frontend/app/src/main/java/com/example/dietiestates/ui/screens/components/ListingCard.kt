@@ -1,5 +1,7 @@
 package com.example.dietiestates.ui.screens.components
 
+import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,6 +50,7 @@ import com.example.dietiestates.AppContainer
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.ui.theme.LocalAppTypography
+import com.example.dietiestates.utility.TokenManager
 import com.example.dietiestates.utility.formatNumberWithDots
 
 @Composable
@@ -63,7 +66,8 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
             .fillMaxWidth()
             .padding(15.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp)
+        border = BorderStroke(1.dp, Color.LightGray),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
 
     ) {
         Column(modifier = Modifier.background(Color(0xFFF3F3F3))) {
@@ -114,7 +118,7 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FeatureItem(icon = Icons.Outlined.RealEstateAgent, value = listing.category)
+                        FeatureItem(icon = Icons.Outlined.RealEstateAgent, value = if (listing.category == "SALE") "Vendita" else "Affitto")
                         FeatureItem(icon = Icons.Outlined.ViewInAr, value = "${listing.size}mq")
                         FeatureItem(
                             icon = Icons.Outlined.MeetingRoom,
@@ -125,7 +129,7 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
                             value = listing.energyClass.toString()
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        val role = AppContainer.tokenManager.getUserRole()
+                        val role = TokenManager.getUserRole()
                         if(role == "AGENT" || role == "SUPPORT-ADMIN" || role == "MANAGER") {
                             EditDeleteMenu(
                                 onEditClick = { onClickOptions() },

@@ -11,7 +11,6 @@ data class PropertyOffer(
     val guestEmail: String?,
     val guestName: String?,
     val guestSurname: String?
-
 )
 
 data class CreateOfferDto(

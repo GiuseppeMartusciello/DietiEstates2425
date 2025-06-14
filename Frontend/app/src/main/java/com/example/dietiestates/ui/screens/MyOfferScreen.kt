@@ -44,28 +44,28 @@ import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.ListingCardMini
 import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSerif
+import com.example.dietiestates.utility.TokenManager
+import com.example.tuaapp.ui.components.NavBar
 
 @Composable
 fun MyOffersScreen(
     navController: NavController, viewModel: MyOfferViewModel = viewModel()
 ) {
-    val userRole = AppContainer.tokenManager.getUserRole()
-
-    Log.d("DEBUG", "MyOffersScreen inizializzata")
-
+    val userRole = TokenManager.getUserRole()
     val uiState by viewModel.uiState.collectAsState()
 
-    Log.d("DEBUG", "uistate corrente: ${uiState}")
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             var text = if (userRole == "CLIENT") "Le mie offerte" else "Offerte"
             TopBarOffer(navController = navController, modifier = Modifier, text)
-        }
+        },
+        bottomBar = { NavBar(navController = navController) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
                 .padding(innerPadding),
             contentAlignment = Alignment.TopCenter
 
@@ -113,18 +113,17 @@ fun MyOffersScreen(
                         }
                     else {
                         LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
+                            contentPadding = PaddingValues(8.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(listings) { listing ->
-                                Log.d("AJA", "Rendering listing: ${listing.id}")
-
                                 ListingCardMini(listing = listing,
                                     onClick = {
-                                        if (userRole == "CLIENT")
+                                        if (userRole == "CLIENT") {
                                             navController.navigate("listing/offer/${listing.id}")
-                                        else
+                                        } else {
                                             navController.navigate("agent/listing/offer/${listing.id}")
+                                        }
                                     }
                                 )
 

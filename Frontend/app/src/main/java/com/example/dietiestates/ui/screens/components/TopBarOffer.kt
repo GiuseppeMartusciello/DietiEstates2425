@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.dietiestates.ui.theme.RobotoSerif
+import com.example.dietiestates.ui.theme.RobotoSlab
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -49,8 +50,11 @@ fun TopBarOffer (navController: NavController, modifier: Modifier, text: String 
 
         }
         Text(
-            text = "${text}", fontFamily = RobotoSerif,
-            fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White,
+            text = "${text}",
+            fontFamily = RobotoSlab,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 26.sp,
+            color = Color.White,
             modifier = Modifier.align(Alignment.Center)
         )
 

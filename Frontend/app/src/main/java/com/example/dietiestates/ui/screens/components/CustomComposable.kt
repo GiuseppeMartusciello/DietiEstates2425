@@ -164,7 +164,7 @@ fun LabeledTextField(
         Text(
             text = "${value.length} / $maxChars",
             fontSize = 12.sp,
-            color = if (value.length >= maxChars) Color.Red else Color.Gray,
+            color = if (value.length > maxChars) Color.Red else Color.Gray,
             modifier = Modifier.align(Alignment.End)
         )
     }
@@ -219,7 +219,7 @@ fun LabeledNumberField(
             Text(
                 text = "${value.length} / $maxChars",
                 fontSize = 12.sp,
-                color = if (value.length >= maxChars) Color.Red else Color.Gray,
+                color = if (value.length > maxChars) Color.Red else Color.Gray,
                 modifier = Modifier.align(Alignment.End)
             )
         }
