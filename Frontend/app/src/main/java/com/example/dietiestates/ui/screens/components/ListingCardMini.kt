@@ -34,22 +34,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.Listing
-
-
-val BASE_IMAGE_URL = "http://dietiestates.duckdns.org:3000"
-
+import com.example.dietiestates.ui.theme.LocalAppTypography
+import com.example.dietiestates.utility.ApiConstants
+import com.example.dietiestates.utility.formatNumberWithDots
 
 
 @Composable
 fun ListingCardMini(listing: Listing, onClick: () -> Unit) {
 
     val imageUrl = listing.imageUrls.firstOrNull()?.let { url ->
-        if (url.startsWith("http")) url else "$BASE_IMAGE_URL$url"
+        if (url.startsWith("http")) url else "${ApiConstants.BASE_URL}$url"
     }
 
 
@@ -99,7 +99,27 @@ fun ListingCardMini(listing: Listing, onClick: () -> Unit) {
                 Text(text = listing.title, style = MaterialTheme.typography.titleMedium, maxLines = 2,  overflow = TextOverflow.Ellipsis)
                 Text(text = "${listing.address}, ${listing.municipality}", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = "€ ${listing.price.toInt()}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = "€ ${formatNumberWithDots(listing.price)}",
+                        style = LocalAppTypography.current.listingPrice,
+                        fontSize = 18.sp,
+                    )
+
+                    if (listing.category == "RENT") {
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        Text(
+                            text = "al mese",
+                            style = LocalAppTypography.current.listingPrice.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = Color.DarkGray
+                            )
+                        )
+                    }
+                }
             }
         }
 

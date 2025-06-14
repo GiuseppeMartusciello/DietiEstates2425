@@ -30,7 +30,7 @@ fun GoogleSignInButton(
     OutlinedButton(
         onClick = onClick,
         modifier = modifier
-            .height(48.dp)
+            .height(42.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         border = BorderStroke(1.dp, Color(0xFF9E9E9E)),

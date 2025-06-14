@@ -88,7 +88,7 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
                     val agents = AppContainer.agencyRepository.getAgents()
                     uiState.value = uiState.value.copy(agents = agents, loading = false, selectedAgentId = agents.first().userId)
                 } catch (e: Exception) {
-                    //eccezione da gestire
+                    //resta semplicemente una lista vuota
                 }
         }
     }
@@ -232,7 +232,7 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
     }
 
     fun validateAndBuildCreateDto(): CreateListingDto? {
-        val agentIdError = if (uiState.value.selectedAgentId == null) {
+        val agentIdError = if (TokenManager.getUserRole() != "AGENT" && uiState.value.selectedAgentId == null) {
             "Devi selezionare un agente"
         } else null
 
@@ -263,6 +263,7 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
 
         if (hasErrors) return null
 
+        val agentId = if(TokenManager.getUserRole() != "AGENT") uiState.value.selectedAgentId else null
         return CreateListingDto(
             address = formState.address,
             title = formState.title,
@@ -274,12 +275,12 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
             energyClass = formState.energyClass,
             description = formState.description,
             price = formState.price.toLong(),
-            category = if (formState.category == "Vendita") "SALE" else "RENT",
+            category = formState.category,
             floor = formState.floor,
             hasElevator = formState.hasElevator,
             hasAirConditioning = formState.hasAirConditioning,
             hasGarage = formState.hasGarage,
-            agentId = uiState.value.selectedAgentId!! // già validato
+            agentId = agentId
         )
     }
 
@@ -317,7 +318,7 @@ class ModifyOrCreateListingViewModel(    savedStateHandle: SavedStateHandle ) : 
             energyClass = formState.energyClass,
             description = formState.description,
             price = formState.price.toLong(),
-            category = if (formState.category == "Vendita") "SALE" else "RENT",
+            category = formState.category,
             floor = formState.floor,
             hasElevator = formState.hasElevator,
             hasAirConditioning = formState.hasAirConditioning,

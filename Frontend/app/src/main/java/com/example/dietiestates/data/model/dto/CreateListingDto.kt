@@ -16,6 +16,6 @@ data class CreateListingDto(
     val hasElevator: Boolean,
     val hasAirConditioning: Boolean,
     val hasGarage: Boolean,
-    val agentId: String
+    val agentId: String?
 )
 

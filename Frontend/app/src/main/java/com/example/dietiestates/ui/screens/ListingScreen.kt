@@ -69,10 +69,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.dietiestates.AppContainer
 import com.example.dietiestates.R
 import com.example.dietiestates.ui.screens.components.CustomButton
@@ -259,7 +261,7 @@ fun ListingScreen(navController: NavController) {
                                     FeatureItem(
                                         Icons.Outlined.RealEstateAgent,
                                         "Contratto",
-                                        listing.category
+                                        if (listing.category == "SALE") "Vendita" else "Affitto"
                                     )
                                 }
                                 Spacer(modifier = Modifier.width(60.dp))
@@ -620,4 +622,3 @@ fun openDialer(context: Context, phoneNumber: String) {
     }
     context.startActivity(intent)
 }
-

@@ -326,9 +326,12 @@ fun ModifyListingScreen(navController: NavController) {
                             )
                             dropDownMenu(
                                 label = "Categoria",
-                                value = form.category,
+                                value =  if (form.category == "SALE") "Vendita" else "Affitto",
                                 options = listOf("Vendita", "Affitto"),
-                                onValueChange = { viewModel.onFieldChange { current -> current.copy(category = it) } },
+                                onValueChange = {
+                                    val mapped = if (it == "Vendita") "SALE" else "RENT"
+                                    viewModel.onFieldChange { current -> current.copy(category = mapped) }
+                                },
                                 modifier = Modifier.width(130.dp)
                             )
                             dropDownMenu(

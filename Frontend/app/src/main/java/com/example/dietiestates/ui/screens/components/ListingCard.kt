@@ -118,7 +118,7 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FeatureItem(icon = Icons.Outlined.RealEstateAgent, value = listing.category)
+                        FeatureItem(icon = Icons.Outlined.RealEstateAgent, value = if (listing.category == "SALE") "Vendita" else "Affitto")
                         FeatureItem(icon = Icons.Outlined.ViewInAr, value = "${listing.size}mq")
                         FeatureItem(
                             icon = Icons.Outlined.MeetingRoom,

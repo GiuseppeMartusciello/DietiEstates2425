@@ -158,16 +158,13 @@ fun AgencyProfileScreen(navController: NavController) {
                         .padding(paddingValues)
                         .verticalScroll(scrollState),
                 ) {
-
                     Image(
-                        painter = painterResource(R.drawable.profile),
-                        contentDescription = null,
+                        painter = painterResource(R.drawable.logodieti),
+                        contentDescription = "Logo",
                         modifier = Modifier
-                            .height(150.dp)
-                            .width(150.dp)
-                            .padding(5.dp)
+                            .height(200.dp)
+                            .width(200.dp)
                             .align(Alignment.CenterHorizontally),
-                        contentScale = ContentScale.Crop
                     )
                     Text(
                         text = agency.name,

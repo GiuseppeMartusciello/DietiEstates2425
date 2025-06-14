@@ -9,12 +9,12 @@ import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.dto.CreateListingDto
 import com.example.dietiestates.data.model.dto.ModifyListingDto
 import com.example.dietiestates.data.remote.api.ListingApi
+import com.example.dietiestates.utility.ApiConstants
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 class ListingRepository(private val api: ListingApi) {
-    private val BASE_IMAGE_URL = "http://dietiestates.duckdns.org:3000"
 
     suspend fun getListings(): List<Listing> {
 
@@ -23,7 +23,7 @@ class ListingRepository(private val api: ListingApi) {
         if (listingsResponse.isSuccessful ) {
             val listing = listingsResponse.body()?.map { listing ->
                 listing.copy(
-                    imageUrls = listing.imageUrls.map { "$BASE_IMAGE_URL$it" }
+                    imageUrls = listing.imageUrls.map { "${ApiConstants.BASE_URL}$it" }
                 )
             } ?: emptyList()
 
@@ -41,7 +41,7 @@ class ListingRepository(private val api: ListingApi) {
         if (response.isSuccessful) {
             val listing = response.body() ?: null
             return listing?.copy(
-                imageUrls = listing.imageUrls.map { "$BASE_IMAGE_URL$it" }
+                imageUrls = listing.imageUrls.map { "${ApiConstants.BASE_URL}$it" }
             )
         } else {
             throw Exception("Errore HTTP: ${response.code()}")

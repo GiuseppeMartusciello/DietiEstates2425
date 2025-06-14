@@ -323,8 +323,6 @@ fun OfferScreen(navController: NavController,
                             listing = it,
                             onClick = { navController.navigate("listingscreen/${it.id}") })
 
-
-
                     }
                     LazyColumn(
                         state = listState,

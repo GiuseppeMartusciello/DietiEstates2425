@@ -1,8 +1,10 @@
 package com.example.dietiestates.ui.screens
 
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,11 +40,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.PostLoginNavigation
 import com.example.dietiestates.ui.screens.components.GoogleSignInButton
 import com.example.dietiestates.ui.theme.customBlue
 import com.example.dietiestates.utility.GoogleSignInUtil
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -140,9 +145,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
 
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                    //.padding(24.dp)
-                    ,
+                        .fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -152,7 +155,6 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                         modifier = Modifier
                             .height(200.dp)
                             .width(200.dp)
-                        //.padding(6.dp)
                     )
                     Text(
                         text = "DietiEstates25",
@@ -160,30 +162,9 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 45.sp,
                         color = Color(0xFF3F51B5),
-                        //letterSpacing = 1.5.sp
                     )
 
                 }
-
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 8.dp)
-//                        .weight(1f),
-//                    contentAlignment = Alignment.TopCenter
-//
-//                ) {
-//
-//
-//                    Text(
-//                       modifier = Modifier
-//                            .padding(0.dp, 55.dp, 0.dp, 0.dp),
-//                        text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-//                        fontWeight = FontWeight.Normal, fontSize = 18.sp, color = Color(0xFF3F51B5)
-//                    )
-//
-//                }
-
 
                 Column(
                     modifier = Modifier
@@ -237,60 +218,27 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    CustomButton(
-                        onClick = {
-                            if (viewModel.validateInputs { message ->
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(message);
-                                        //Toast.makeText(context, "Hello", Toast.LENGTH_SHORT ).show()
-                                    }
-                                }) viewModel.login(email, password,context)
-                        },
-                        style = "blue",
-                        enabled = loginState !is LoginState.Loading,
-                        text = "ACCEDI",
-                        modifier = Modifier.fillMaxWidth()
-
+                    LoginButton(
+                        viewModel = viewModel,
+                        loginState = loginState,
+                        context = context,
+                        email = email
                     )
 
                     if (loginState is LoginState.Loading) {
                         CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
                     }
 
-//               if (loginState is LoginState.Error) {
-//                   Text(
-//                       "Errore: ${(loginState as LoginState.Error).message}",
-//                       color = Color.Red,
-//                       modifier = Modifier.padding(top = 8.dp)
-//                   )
-//               }
                 }
 
-
-
+                Spacer(modifier = Modifier.height(20.dp))
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp)
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom
                 ) {
-//                    val googleIcon = ImageVector.vectorResource(id = R.drawable.android_light_rd_na)
-//
-//                    CustomButton(
-//                        onClick = {
-//                            googleSignInClient.signOut().addOnCompleteListener {
-//                                launcher.launch(googleSignInClient.signInIntent)
-//                            }
-//                        },
-//                        style = "white",
-//                        text = "ACCEDI CON GOOGLE",
-//                        icon = googleIcon
-//                        ,
-////                        icon = Icons.Outlined.AccountCircle,
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
                     GoogleSignInButton(onClick = {
                         googleSignInClient.signOut().addOnCompleteListener {
                             launcher.launch(googleSignInClient.signInIntent)
@@ -306,7 +254,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                         },
                         style = "white",
                         text = "REGISTRATI",
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(42.dp)
                     )
 
                 }
@@ -370,3 +318,36 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
 
 
 
+@Composable
+fun LoginButton(viewModel: AuthViewModel, loginState: LoginState, context: Context, email: String) {
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var isClickable by remember { mutableStateOf(true) }
+
+    CustomButton(
+        onClick = {
+            if (isClickable) {
+                isClickable = false // disabilita subito
+                coroutineScope.launch {
+                    // riabilita dopo 500 ms
+                    delay(500)
+                    isClickable = true
+                }
+
+                if (viewModel.validateInputs { message ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    }
+                ) {
+                    viewModel.login(email, viewModel.password, context)
+                }
+            }
+        },
+        style = "blue",
+        enabled = loginState !is LoginState.Loading && isClickable,
+        text = "ACCEDI",
+        modifier = Modifier.fillMaxWidth()
+    )
+}

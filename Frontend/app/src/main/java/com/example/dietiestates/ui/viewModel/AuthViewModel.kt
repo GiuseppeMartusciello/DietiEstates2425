@@ -41,7 +41,6 @@ sealed class ChangePasswordState {
 class AuthViewModel : ViewModel() {
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState
-    val isLoggedIn = mutableStateOf(false)
     val postLoginNavigation = mutableStateOf(PostLoginNavigation.HOME)
 
 
@@ -90,11 +89,12 @@ class AuthViewModel : ViewModel() {
         passwordVisible = !passwordVisible
     }
 
-    fun checkLogin() {
-        isLoggedIn.value = TokenManager.isLoggedIn()
+    fun checkLogin(): Boolean {
+        return TokenManager.isLoggedIn()
     }
 
     fun login(email: String, password: String, context: Context) {
+        Log.d("output","sto loggando")
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             val result = authRepository.login(email, password)
@@ -102,7 +102,6 @@ class AuthViewModel : ViewModel() {
             _loginState.value = when {
                 result.isSuccess -> {
                     AppContainer.reInit(context)
-                    isLoggedIn.value = true
                     val authResult = result.getOrNull()
                     postLoginNavigation.value = if (authResult?.mustChangePassword == true) {
                         PostLoginNavigation.CHANGE_PASSWORD
@@ -148,7 +147,6 @@ class AuthViewModel : ViewModel() {
             _loginState.value = when {
                 result.isSuccess -> {
                     //AppContainer.reInit(context)
-                    isLoggedIn.value = true
                     LoginState.Success
                 }
 
