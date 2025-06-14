@@ -138,7 +138,6 @@ fun ListingCard(listing: Listing, onClick: () -> Unit, onClickOptions: () -> Uni
                         }
 
                     }
-
                 }
             }
         }

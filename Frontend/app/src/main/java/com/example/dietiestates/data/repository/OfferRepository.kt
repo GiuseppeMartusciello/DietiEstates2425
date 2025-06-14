@@ -75,8 +75,8 @@ class OfferRepository (private val offerApi: OfferApi, private val listingApi: L
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Risposta vuota")
         } else {
-            if (response.code() == 409)
-                throw Exception("Impossibile inserire offerta perche' ne e' stata gia accettata un'altra")
+            if (response.code() == 400)
+                throw Exception("Impossibile inserire l'offerta")
             else
                 throw Exception(" ${response.message()}")
         }
@@ -133,7 +133,7 @@ class OfferRepository (private val offerApi: OfferApi, private val listingApi: L
             return response.body()!!
         } else {
             if (response.code() == 409)
-                throw Exception("Impossibile accettare quest'offerta perche' ne e' stata gia accettata precedentemente.")
+                throw Exception("Impossibile accettare quest'offerta perchè ne è stata già accettata una precedentemente.")
             else
                 throw Exception(" ${response.message()}")
         }

@@ -51,7 +51,7 @@ class ProfileViewModel() : ViewModel() {
         val previousClient = current.client
 
         // aggiorna localmente subito
-        _clientState.value = current.copy(client = updatedClient)
+        _clientState.value = current.copy(client = updatedClient, errorNotification = null)
 
         viewModelScope.launch {
             try {
@@ -60,7 +60,7 @@ class ProfileViewModel() : ViewModel() {
                 // ROLLBACK se fallisce la chiamata
                 _clientState.value = _clientState.value.copy(
                     client = previousClient,
-                    error = "Errore aggiornamento preferenza: ${e.message}"
+                    errorNotification = " aggiornamento preferenza non riuscito"
                 )
             }
         }
@@ -70,6 +70,7 @@ class ProfileViewModel() : ViewModel() {
     data class ClientState(
         val loading: Boolean = true,
         val client: Client = Client(),
-        val error: String? = null
+        val error: String? = null,
+        val errorNotification: String? = null
     )
 }

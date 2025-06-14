@@ -4,8 +4,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -28,9 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.dietiestates.AppContainer
 import com.example.dietiestates.utility.TokenManager
 
@@ -57,7 +63,8 @@ fun NavBar(navController: NavController) {
             tonalElevation = 8.dp,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .navigationBarsPadding()
+                .heightIn(max = 60.dp)
         ) {
             items.take(2).forEach { item ->
                 val selected = currentRoute == item.route
@@ -117,8 +124,8 @@ fun NavBar(navController: NavController) {
                 )
             }
 
-            val userRole = TokenManager.getUserRole()
-            val dynamicItem = when (userRole) {
+            //val userRole = TokenManager.getUserRole()
+            val dynamicItem = when (role) {
                 "CLIENT" -> NavItem("profile", Icons.Outlined.Person, Icons.Filled.Person)
                 "MANAGER" -> NavItem("agencyProfile", Icons.Outlined.RealEstateAgent, Icons.Filled.RealEstateAgent)
                 else -> NavItem("logout", Icons.Outlined.Logout, Icons.Filled.Logout)

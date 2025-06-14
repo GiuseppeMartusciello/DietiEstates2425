@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -486,9 +488,9 @@ private fun BottomBar(
     Surface(
         modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .navigationBarsPadding()
+            .heightIn(max = 60.dp)
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-            .padding(bottom = navBarPadding)
             .border(1.dp, Color(0xFF9E9E9E), RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
         color = Color.White,
     ) {
