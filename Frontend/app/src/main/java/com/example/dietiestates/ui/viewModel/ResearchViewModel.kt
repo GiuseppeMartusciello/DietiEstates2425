@@ -19,11 +19,6 @@ import kotlinx.coroutines.launch
 
 class ResearchViewModel: ViewModel() {
 
-    //TODO 2 (il problema è del front end) ci sta un problema se il prezzo minimo è maggiore del prezzo piu alto di tutti gli immobili
-
-    //todo fare in modo tale che la ricerca venga rieffettuata con gli stessi filtri
-    //todo migliorare graficamente
-    //todo dire di mettere municipalita nel listing
 
     //gestisce  le ultime 10 ricerche
     private val _researchState = mutableStateOf(ResearchState())
@@ -143,20 +138,12 @@ class ResearchViewModel: ViewModel() {
     fun updateResearch()  {
         viewModelScope.launch {
             try {
-                _searchState.value = _searchState.value.copy(loading = true, error = null)
 
                 val listings = AppContainer.researchRepository.updateResearch(selectedResearch!!.id)
 
                 _searchState.value = SearchedState(
                     loading = false,
                     listings = listings,
-                    error = null
-                )
-
-                val updatedList = AppContainer.researchRepository.getLast10Researches()
-
-                _researchState.value = _researchState.value.copy(
-                    researches = updatedList,
                     error = null
                 )
 
@@ -167,6 +154,29 @@ class ResearchViewModel: ViewModel() {
             }
         }
     }
+
+
+    fun updateListResearch()
+    {
+        viewModelScope.launch {
+            try {
+                val updatedList = AppContainer.researchRepository.getLast10Researches()
+
+                _researchState.value = _researchState.value.copy(
+                    researches = updatedList,
+                    error = null
+                )
+
+            }
+            catch (e: Exception) {
+                _researchState.value = _researchState.value.copy(
+                    error = "Errore aggiornamento ricerca: ${e.message}"
+                )
+            }
+        }
+
+    }
+
 
 
     fun validateAndBuildDto(): CreateResearchDto? {

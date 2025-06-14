@@ -2,12 +2,10 @@ package com.example.dietiestates
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,10 +36,7 @@ import com.example.dietiestates.ui.screens.MyOffersScreen
 import com.example.dietiestates.ui.screens.OfferScreen
 import com.example.dietiestates.ui.screens.MapSearchScreen
 import com.example.dietiestates.ui.screens.RegisterScreen
-import com.example.dietiestates.ui.screens.ModifyListingScreen
-import com.example.dietiestates.ui.screens.MyOffersScreen
 import com.example.dietiestates.ui.screens.NotificationScreen
-import com.example.dietiestates.ui.screens.OfferScreen
 import com.example.dietiestates.ui.screens.ProfileScreen
 import com.example.dietiestates.ui.screens.ResearchScreen
 import com.example.dietiestates.ui.screens.SearchedListingScreen
@@ -49,8 +44,6 @@ import com.example.dietiestates.ui.theme.CustomTypography
 import com.example.dietiestates.ui.theme.DietiEstatesTheme
 import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.viewModel.AuthViewModel
-import com.example.dietiestates.ui.viewModel.HomeViewModel
-import com.example.dietiestates.ui.viewModel.ListingOfferViewModel
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
 
 
