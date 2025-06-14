@@ -3,9 +3,11 @@ package com.example.dietiestates.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.data.model.Agent
 import com.example.dietiestates.data.model.Listing
-import com.example.dietiestates.data.model.dto.ModifyOrCreateListingDto
+import com.example.dietiestates.data.model.dto.CreateListingDto
+import com.example.dietiestates.data.model.dto.ModifyListingDto
 import com.example.dietiestates.data.remote.api.ListingApi
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -15,6 +17,7 @@ class ListingRepository(private val api: ListingApi) {
     private val BASE_IMAGE_URL = "http://dietiestates.duckdns.org:3000"
 
     suspend fun getListings(): List<Listing> {
+
         val listingsResponse = api.getListings()
 
         if (listingsResponse.isSuccessful ) {
@@ -103,7 +106,7 @@ class ListingRepository(private val api: ListingApi) {
             throw Exception("Errore durante l'eliminazione: ${response.code()}")
         }
     }
-    suspend fun modifyListing(listingId: String, dto: ModifyOrCreateListingDto): Listing {
+    suspend fun modifyListing(listingId: String, dto: ModifyListingDto): Listing {
         val response = api.modifyListing(listingId, dto)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Nessun corpo nella risposta")
@@ -113,7 +116,7 @@ class ListingRepository(private val api: ListingApi) {
     }
 
 
-    suspend fun postListing(dto: ModifyOrCreateListingDto): Listing {
+    suspend fun postListing(dto: CreateListingDto): Listing {
         val response = api.postListing(dto)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Nessun corpo nella risposta")

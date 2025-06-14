@@ -48,11 +48,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.data.model.Notification
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.NotificationState
 import com.example.dietiestates.ui.viewModel.NotificationViewModel
+import com.example.tuaapp.ui.components.NavBar
 import kotlinx.coroutines.delay
 
 
@@ -78,7 +78,7 @@ fun NotificationScreen(navController: NavController) {
                 "Centro Notifiche"
             )
         },
-        bottomBar = { AppBottomBar(navController) }
+        bottomBar = { NavBar(navController = navController) }
     )
     { paddingValues ->
 

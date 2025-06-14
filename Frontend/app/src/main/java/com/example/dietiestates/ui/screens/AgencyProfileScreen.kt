@@ -92,7 +92,6 @@ import androidx.navigation.NavController
 import com.example.dietiestates.R
 import com.example.dietiestates.data.model.dto.CreateAgentDto
 import com.example.dietiestates.data.model.dto.CreateSupportAdminDto
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.LabeledNumberField
 import com.example.dietiestates.ui.screens.components.LabeledTextField
@@ -104,6 +103,7 @@ import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.AgencyProfileViewModel
 import com.example.dietiestates.ui.viewModel.ProfileViewModel
+import com.example.dietiestates.utility.TokenManager
 import com.example.tuaapp.ui.components.NavBar
 import com.example.tuaapp.ui.components.NavItem
 import java.time.Instant
@@ -121,7 +121,7 @@ fun AgencyProfileScreen(navController: NavController) {
 
     Scaffold(
         topBar = { TopBarOffer(navController = navController, modifier = Modifier, "Profilo Agenzia") },
-        bottomBar = { AppBottomBar(navController = navController) }) {
+        bottomBar = { NavBar(navController = navController) }) {
         paddingValues ->
         when {
             state.loading -> {
@@ -136,7 +136,6 @@ fun AgencyProfileScreen(navController: NavController) {
             }
 
             state.error != null -> {
-                Log.d("output","Error: ${state.error}")
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -214,7 +213,9 @@ fun AgencyProfileScreen(navController: NavController) {
                             )
                             .clip(RoundedCornerShape(12.dp))
                             .padding(vertical = 12.dp, horizontal = 20.dp)
-                            .clickable { navController.navigate("logout") },
+                            .clickable {
+                                TokenManager.clearSession()
+                                navController.navigate("loginscreen")},
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {

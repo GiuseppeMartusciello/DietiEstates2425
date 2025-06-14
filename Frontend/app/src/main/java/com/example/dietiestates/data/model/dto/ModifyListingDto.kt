@@ -1,6 +1,6 @@
 package com.example.dietiestates.data.model.dto
 
-data class ModifyOrCreateListingDto(
+data class ModifyListingDto(
     val address: String,
     val title: String,
     val municipality: String,
@@ -15,7 +15,6 @@ data class ModifyOrCreateListingDto(
     val floor: String,
     val hasElevator: Boolean,
     val hasAirConditioning: Boolean,
-    val hasGarage: Boolean,
-    val agentId: String
+    val hasGarage: Boolean
 )
 

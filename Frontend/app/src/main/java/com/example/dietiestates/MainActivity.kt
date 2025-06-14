@@ -12,6 +12,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -118,10 +119,6 @@ fun MyApp() {
         }
         composable(route = "home") {
             HomeScreen(navController)
-        }
-        composable(route = "logout") {
-            authViewModel.logout()
-            LoginScreen(navController = navController)
         }
         composable(route = "offer") {
             MyOffersScreen(navController = navController)

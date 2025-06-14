@@ -20,7 +20,7 @@ import retrofit2.HttpException
 
 class AuthRepository(
     private val authApi: AuthApi,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager = TokenManager
 ) {
 
     suspend fun login(email: String, password: String): Result<AuthResult> {
@@ -95,11 +95,8 @@ class AuthRepository(
 
     suspend fun loginWithGoogle(idToken: String): Result<Unit> {
         return try {
-            Log.d("GoogleLogin", "Sto per chiamare l'API con token: $idToken")
             val response = authApi.loginWithGoogleToken(mapOf("idToken" to idToken))
-
-            Log.d("GoogleLogin", "Risposta ricevuta: ${response.accessToken}")
-            AppContainer.tokenManager.saveToken(response.accessToken)
+            tokenManager.saveToken(response.accessToken)
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e("GoogleLogin", "Errore nella chiamata a /google-token", e)

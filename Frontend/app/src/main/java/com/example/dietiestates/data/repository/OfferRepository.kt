@@ -18,8 +18,6 @@ class OfferRepository (private val offerApi: OfferApi, private val listingApi: L
         return try {
             val response = offerApi.getMyOfferListings()
 
-            Log.d("DEBUG", "Chiamata terminata dalla repository, response: ${response.body()}")
-
             if (response.isSuccessful) {
                 val listings = response.body() ?: emptyList()
                 Result.success(listings)
@@ -59,7 +57,6 @@ class OfferRepository (private val offerApi: OfferApi, private val listingApi: L
     }
 
     suspend fun  getClientByListingAgent(listingId: String): List<ClientsOffer> {
-
 
         val response = offerApi.getClientByListingAgent(listingId)
 
@@ -136,7 +133,7 @@ class OfferRepository (private val offerApi: OfferApi, private val listingApi: L
             return response.body()!!
         } else {
             if (response.code() == 409)
-                throw Exception("Impossibile accettare offerta perche' ne e' stata gia accettata un'altra")
+                throw Exception("Impossibile accettare quest'offerta perche' ne e' stata gia accettata precedentemente.")
             else
                 throw Exception(" ${response.message()}")
         }

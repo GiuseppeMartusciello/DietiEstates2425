@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dietiestates.AppContainer
 import com.example.dietiestates.data.model.SignUpRequest
+import com.example.dietiestates.utility.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -97,7 +98,7 @@ class RegistrationViewModel: ViewModel() {
     }
 
     fun checkLogin() {
-        isRegistered.value = AppContainer.tokenManager.isLoggedIn()
+        isRegistered.value = TokenManager.isLoggedIn()
     }
 
     fun register (request: SignUpRequest, onValidationError: (String) -> Unit) {

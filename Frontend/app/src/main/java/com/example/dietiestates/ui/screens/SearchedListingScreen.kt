@@ -30,11 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.ErrorHandle
 import com.example.dietiestates.ui.screens.components.ListingCard
 import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
+import com.example.tuaapp.ui.components.NavBar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -59,7 +59,7 @@ fun SearchedListingScreen(
 
     Scaffold(
         topBar = { TopBarOffer(navController = navController, modifier = Modifier, "Risultati") },
-        bottomBar = { AppBottomBar(navController = navController) }
+        bottomBar = { NavBar(navController = navController) }
 
     ) { paddingValues ->
         when {
