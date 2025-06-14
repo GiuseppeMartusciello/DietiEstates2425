@@ -92,7 +92,10 @@ export class ListingService {
   }
 
   async getListingById(id: string): Promise<ListingResponse> {
-    const listing = await this.listingRepository.findOneBy({ id: id });
+    const listing = await this.listingRepository.findOne({ 
+      where: { id: id },
+      relations: ['agency'],
+    });
 
     if (!listing) throw new NotFoundException(`Listing id  "${id}" not found`);
 
@@ -102,6 +105,17 @@ export class ListingService {
       ...(instanceToPlain(listing) as Listing),
       imageUrls: images,
     };
+  }
+
+  async getListingForCheck(id: string): Promise<Listing> {
+    const listing = await this.listingRepository.findOne({ 
+      where: { id: id },
+      relations: ['agency'],
+    });
+
+    if (!listing) throw new NotFoundException(`Listing id  "${id}" not found`);
+
+    return listing;
   }
 
   async getAllListing(): Promise<ListingResponse[]> {
@@ -189,6 +203,8 @@ export class ListingService {
     agencyId: string,
     agentId?: string,
   ): Promise<void> {
+
+
     const result = await this.listingRepository.delete({
       id: listingId,
       ...(agentId && { agent: { userId: agentId } as Agent }),

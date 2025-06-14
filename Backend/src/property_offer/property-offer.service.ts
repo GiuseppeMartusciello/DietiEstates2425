@@ -199,7 +199,6 @@ export class OfferService {
     if (!listing) throw new UnauthorizedException('Listing not found');
 
     this.checkAuthorization(agent, listing); //controllo permessi
-
     const offers = await this.offerRepository.find({
       where: {
         listing: { id: listingId },
@@ -233,8 +232,6 @@ export class OfferService {
       .orderBy('offer.date', 'ASC')
       .getMany();
 
-    console.log(externalOffers);
-
     const result: ClientWithLastOfferDto[] = externalOffers.map((offer) => {
       // Offerta da utente esterno (ospite)
       return {
@@ -264,9 +261,7 @@ export class OfferService {
       where: { id: listingId },
     });
     if (!listing) throw new UnauthorizedException('Listing not found');
-
     this.checkAuthorization(user, listing); // controllo permessi
-
     const offers = await this.offerRepository
       .createQueryBuilder('offer')
       .distinctOn(['offer.clientUserId']) // clientUserId è la FK nel DB
@@ -350,6 +345,8 @@ export class OfferService {
 
     this.checkAuthorization(user, listing);
 
+    this.checkPrice(listing.price, price)
+
     const offer = this.offerRepository.create({
       price,
       date: new Date(),
@@ -373,10 +370,10 @@ export class OfferService {
     if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
 
-    if (user.supportAdmin && user.supportAdmin.agency !== listing.agency)
+    if (user.supportAdmin && user.supportAdmin.agency.id != listing.agency.id)
       throw new UnauthorizedException();
 
-    if (user.manager && user.manager.agency !== listing.agency)
+    if (user.manager && user.manager.agency.id != listing.agency.id)
       throw new UnauthorizedException();
   }
 
@@ -405,7 +402,7 @@ export class OfferService {
 
   private checkPrice(listingPrice: number, userOffer: number) {
     if (listingPrice < userOffer)
-      throw new BadRequestException('Price exceeds listing price');
+      throw new BadRequestException("L'offerta non puo' essere superiore al prezzo dell'immobile. (€410000)");
 
     if (userOffer <= 0)
       throw new BadRequestException('Price can t be < then 0');

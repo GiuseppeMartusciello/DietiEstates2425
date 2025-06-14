@@ -80,8 +80,6 @@ export class ResearchService {
 
     const result = await this.listingRepository.searchListings(research);
 
-    console.log('Search results:', result);
-
     return result;
   }
 }

@@ -34,7 +34,6 @@ export class OfferController {
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
     @GetUser() user: UserItem,
   ): Promise<PropertyOffer[]> {
-    console.log('Daje Roma');
     return this.offerService.getOffersByListingAndClient(listingId, user.id);
   }
 
@@ -84,8 +83,6 @@ export class OfferController {
   @Get('/my-offer/listing')
   @Roles(UserRoles.CLIENT)
   getOffersbyClientId(@GetUser() user: UserItem): Promise<ListingResponse[]> {
-    console.log('Sono nel controller.');
-
     return this.offerService.getListingByClientId(user.id);
   }
 

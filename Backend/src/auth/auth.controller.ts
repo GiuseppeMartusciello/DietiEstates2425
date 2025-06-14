@@ -19,7 +19,6 @@ export class AuthController {
 
   @Post('/google-token')
   async googleTokenLogin(@Body() body: { idToken: string }) {
-    console.log("Google token e' stato chiamato");
     return this.authService.verifyGoogleTokenAndLogin(body.idToken);
   }
 }
