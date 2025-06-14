@@ -30,7 +30,6 @@ interface NotificationApi {
         @Path("notificationId") userNotificationId: String
     ): Response<Void>
 
-
    /* @POST("notification/test-push")
     suspend fun sendTestPush(
         @Body body: FcmTestBody

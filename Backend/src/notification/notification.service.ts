@@ -135,7 +135,7 @@ export class NotificationService {
     .createQueryBuilder('notification')
     .innerJoinAndSelect('notification.userNotifications', 'userNotification', 'userNotification.user.id = :userId', { userId })
     .leftJoinAndSelect('notification.listing', 'listing')
-    .leftJoinAndSelect('notification.offer', 'propertyOffer')
+    .leftJoinAndSelect('notification.propertyOffer', 'propertyOffer')
     .orderBy('notification.date', 'DESC')
     .getMany();
 

@@ -1,6 +1,5 @@
 package com.example.dietiestates.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,10 +50,10 @@ import androidx.compose.material.icons.filled.Elevator
 import androidx.compose.material3.*
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
 import com.example.dietiestates.ui.screens.components.AppTopBar
 import com.example.dietiestates.ui.screens.components.GoBackButton
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 
 
 @Composable
@@ -65,7 +64,7 @@ fun FilterScreen(
 
     Scaffold(
         topBar = {
-            AppTopBar()
+            TopBarOffer(navController = navController, modifier = Modifier, "Filtri")
         }
     ) { paddingValues ->
         Box (
@@ -74,10 +73,8 @@ fun FilterScreen(
                 .padding(paddingValues)
                 .padding(vertical = 0.dp)
         ) {
-            GoBackButton(navController,)
 
             Filtering(viewModel,navController)
-
 
             Box(
                 modifier = Modifier
@@ -233,11 +230,6 @@ fun SearchButton(
         onClick = {
             //se non è una ricerca vecchia, crea una nuova
             if(!viewModel.isOldResearch) {viewModel.createResearch()}
-
-            //se è una ricerca vecchia, aggiorna la data
-            else viewModel.updateResearch()
-
-
             navController.navigate("searchedscreen")
         },
         colors = ButtonDefaults.buttonColors(Color(0xFF3F51B5)),

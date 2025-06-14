@@ -74,9 +74,13 @@ fun ResearchScreen(
     navController: NavController,
 ) {
     LaunchedEffect(Unit) {
+        if(viewModel.isOldResearch){viewModel.updateListResearch()}
+
         viewModel.fetchResearch10()
+
         viewModel.updateSelectedResearch(null)
         viewModel.isOldResearch = false
+
         viewModel.resetResearchForm()
     }
 
@@ -219,7 +223,8 @@ fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) 
                                 onDelete = { id ->
                                     viewModel.deleteResearch(id);
                                     viewModel.fetchResearch10()
-                                }
+                                },
+                                viewModel
                             )
                         }
                     }
@@ -246,7 +251,8 @@ fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) 
 fun ResearchItem(
     research: Research,
     onSelect: (String, Research) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    viewModel: ResearchViewModel
 ) {
 
     val content = if (!research.municipality.isNullOrBlank()) {
@@ -258,7 +264,7 @@ fun ResearchItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onSelect(content, research) }),
+            .clickable(onClick = { onSelect(content, research);  viewModel.updateResearch()}),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF0FAFE),
@@ -360,8 +366,13 @@ fun CustomOutlineTextField(
                     radius = ""
                 )
             }
-            navController.navigate("filterscreen")
-            keyboardController?.hide()
+            if(viewModel.isOldResearch){
+                navController.navigate("searchedscreen")
+            }
+            else{
+                navController.navigate("filterscreen")
+                keyboardController?.hide()
+            }
         } else {
             showAlert = true
         }
@@ -389,6 +400,7 @@ fun CustomOutlineTextField(
             }
         },
         modifier = Modifier
+
             .padding(horizontal = 32.dp)
             .fillMaxWidth()
             .onGloballyPositioned {

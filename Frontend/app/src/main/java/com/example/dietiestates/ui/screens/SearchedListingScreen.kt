@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,11 +46,14 @@ fun SearchedListingScreen(
     val viewState by viewmodel.searchState
     val systemUiController = rememberSystemUiController()
 
+
     SideEffect {
         systemUiController.setStatusBarColor(
             Color(0xFF3F51B5),
             darkIcons = true
         ) // o false se immagine scura
+
+        viewmodel.updateListResearch()
     }
 
 
