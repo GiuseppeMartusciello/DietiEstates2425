@@ -370,8 +370,6 @@ fun OfferScreen(
                         ListingCardMini(
                             listing = it,
                             onClick = { navController.navigate("listingscreen/${it.id}") })
-
-
                     }
                     LazyColumn(
                         state = listState,
@@ -462,10 +460,7 @@ fun OfferScreen(
 
                         }
                     }
-
                 }
-
-
             }
         }
     }

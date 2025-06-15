@@ -103,7 +103,7 @@ class ListingRepository(private val api: ListingApi) {
     suspend fun deleteListing(listingId: String) {
         val response = api.deleteListing(listingId)
         if (!response.isSuccessful) {
-            throw Exception("Errore durante l'eliminazione: ${response.code()}")
+            throw Exception("Errore durante l'eliminazione dell'annuncio")
         }
     }
     suspend fun modifyListing(listingId: String, dto: ModifyListingDto): Listing {

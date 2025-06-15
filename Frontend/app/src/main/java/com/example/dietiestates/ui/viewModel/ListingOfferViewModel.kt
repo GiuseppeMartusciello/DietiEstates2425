@@ -182,6 +182,12 @@ class ListingOfferViewModel(
                     )
                     return false
                 }
+                if (price > listingPrice) {
+                    _uiState.value = _uiState.value.copy(
+                        error = "L'offerta non può essere maggiore del prezzo dell'immobile"
+                    )
+                    return false
+                }
 
 
 

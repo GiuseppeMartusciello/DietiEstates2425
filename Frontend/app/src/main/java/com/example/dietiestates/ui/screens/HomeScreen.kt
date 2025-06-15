@@ -120,7 +120,6 @@ fun HomeScreen(navController: NavController) {
                                 onClickDelete ={ homeViewModel.deleteListing(    listingId = listing.id,
                                     onSuccess = {
                                         Toast.makeText(context, "Annuncio eliminato ✅", Toast.LENGTH_SHORT).show()
-
                                     },
                                     onError = { message ->
                                         Toast.makeText(context, "Errore eliminazione ❌: $message", Toast.LENGTH_SHORT).show()

@@ -25,6 +25,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
             android:theme="@style/Theme.DietiEstates">
             <intent-filter>
