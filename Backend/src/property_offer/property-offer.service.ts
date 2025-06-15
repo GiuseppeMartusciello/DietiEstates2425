@@ -174,11 +174,15 @@ export class OfferService {
       await this.notificationService.createSpecificNotificationOffer(
         {
           title: 'Your offer has been updated !',
-          description: 'check out the your offer for' + offer.listing.title + ' the state is now ' + status,
+          description:
+            'check out the your offer for' +
+            offer.listing.title +
+            ' the state is now ' +
+            status,
           category: NotificationType.SPECIFIC,
         },
         offer,
-        true
+        true,
       );
 
     if (!notifica)
@@ -300,9 +304,7 @@ export class OfferService {
     return result;
   }
 
-  async getClientsByListingId(
-    listingId: string,
-  ): Promise<PropertyOffer[]> {
+  async getClientsByListingId(listingId: string): Promise<PropertyOffer[]> {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
     const uniqueClients = await this.findClientByListingId(listingId);
@@ -370,6 +372,7 @@ export class OfferService {
   }
 
   checkAuthorization(user: UserItem, listing: Listing): void {
+    console.log('Controllo permessi di user: ', user);
     if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
 
@@ -426,24 +429,22 @@ export class OfferService {
       client: { userId: clientId } as Client,
     });
 
-
-
     await this.offerRepository.save(offer);
     //crea notifica specifica per una nuova offerta
-     const notifica =
-       await this.notificationService.createSpecificNotificationOffer(
-         {
-           title: 'Offer for ' + listing.title,
-           description: `A new offer of ${price}€ has been made for the property ${listing.title}.`,
-           category: NotificationType.SPECIFIC,
-         },
-         offer,
-         false,
-       );
+    const notifica =
+      await this.notificationService.createSpecificNotificationOffer(
+        {
+          title: 'Offer for ' + listing.title,
+          description: `A new offer of ${price}€ has been made for the property ${listing.title}.`,
+          category: NotificationType.SPECIFIC,
+        },
+        offer,
+        false,
+      );
 
-     if (!notifica)
-       throw new InternalServerErrorException('Notification not created');
+    if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
 
-     return offer;
+    return offer;
   }
 }

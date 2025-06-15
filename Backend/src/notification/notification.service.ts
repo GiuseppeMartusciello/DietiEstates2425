@@ -10,7 +10,6 @@ import { Client } from 'src/client/client.entity';
 import { PropertyOffer } from 'src/property_offer/property_offer.entity';
 import { User } from 'src/auth/user.entity';
 
-
 @Injectable()
 export class NotificationService {
   constructor(
@@ -78,9 +77,8 @@ export class NotificationService {
   async createSpecificNotificationOffer(
     createNotificationDto: CreateNotificationDto,
     propertyOffer: PropertyOffer,
-    update : boolean,
+    update: boolean,
   ): Promise<Notification> {
-
     //se l offerta è stata fatta da un cliente viene notificato l agente
     //l agente vien recuperato da propertyOffer e listing
     //se l offerta è stata fatta da un agente viene notificato il cliente
@@ -88,20 +86,20 @@ export class NotificationService {
 
     //in caso di update la logica è esattamente il contrario
 
-  let user: { userId: string };
+    let user: { userId: string };
 
-  if (!update) {
-    // Caso normale: offerta nuova
-    user = propertyOffer.madeByUser
-      ? propertyOffer.listing.agent
-      : propertyOffer.client;
-  } else {
-    // Caso update: inverti logica
-    user = propertyOffer.madeByUser
-      ? propertyOffer.client
-      : propertyOffer.listing.agent;
-  }
-    
+    if (!update) {
+      // Caso normale: offerta nuova
+      user = propertyOffer.madeByUser
+        ? propertyOffer.listing.agent
+        : propertyOffer.client;
+    } else {
+      // Caso update: inverti logica
+      user = propertyOffer.madeByUser
+        ? propertyOffer.client
+        : propertyOffer.listing.agent;
+    }
+
     const result = this.notificationRepository.create({
       ...createNotificationDto,
       date: new Date(),
@@ -126,20 +124,23 @@ export class NotificationService {
     return savedNotification;
   }
 
-
   //restituisce tutte le notifiche non lette per un utente
   //viene utilizzato una qery builder personalizzata
 
- async Notifications(userId: string): Promise<Notification[]> {
-  const notifications = await this.notificationRepository
-    .createQueryBuilder('notification')
-    .innerJoinAndSelect('notification.userNotifications', 'userNotification', 'userNotification.user.id = :userId', { userId })
-    .orderBy('notification.date', 'DESC')
-    .getMany();
+  async Notifications(userId: string): Promise<Notification[]> {
+    const notifications = await this.notificationRepository
+      .createQueryBuilder('notification')
+      .innerJoinAndSelect(
+        'notification.userNotifications',
+        'userNotification',
+        'userNotification.user.id = :userId',
+        { userId },
+      )
+      .orderBy('notification.date', 'DESC')
+      .getMany();
 
-  return notifications;
-}
-
+    return notifications;
+  }
 
   async NotificationById(notificationId: string): Promise<Notification> {
     const notification = await this.notificationRepository.findOneOrFail({

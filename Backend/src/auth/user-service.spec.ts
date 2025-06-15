@@ -53,7 +53,7 @@ describe('UserService - changePassword', () => {
     jest.clearAllMocks();
   });
 
-  it('✔️ Dovrebbe aggiornare la password se le credenziali sono corrette', async () => {
+  it('should update password if currentPassword matches and user exists', async () => {
     const dto: CredentialDto = {
       currentPassword: 'oldPass123',
       newPassword: 'newPass456!',
@@ -61,10 +61,15 @@ describe('UserService - changePassword', () => {
 
     const mockUserCopy = JSON.parse(JSON.stringify(mockUser));
     (userRepository.findOne as jest.Mock).mockResolvedValue(mockUserCopy);
+    (userRepository.save as jest.Mock).mockResolvedValue(mockUserCopy);
 
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
-    jest.spyOn(bcrypt, 'genSalt').mockResolvedValue('salt');
-    jest.spyOn(bcrypt, 'hash').mockResolvedValue('newHashedPassword');
+    const newHashedPassword = 'newHashedPassword123';
+    jest
+      .spyOn(userService as any, 'hashPassword')
+      .mockResolvedValue(newHashedPassword);
+    // jest.spyOn(bcrypt, 'genSalt').mockResolvedValue('salt');
+    // jest.spyOn(bcrypt, 'hash').mockResolvedValue('newHashedPassword');
 
     const result = await userService.changePassword(dto, mockUser.id);
 
@@ -78,13 +83,14 @@ describe('UserService - changePassword', () => {
     );
     expect(userRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        password: 'newHashedPassword',
+        password: newHashedPassword,
       }),
     );
+
     expect(result).toEqual({ message: 'Password updated successfully' });
   });
 
-  it('❌ Dovrebbe lanciare NotFoundException se l’utente non esiste', async () => {
+  it('should throw NotFoundException if user is not found', async () => {
     (userRepository.findOne as jest.Mock).mockResolvedValue(null);
     const dto: CredentialDto = {
       currentPassword: 'any',
@@ -96,7 +102,7 @@ describe('UserService - changePassword', () => {
     );
   });
 
-  it('❌ Dovrebbe lanciare UnauthorizedException se la password è errata', async () => {
+  it('should throw UnauthorizedException if currentPassword is wrong', async () => {
     (userRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
 

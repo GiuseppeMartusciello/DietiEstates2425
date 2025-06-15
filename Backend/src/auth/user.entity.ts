@@ -47,7 +47,9 @@ export class User {
   )
   userNotifications: UserNotification[];
 
-  @OneToMany(() => Notification, (notification: Notification) => notification.createdBy)
+  @OneToMany(
+    () => Notification,
+    (notification: Notification) => notification.createdBy,
+  )
   createdNotifications: Notification[];
-  
 }

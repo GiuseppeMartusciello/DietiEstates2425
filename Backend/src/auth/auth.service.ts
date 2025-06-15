@@ -84,7 +84,7 @@ export class AuthService {
       role: user.role,
     };
 
-    const accessToken = await this.createToken(payload, '1h');
+    const accessToken = await this.createToken(payload, '3h');
 
     return {
       accessToken: accessToken,
@@ -119,7 +119,7 @@ export class AuthService {
 
     const payload: JwtPayload = { userId: user.id, role: user.role };
 
-    const accessToken = await this.createToken(payload, '45m');
+    const accessToken = await this.createToken(payload, '2h');
 
     console.log(user);
 
@@ -163,7 +163,7 @@ export class AuthService {
       if (user.provider === Provider.GOOGLE) {
         const accessToken = await this.createToken(
           { userId: user.id, role: user.role },
-          '45m',
+          '2h',
         );
         return { accessToken, mustChangePassword: false };
       } else
@@ -194,7 +194,7 @@ export class AuthService {
 
     const accessToken = await this.createToken(
       { userId: newUser.id, role: newUser.role },
-      '45m',
+      '2h',
     );
     return { accessToken, mustChangePassword: false };
   }

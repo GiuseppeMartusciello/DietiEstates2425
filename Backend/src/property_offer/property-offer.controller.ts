@@ -66,9 +66,7 @@ export class OfferController {
   //   return this.offerService.getAllOffersByListingId(listingId);
   // }
 
-  // in questo caso l agente clicca su un cliente e vede tutte le offerte che ha fatto
-  // serve sia l id dell utente sia l id della proprieta
-  //questo è il caso in cui l agente clicca su una chat e vede lo storico di offerte con un cliente
+  // CHAT OFFERTE CON UN CLIENTE
   @Get('/listing/:listingId/client/:clientId/offers')
   @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
   async getOffersByAgentId(
@@ -79,7 +77,7 @@ export class OfferController {
     return this.offerService.getOffersByAgentId(listingId, clientId, agent);
   }
 
-  //questo metodo restituisce tutti i listining per cui il cliente ha fatto un offerta
+  // Questo metodo restituisce tutti i listining per cui il cliente ha fatto un offerta
   @Get('/my-offer/listing')
   @Roles(UserRoles.CLIENT)
   getOffersbyClientId(@GetUser() user: UserItem): Promise<ListingResponse[]> {

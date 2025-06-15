@@ -56,7 +56,7 @@ describe('AgencyService - deleteAgentById', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('✔️ Dovrebbe eliminare correttamente un agente', async () => {
+  it('TC1 - It should properly delete an agent', async () => {
     (userRepository.findOneBy as jest.Mock).mockResolvedValue(user);
     (agentRepository.findOne as jest.Mock).mockResolvedValue(agent);
 
@@ -66,7 +66,7 @@ describe('AgencyService - deleteAgentById', () => {
     expect(result).toEqual({ message: 'Agent delete successfully' });
   });
 
-  it('❌ Dovrebbe lanciare NotFoundException se l’utente non esiste', async () => {
+  it('TC2 - Should throw NotFoundException if user does not exist', async () => {
     (userRepository.findOneBy as jest.Mock).mockResolvedValue(null);
 
     await expect(
