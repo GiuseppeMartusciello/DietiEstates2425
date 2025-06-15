@@ -120,7 +120,7 @@ export class OfferService {
     // cerco l oggetto offerta tramite l id dell offerta
     const offer = await this.offerRepository.findOne({
       where: { id: offerId },
-      relations: ['listing'],
+      relations: ['listing','client'],
     });
     if (!offer) throw new NotFoundException('Offer not found');
 

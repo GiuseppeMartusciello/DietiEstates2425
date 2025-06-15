@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "joi": "^17.13.3"
-  },
-  "devDependencies": {
-    "typeorm-ts-node-esm": "^0.3.20"
-  }
-}
