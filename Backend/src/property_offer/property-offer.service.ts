@@ -171,31 +171,31 @@ export class OfferService {
     //crea notifica specifica
     //attenzione ! la notifica viene create l update è sull offerta ma la notifica è nuova
     const { title, description } =
-    status === 'ACCEPTED'
-      ? {
-          title: 'La tua offerta è stata accettata!',
-          description: `L'agente ha accettato la tua offerta per l'immobile: ${offer.listing.title}.`,
-        }
-      : status === 'DECLINED'
-      ? {
-          title: 'La tua offerta è stata rifiutata',
-          description: `L'agente ha rifiutato la tua offerta per l'immobile: ${offer.listing.title}.`,
-        }
-      : {
-          title: 'Lo stato della tua offerta è cambiato',
-          description: `Controlla la tua offerta per ${offer.listing.title}, il nuovo stato è: ${status}`,
-        };
-  
-  const notifica =
-    await this.notificationService.createSpecificNotificationOffer(
-      {
-        title,
-        description,
-        category: NotificationType.OFFER,
-      },
-      offer,
-      true,
-    );
+      status === 'ACCEPTED'
+        ? {
+            title: 'La tua offerta è stata accettata!',
+            description: `L'agente ha accettato la tua offerta per l'immobile: ${offer.listing.title}.`,
+          }
+        : status === 'DECLINED'
+          ? {
+              title: 'La tua offerta è stata rifiutata',
+              description: `L'agente ha rifiutato la tua offerta per l'immobile: ${offer.listing.title}.`,
+            }
+          : {
+              title: 'Lo stato della tua offerta è cambiato',
+              description: `Controlla la tua offerta per ${offer.listing.title}, il nuovo stato è: ${status}`,
+            };
+
+    const notifica =
+      await this.notificationService.createSpecificNotificationOffer(
+        {
+          title,
+          description,
+          category: NotificationType.OFFER,
+        },
+        offer,
+        true,
+      );
 
     if (!notifica)
       throw new InternalServerErrorException('Notification not created');
@@ -339,8 +339,6 @@ export class OfferService {
     listingId: string,
   ): Promise<PropertyOffer> {
     const { price, guestEmail, guestName, guestSurname } = dto;
-    if (!guestEmail && !guestName && !guestSurname)
-      throw new BadRequestException('Email, name and surname are required');
 
     const listing = await this.listingRepository.findOne({
       where: { id: listingId },
