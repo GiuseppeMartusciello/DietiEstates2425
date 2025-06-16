@@ -4,15 +4,12 @@ export class CreateExternalOfferDto {
   @IsNumber()
   price: number;
 
-  @IsOptional()
   @IsEmail()
-  guestEmail?: string;
+  guestEmail: string;
 
-  @IsOptional()
   @IsString()
-  guestName?: string;
+  guestName: string;
 
-  @IsOptional()
   @IsString()
-  guestSurname?: string;
+  guestSurname: string;
 }
