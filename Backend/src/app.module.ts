@@ -41,7 +41,6 @@ import { join } from 'path';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
-        //logging: 'all',
       }),
     }),
     AuthModule,

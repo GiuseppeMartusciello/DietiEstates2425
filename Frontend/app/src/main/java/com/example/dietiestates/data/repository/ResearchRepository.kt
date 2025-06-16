@@ -5,9 +5,9 @@ import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.Research
 import com.example.dietiestates.data.remote.api.ListingApi
 import com.example.dietiestates.data.remote.api.ResearchApi
+import com.example.dietiestates.utility.ApiConstants
 
 data class ResearchRepository(private val api: ResearchApi, private val apiListing: ListingApi) {
-    private val BASE_IMAGE_URL = "http://10.0.2.2:3000"
 
     suspend fun getLast10Researches(): List<Research> {
         val response = api.getLast10Researches()
@@ -32,7 +32,7 @@ data class ResearchRepository(private val api: ResearchApi, private val apiListi
 
             return body.map { listing ->
                 val firstImage = imageMap[listing.id]?.firstOrNull()
-                val fullUrl = firstImage?.let { "$BASE_IMAGE_URL$it" }
+                val fullUrl = firstImage?.let { "${ApiConstants.BASE_URL}$it" }
                 listing.copy(imageUrls = listOfNotNull(fullUrl))
             }
         } else {
@@ -59,7 +59,7 @@ data class ResearchRepository(private val api: ResearchApi, private val apiListi
 
             return body.map { listing ->
                 val firstImage = imageMap[listing.id]?.firstOrNull()
-                val fullUrl = firstImage?.let { "$BASE_IMAGE_URL$it" }
+                val fullUrl = firstImage?.let { "${ApiConstants.BASE_URL}$it" }
                 listing.copy(imageUrls = listOfNotNull(fullUrl))
             }
         } else {

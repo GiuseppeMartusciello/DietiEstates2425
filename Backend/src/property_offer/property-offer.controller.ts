@@ -34,7 +34,6 @@ export class OfferController {
     @Param('listingId', new ParseUUIDPipe()) listingId: string,
     @GetUser() user: UserItem,
   ): Promise<PropertyOffer[]> {
-    console.log('Daje Roma');
     return this.offerService.getOffersByListingAndClient(listingId, user.id);
   }
 
@@ -57,14 +56,7 @@ export class OfferController {
     return this.offerService.getExternalOffers(listingId, user);
   }
 
-  // @Get('listing/:listingId/all')
-  // // @Roles(UserRoles.AGENT, UserRoles.MANAGER, UserRoles.SUPPORT_ADMIN)
-  // async getAllOffer(
-  //   @GetUser() user: UserItem,
-  //   @Param('listingId', new ParseUUIDPipe()) listingId: string,
-  // ): Promise<PropertyOffer[]> {
-  //   return this.offerService.getAllOffersByListingId(listingId);
-  // }
+
 
   // CHAT OFFERTE CON UN CLIENTE
   @Get('/listing/:listingId/client/:clientId/offers')
@@ -81,8 +73,6 @@ export class OfferController {
   @Get('/my-offer/listing')
   @Roles(UserRoles.CLIENT)
   getOffersbyClientId(@GetUser() user: UserItem): Promise<ListingResponse[]> {
-    console.log('Sono nel controller.');
-
     return this.offerService.getListingByClientId(user.id);
   }
 

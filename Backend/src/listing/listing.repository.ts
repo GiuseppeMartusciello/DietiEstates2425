@@ -37,9 +37,6 @@ export class ListingRepository extends Repository<Listing> {
       hasGarage,
     } = serchListingDto;
 
-
-
-    //todo si potrebbe aggiungere anche provincia tra i filtri
     const energyRank: Record<string, number> = {
       A: 5,
       B: 6,
@@ -71,7 +68,6 @@ export class ListingRepository extends Repository<Listing> {
     let listings = await query.getMany();
 
 
-    //  Energy class filter
     if (
       energyClass &&
       energyRank[energyClass.toUpperCase().trim()] !== undefined
@@ -86,7 +82,6 @@ export class ListingRepository extends Repository<Listing> {
       });
     }
 
-    //  Municipality match
     if (searchType === SearchType.MUNICIPALITY && municipality?.trim()) {
       listings = listings.filter((listing) =>
         listing.municipality
@@ -95,7 +90,6 @@ export class ListingRepository extends Repository<Listing> {
       );
     }
 
-    //  Coordinates (radius) match
     if (
       searchType === SearchType.COORDINATES &&
       latitude !== undefined &&

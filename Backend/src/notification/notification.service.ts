@@ -58,9 +58,6 @@ export class NotificationService {
       .andWhere('research.municipality = :municipality', { municipality })
       .getMany();
 
-    //testare! di nuovo
-    //vengono messi tutti i client in una map
-
     const userNotifications = AllClient.map((user) => ({
       user: { id: user.userId }, // entità parziale User
       notification: { id: savedNotification.id }, // entità parziale Notification
@@ -87,6 +84,7 @@ export class NotificationService {
     //in caso di update la logica è esattamente il contrario
 
     let user: { userId: string };
+    if (propertyOffer.guestEmail) return new Notification();
 
     if (!update) {
       // Caso normale: offerta nuova

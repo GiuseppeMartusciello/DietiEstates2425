@@ -34,16 +34,7 @@ export class AuthService {
   ) {}
 
   async signUp(authCredentialDto: AuthCredentialDto): Promise<AuthResponse> {
-    const {
-      name,
-      surname,
-      email,
-      password,
-      phone,
-      // birthDate,
-      // gender,
-      // address,
-    } = authCredentialDto;
+    const { name, surname, email, password, phone } = authCredentialDto;
 
     const found = await this.userRepository
       .createQueryBuilder('user')
@@ -63,8 +54,6 @@ export class AuthService {
       email,
       password: hashedPassword,
       phone,
-      // birthDate,
-      // gender,
       role: UserRoles.CLIENT,
       provider: Provider.LOCAL,
       lastPasswordChangeAt: new Date(),

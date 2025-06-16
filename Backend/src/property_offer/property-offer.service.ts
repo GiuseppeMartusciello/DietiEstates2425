@@ -120,7 +120,7 @@ export class OfferService {
     // cerco l oggetto offerta tramite l id dell offerta
     const offer = await this.offerRepository.findOne({
       where: { id: offerId },
-      relations: ['listing'],
+      relations: ['listing', 'client'],
     });
     if (!offer) throw new NotFoundException('Offer not found');
 
@@ -173,11 +173,11 @@ export class OfferService {
     const notifica =
       await this.notificationService.createSpecificNotificationOffer(
         {
-          title: 'Your offer has been updated !',
+          title: 'Un offerta è stata cambiata !',
           description:
-            'check out the your offer for' +
+            'Controlla l offerta per :' +
             offer.listing.title +
-            ' the state is now ' +
+            'il suo nuovo stato adesso è' +
             status,
           category: NotificationType.SPECIFIC,
         },
@@ -203,7 +203,6 @@ export class OfferService {
     if (!listing) throw new UnauthorizedException('Listing not found');
 
     this.checkAuthorization(agent, listing); //controllo permessi
-
     const offers = await this.offerRepository.find({
       where: {
         listing: { id: listingId },
@@ -237,8 +236,6 @@ export class OfferService {
       .orderBy('offer.date', 'ASC')
       .getMany();
 
-    console.log(externalOffers);
-
     const result: ClientWithLastOfferDto[] = externalOffers.map((offer) => {
       // Offerta da utente esterno (ospite)
       return {
@@ -268,9 +265,7 @@ export class OfferService {
       where: { id: listingId },
     });
     if (!listing) throw new UnauthorizedException('Listing not found');
-
     this.checkAuthorization(user, listing); // controllo permessi
-
     const offers = await this.offerRepository
       .createQueryBuilder('offer')
       .distinctOn(['offer.clientUserId']) // clientUserId è la FK nel DB
@@ -326,16 +321,6 @@ export class OfferService {
     });
   }
 
-  // async getAllOffersByListingId(listingId: string): Promise<PropertyOffer[]> {
-  //   return this.offerRepository.find({
-  //     where: {
-  //       listing: { id: listingId },
-  //     },
-  //     relations: ['client', 'listing'],
-  //     order: { date: 'ASC' },
-  //   });
-  // }
-
   async createExternalOffer(
     dto: CreateExternalOfferDto,
     user: UserItem,
@@ -351,6 +336,8 @@ export class OfferService {
     if (!listing) throw new NotFoundException('Listing not found');
 
     this.checkAuthorization(user, listing);
+
+    this.checkPrice(listing.price, price);
 
     const offer = this.offerRepository.create({
       price,
@@ -376,14 +363,13 @@ export class OfferService {
     if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
 
-    if (user.supportAdmin && user.supportAdmin.agency !== listing.agency)
+    if (user.supportAdmin && user.supportAdmin.agency.id != listing.agency.id)
       throw new UnauthorizedException();
 
-    if (user.manager && user.manager.agency !== listing.agency)
+    if (user.manager && user.manager.agency.id != listing.agency.id)
       throw new UnauthorizedException();
   }
 
-  // PRIVATE HELPERS
   private async findClientByListingId(
     listingId: string,
   ): Promise<PropertyOffer[]> {
@@ -397,7 +383,7 @@ export class OfferService {
 
     return offers;
   }
-  //agg
+
   private async checkValidate(listingId: string) {
     const exist = await this.offerRepository.findOne({
       where: { state: OfferState.ACCEPTED, listing: { id: listingId } },
@@ -408,7 +394,9 @@ export class OfferService {
 
   private checkPrice(listingPrice: number, userOffer: number) {
     if (listingPrice < userOffer)
-      throw new BadRequestException('Price exceeds listing price');
+      throw new BadRequestException(
+        "L'offerta non puo' essere superiore al prezzo dell'immobile. (€410000)",
+      );
 
     if (userOffer <= 0)
       throw new BadRequestException('Price can t be < then 0');
@@ -434,8 +422,8 @@ export class OfferService {
     const notifica =
       await this.notificationService.createSpecificNotificationOffer(
         {
-          title: 'Offer for ' + listing.title,
-          description: `A new offer of ${price}€ has been made for the property ${listing.title}.`,
+          title: 'Nuova offerta per ' + listing.title,
+          description: `Ti è stata proposta una offerta di ${price}€ per l immobile: ${listing.title}.`,
           category: NotificationType.SPECIFIC,
         },
         offer,

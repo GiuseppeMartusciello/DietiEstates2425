@@ -40,7 +40,7 @@ export class Research {
   category: ListingCategory;
 
   @Column({ nullable: true })
-  minSize: number; //dimensione in metri quadri
+  minSize: number;
 
   @Column({ nullable: true })
   energyClass: string;

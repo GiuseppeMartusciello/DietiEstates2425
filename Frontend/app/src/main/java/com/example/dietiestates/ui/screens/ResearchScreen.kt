@@ -37,7 +37,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,10 +62,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.data.model.Research
-import com.example.dietiestates.ui.screens.components.AppBottomBar
 import com.example.dietiestates.ui.screens.components.AppTopBar
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
+import com.example.tuaapp.ui.components.NavBar
 
 @Composable
 fun ResearchScreen(
@@ -74,20 +74,27 @@ fun ResearchScreen(
     navController: NavController,
 ) {
     LaunchedEffect(Unit) {
+        if(viewModel.isOldResearch){viewModel.updateListResearch()}
+
         viewModel.fetchResearch10()
+
         viewModel.updateSelectedResearch(null)
         viewModel.isOldResearch = false
+
         viewModel.resetResearchForm()
     }
 
     Scaffold(
-        topBar = { AppTopBar(modifier = Modifier) },
-        bottomBar = { AppBottomBar(navController) }
+        topBar = {
+            TopBarOffer(navController = navController, modifier = Modifier, "Ricerca")
+        },
+        bottomBar = { NavBar(navController = navController) }
     ) { paddingValues ->
 
         Box(
             modifier = Modifier
                 .padding(paddingValues)
+                .background(Color.White)
         ) {
             Research(
                 navController,
@@ -96,7 +103,6 @@ fun ResearchScreen(
         }
     }
 }
-
 
 @Composable
 fun Research(
@@ -107,7 +113,6 @@ fun Research(
     val focusManager = LocalFocusManager.current
 
     var query by remember { mutableStateOf("") }
-
 
 
     Column(modifier = Modifier
@@ -218,7 +223,8 @@ fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) 
                                 onDelete = { id ->
                                     viewModel.deleteResearch(id);
                                     viewModel.fetchResearch10()
-                                }
+                                },
+                                viewModel
                             )
                         }
                     }
@@ -245,7 +251,8 @@ fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) 
 fun ResearchItem(
     research: Research,
     onSelect: (String, Research) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    viewModel: ResearchViewModel
 ) {
 
     val content = if (!research.municipality.isNullOrBlank()) {
@@ -257,7 +264,7 @@ fun ResearchItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onSelect(content, research) }),
+            .clickable(onClick = { onSelect(content, research);  viewModel.updateResearch()}),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF0FAFE),
@@ -359,8 +366,13 @@ fun CustomOutlineTextField(
                     radius = ""
                 )
             }
-            navController.navigate("filterscreen")
-            keyboardController?.hide()
+            if(viewModel.isOldResearch){
+                navController.navigate("searchedscreen")
+            }
+            else{
+                navController.navigate("filterscreen")
+                keyboardController?.hide()
+            }
         } else {
             showAlert = true
         }
@@ -388,6 +400,7 @@ fun CustomOutlineTextField(
             }
         },
         modifier = Modifier
+
             .padding(horizontal = 32.dp)
             .fillMaxWidth()
             .onGloballyPositioned {

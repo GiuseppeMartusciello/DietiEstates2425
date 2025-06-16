@@ -1,6 +1,5 @@
 package com.example.dietiestates.ui.screens
 
-import android.app.Activity
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -16,21 +15,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Error
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.LocalOffer
-import androidx.compose.material.icons.outlined.Logout
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,24 +28,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.dietiestates.ui.screens.components.AppBottomBar
+import com.example.dietiestates.ui.screens.components.AppTopBar
 import com.example.dietiestates.ui.screens.components.ListingCard
-import com.example.dietiestates.ui.theme.Roboto
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.HomeViewModel
 import com.example.tuaapp.ui.components.NavBar
-import com.example.tuaapp.ui.components.NavItem
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -75,7 +57,7 @@ fun HomeScreen(navController: NavController) {
         systemUiController.setStatusBarColor(
             Color(0xFF3F51B5),
             darkIcons = true
-        ) // o false se immagine scura
+        )
     }
 
     //Aggiorna al ritorno della modifica di un listing
@@ -88,30 +70,13 @@ fun HomeScreen(navController: NavController) {
         }
     }
 
-    Scaffold(topBar = {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(0.dp, 0.dp, 0.dp, 8.dp)
-                .background(Color(0xFF3F51B5)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "DietiEstates25", fontFamily = RobotoSerif,
-                fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-            )
-            Text(
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 5.dp),
-                text = "Perchè perder tempo quando ci siamo noi?", fontFamily = RobotoSlab,
-                fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.White
-            )
-        }
-    }, bottomBar = {
-        AppBottomBar(navController = navController)
-    }) { paddingValues ->
+    Scaffold(
+        topBar = {
+            AppTopBar()
+        },
+        bottomBar = {
+            NavBar(navController = navController) })
+    { paddingValues ->
         when {
             viewState.loading -> {
                 CircularProgressIndicator()
@@ -137,8 +102,9 @@ fun HomeScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues),
-                    contentAlignment = Alignment.Center // centra il contenuto nel Box
+                    contentAlignment = Alignment.TopCenter // centra il contenuto nel Box
                 ) {
                     LazyColumn(
                         horizontalAlignment = Alignment.CenterHorizontally, // per centrare gli elementi dentro
@@ -154,7 +120,6 @@ fun HomeScreen(navController: NavController) {
                                 onClickDelete ={ homeViewModel.deleteListing(    listingId = listing.id,
                                     onSuccess = {
                                         Toast.makeText(context, "Annuncio eliminato ✅", Toast.LENGTH_SHORT).show()
-
                                     },
                                     onError = { message ->
                                         Toast.makeText(context, "Errore eliminazione ❌: $message", Toast.LENGTH_SHORT).show()

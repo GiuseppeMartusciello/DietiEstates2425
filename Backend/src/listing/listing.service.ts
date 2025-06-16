@@ -51,7 +51,7 @@ export class ListingService {
       },
     });
 
-    const images = this.getAllListingImages();
+    const images = await this.getAllListingImages();
 
     const response: ListingResponse[] = listings.map((listing) => ({
       ...(instanceToPlain(listing) as Listing),
@@ -61,8 +61,41 @@ export class ListingService {
     return response;
   }
 
+  async getAgentOfListing(listingId: string): Promise<any> {
+    const listing = await this.listingRepository.findOne({
+      where: { id: listingId },
+      relations: ['agent', 'agency'],
+    });
+
+    if (!listing) {
+      throw new NotFoundException(`Listing with id "${listingId}" not found`);
+    }
+
+    if (!listing.agent) {
+      throw new NotFoundException(
+        `No agent found for listing with id "${listingId}"`,
+      );
+    }
+
+    const { name, surname, birthDate } = listing.agent.user;
+
+    return {
+      name: name,
+      surname: surname,
+      birthDate: birthDate,
+      start_date: listing.agent.start_date,
+      licenseNumber: listing.agent.licenseNumber,
+      languages: listing.agent.languages,
+      agencyName: listing.agency.name,
+      agencyAddress: listing.agency.legalAddress,
+    };
+  }
+
   async getListingById(id: string): Promise<ListingResponse> {
-    const listing = await this.listingRepository.findOneBy({ id: id });
+    const listing = await this.listingRepository.findOne({ 
+      where: { id: id },
+      relations: ['agency'],
+    });
 
     if (!listing) throw new NotFoundException(`Listing id  "${id}" not found`);
 
@@ -72,6 +105,17 @@ export class ListingService {
       ...(instanceToPlain(listing) as Listing),
       imageUrls: images,
     };
+  }
+
+  async getListingForCheck(id: string): Promise<Listing> {
+    const listing = await this.listingRepository.findOne({ 
+      where: { id: id },
+      relations: ['agency'],
+    });
+
+    if (!listing) throw new NotFoundException(`Listing id  "${id}" not found`);
+
+    return listing;
   }
 
   async getAllListing(): Promise<ListingResponse[]> {
@@ -159,6 +203,8 @@ export class ListingService {
     agencyId: string,
     agentId?: string,
   ): Promise<void> {
+
+
     const result = await this.listingRepository.delete({
       id: listingId,
       ...(agentId && { agent: { userId: agentId } as Agent }),
@@ -226,8 +272,7 @@ export class ListingService {
         const images = await this.getImagesForListing(listingId);
         if (images) {
           results[listingId] = images;
-        }else
-          results[listingId] = [];
+        } else results[listingId] = [];
       }
     }
 
@@ -251,7 +296,7 @@ export class ListingService {
       throw new NotFoundException('Immagine non trovata');
     }
 
-     fs.unlinkSync(filePath);
+    fs.unlinkSync(filePath);
 
     return { success: true };
   }
@@ -266,6 +311,6 @@ export class ListingService {
       }
 
       fs.rmdirSync(folderPath);
-    } 
+    }
   }
 }

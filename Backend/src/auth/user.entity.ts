@@ -35,6 +35,7 @@ export class User {
   @Column({ type: 'enum', enum: UserRoles })
   role: UserRoles;
 
+  @Exclude()
   @Column({ type: 'enum', enum: Provider, nullable: true })
   provider: Provider;
 

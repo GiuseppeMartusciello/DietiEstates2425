@@ -11,7 +11,6 @@ data class PropertyOffer(
     val guestEmail: String?,
     val guestName: String?,
     val guestSurname: String?
-
 )
 
 data class CreateOfferDto(
@@ -42,8 +41,9 @@ data class ClientsOffer (
 data class LastOfferDto (
     val id: String,
     val price: Double,
-    val date: Date,
+    val date: String,
     val state: String,
+    val madeByUser: Boolean
 )
 
 data class Guest (

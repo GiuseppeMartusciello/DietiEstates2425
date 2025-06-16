@@ -212,17 +212,30 @@ export class AgencyService {
     };
   }
 
-  async getAgents(agencyId: string) {
-    const agents = this.agentRepository.find({
+  async getAgents(agencyId: string): Promise<any> {
+    const agents = await this.agentRepository.find({
       where: { agency: { id: agencyId } },
-      relations: ['user'],
+      relations: ['user','agency'],
     });
 
-    return agents;
+    return agents.map(agent => {
+      const { name, surname, birthDate} = agent.user;
+      return {
+        userId: agent.userId,
+        name: name,
+        surname: surname,
+        birthDate: birthDate,
+        start_date: agent.start_date,
+        licenseNumber: agent.licenseNumber,
+        languages: agent.languages,
+        agencyName: agent.agency.name,
+        agencyAddress: agent.agency.legalAddress,
+      };
+    });
   }
 
   async getAgency(agencyId: string) {
-    const agency = this.agencyRepository.find({
+    const agency = this.agencyRepository.findOne({
       where: { id: agencyId } },
     );
 

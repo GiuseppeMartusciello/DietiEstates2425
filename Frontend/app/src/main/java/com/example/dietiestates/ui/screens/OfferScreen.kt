@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -22,11 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,19 +54,25 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.SavedStateHandle
 import com.example.dietiestates.AppContainer
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.utility.TokenManager
 import kotlinx.coroutines.launch
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OfferScreen(navController: NavController,
-                viewModel: ListingOfferViewModel = viewModel()) {
+fun OfferScreen(
+    navController: NavController,
+    viewModel: ListingOfferViewModel = viewModel()
+) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -76,57 +80,44 @@ fun OfferScreen(navController: NavController,
     val clientId = savedStateHandle.get<String>("clientId")
 
 
-    val uiState by  viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val listing = viewModel.listing.value
 
     val isWriting = viewModel.isWritingOffer.value
     val price = viewModel.offerPrice.value
 
 
-
     val listState = rememberLazyListState()
 
-    val userRole = AppContainer.tokenManager.getUserRole()
+    val userRole = TokenManager.getUserRole()
 
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
-    val guestName = mutableStateOf("")
-    val guestSurname = mutableStateOf("")
-    val guestEmail = mutableStateOf("")
-    val guestOffer = mutableStateOf("")
-
-
-
+    LaunchedEffect(isWriting) {
+        if (isWriting) {
+            focusRequester.requestFocus()
+        }
+    }
 
 
     LaunchedEffect(uiState.offers.size) {
-        Log.d("CHIAMATA",
-                "Chiamata OfferScreen" +
-            "Listing: ${listing}," +
-                "ClientID: ${clientId}" +
-                "")
-
         // Scrolla all'ultima offerta (se ce n'è almeno una)
         if (uiState.offers.isNotEmpty()) {
             listState.animateScrollToItem(uiState.offers.size - 1)
         }
+
+
     }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let { errorMessage ->
             coroutineScope.launch {
                 snackbarHostState.showSnackbar("Errore: ${errorMessage}")
+                viewModel.clearError()
             }
         }
     }
-
-
-//    SideEffect (uiState.error)  {
-//
-//
-//
-//    }
-//
-
 
 
     val textFieldColors = OutlinedTextFieldDefaults.colors(
@@ -150,7 +141,7 @@ fun OfferScreen(navController: NavController,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
-                    //.align(Alignment.TopCenter)
+                //.align(Alignment.TopCenter)
             )
         },
         topBar = {
@@ -162,18 +153,7 @@ fun OfferScreen(navController: NavController,
                     .background(Color(0xFF3F51B5)),
             ) {
 
-                Row {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Indietro")
-
-                    }
-                    Text(
-                        text = "Le mie Offerte", fontFamily = RobotoSerif,
-                        fontWeight = FontWeight.SemiBold, fontSize = 40.sp, color = Color.White
-                    )
-
-
-                }
+                TopBarOffer(navController = navController, modifier = Modifier)
 
             }
         },
@@ -187,8 +167,19 @@ fun OfferScreen(navController: NavController,
                                 text = "Invia",
                                 style = "blue",
                                 onClick = {
-                                    viewModel.submitExternalOffer()
-                                    viewModel.showExternalOfferDialog.value = false
+
+                                    coroutineScope.launch {
+                                        val success = viewModel.submitExternalOffer()
+                                        viewModel.isWritingOffer.value = false
+                                        viewModel.offerPrice.value = ""
+                                        viewModel.showExternalOfferDialog.value = false
+                                        if (success) {
+                                            snackbarHostState.showSnackbar("Offerta esterna inserita con successo.")
+                                        }
+                                        else {
+                                            Log.d("DIALOG", "Errore, non chiudo il dialogo")                                        }
+                                    }
+
                                 }
                             )
                         },
@@ -208,7 +199,8 @@ fun OfferScreen(navController: NavController,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 30.sp,
                                 color = Color(0xFF3F51B5)
-                            ) },
+                            )
+                        },
                         text = {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedTextField(
@@ -253,11 +245,13 @@ fun OfferScreen(navController: NavController,
                         }
                     )
                 }
+
                 !isWriting -> {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .imePadding()
                             .navigationBarsPadding(), // <-- per evitare che venga tagliato
                         contentAlignment = Alignment.Center
                         //.background(Color.Gray)
@@ -271,10 +265,12 @@ fun OfferScreen(navController: NavController,
                                     .align(Alignment.Center),
                                 text = "Proponi offerta"
                             )
-                        }
-                        else {
+
+
+                        } else {
                             CustomButton(
-                                onClick = { viewModel.showExternalOfferDialog.value = true
+                                onClick = {
+                                    viewModel.showExternalOfferDialog.value = true
                                 },
                                 style = "blue",
                                 modifier = Modifier
@@ -285,12 +281,18 @@ fun OfferScreen(navController: NavController,
                             )
                         }
                     }
+
                 }
+
                 else -> {
+
+
                     Row(
                         Modifier
-                            .padding(bottom = 40.dp)
-                            .fillMaxWidth(),
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                            //.imePadding() // <-- evita che venga coperto dalla tastiera
+                            .navigationBarsPadding(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedTextField(
@@ -300,21 +302,30 @@ fun OfferScreen(navController: NavController,
                             placeholder = { Text("€ Inserisci offerta") },
                             modifier = Modifier
                                 .weight(1f)
-                                .width(20.dp),
+                                .focusRequester(focusRequester),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             textStyle = MaterialTheme.typography.bodyLarge,
                             colors = textFieldColors,
+
                         )
 
                         IconButton(
                             onClick = {
-                                Log.d("Submit", "ListingID: ${listing?.id}, ClientId: ${clientId}")
-
                                 listing?.id?.let { id ->
-                                    viewModel.submitOffer()
-                                    viewModel.isWritingOffer.value = false
-                                    viewModel.offerPrice.value = ""
+                                    coroutineScope.launch {
+                                        var success = viewModel.submitOffer()
+                                        viewModel.isWritingOffer.value = false
+                                        viewModel.offerPrice.value = ""
+                                        if(success) {
+                                            snackbarHostState.showSnackbar("Offerta inviata con successo.")
+                                        }
+
+                                    }
+
+                                    focusManager.clearFocus()
+
+
                                 }
                             }
                         ) {
@@ -347,6 +358,7 @@ fun OfferScreen(navController: NavController,
             else -> {
                 Column(
                     Modifier
+                        .fillMaxSize()
                         .padding(
                             top = padding.calculateTopPadding(),
                             bottom = padding.calculateBottomPadding()
@@ -358,9 +370,6 @@ fun OfferScreen(navController: NavController,
                         ListingCardMini(
                             listing = it,
                             onClick = { navController.navigate("listingscreen/${it.id}") })
-
-
-
                     }
                     LazyColumn(
                         state = listState,
@@ -377,43 +386,71 @@ fun OfferScreen(navController: NavController,
                             key = { "${it.id}_${it.state}" }
                         ) { offer ->
 
+
 //                        Text("Offerta: € ${offer.price} - Stato: ${offer.state} - Data: ${offer.date}")
                             if (userRole == "CLIENT") {
                                 if (!offer.madeByUser) {
                                     OfferBubble(
                                         offer = offer,
-                                        onAccept = { viewModel.updateOfferStatus(offer.id, "ACCEPTED") },
-                                        onDecline = { viewModel.updateOfferStatus(offer.id, "DECLINED") }
+                                        onAccept = {
+                                            viewModel.updateOfferStatus(
+                                                offer.id,
+                                                "ACCEPTED"
+                                            )
+                                        },
+                                        onDecline = {
+                                            viewModel.updateOfferStatus(
+                                                offer.id,
+                                                "DECLINED"
+                                            )
+                                        }
                                     )
-                                }
-                                else {
+                                } else {
                                     OfferBubble(
                                         offer = offer
                                     )
                                 }
-                            }
-                            else {
+                            } else {
                                 if (offer.madeByUser) {
-                                    if(viewModel.isExternalMode)
+                                    if (viewModel.isExternalMode)
                                         OfferBubble(
                                             offer = offer,
-                                            onAccept = { viewModel.updateOfferStatus(offer.id, "ACCEPTED") },
-                                            onDecline = { viewModel.updateOfferStatus(offer.id, "DECLINED") },
+                                            onAccept = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "ACCEPTED"
+                                                )
+                                            },
+                                            onDecline = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "DECLINED"
+                                                )
+                                            },
                                             name = offer.guestName,
-                                            surname = offer.guestName,
-                                            email = offer.guestSurname
+                                            surname = offer.guestSurname,
+                                            email = offer.guestEmail
 
 
                                         )
                                     else {
                                         OfferBubble(
                                             offer = offer,
-                                            onAccept = { viewModel.updateOfferStatus(offer.id, "ACCEPTED") },
-                                            onDecline = { viewModel.updateOfferStatus(offer.id, "DECLINED") }
+                                            onAccept = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "ACCEPTED"
+                                                )
+                                            },
+                                            onDecline = {
+                                                viewModel.updateOfferStatus(
+                                                    offer.id,
+                                                    "DECLINED"
+                                                )
+                                            }
                                         )
                                     }
-                                }
-                                else {
+                                } else {
                                     OfferBubble(
                                         offer = offer
                                     )
@@ -421,13 +458,9 @@ fun OfferScreen(navController: NavController,
                             }
 
 
-
                         }
                     }
-
                 }
-
-
             }
         }
     }

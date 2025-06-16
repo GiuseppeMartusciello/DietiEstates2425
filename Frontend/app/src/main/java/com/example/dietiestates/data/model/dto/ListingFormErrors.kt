@@ -10,4 +10,5 @@ data class ListingFormErrors(
     val description: String? = null,
     val price: String? = null,
     val images: String? = null,
+    val agentId: String? = null
 )

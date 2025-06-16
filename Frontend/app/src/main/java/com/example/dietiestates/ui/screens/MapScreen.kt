@@ -3,40 +3,36 @@ package com.example.dietiestates.ui.screens
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.dietiestates.ui.screens.components.AppTopBar
-import com.example.dietiestates.ui.screens.components.GoBackButton
+import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
@@ -48,6 +44,8 @@ fun MapSearchScreen(
     viewModel: ResearchViewModel,
     navController: NavController,
 ) {
+    val sliderValue = remember { mutableFloatStateOf(0f) } // valore iniziale in km
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(40.85, 14.27), 12f)
     }
@@ -55,7 +53,7 @@ fun MapSearchScreen(
     val context = LocalContext.current
 
     Scaffold(
-        topBar = { AppTopBar(modifier = Modifier) }
+        topBar = {  TopBarOffer(navController = navController, modifier = Modifier, "Ricerca") }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -75,30 +73,71 @@ fun MapSearchScreen(
                         state = MarkerState(position = position),
                         title = "Punto selezionato"
                     )
+                    Circle(
+                        center = position,
+                        radius = (sliderValue.value * 500).toDouble(), // in metri
+                        strokeColor = Color(0x663F51B5),
+                        fillColor = Color(0x333F51B5),
+                        strokeWidth = 2f
+                    )
                 }
             }
-
-            GoBackButton(
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(top=10.dp)
-                    .padding(horizontal = 10.dp),
-                navController,
-                "researchscreen")
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 0.dp)
+                    .height(300.dp), // altezza visibile dello slider
+                contentAlignment = Alignment.Center
+            ) {
+                CustomSlider(
+                    sliderValue ,
+                    enabled = markerPosition.value != null
+                )
+            }
 
-            CostumeButton(
+                CostumeButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 40.dp),
+                    .padding(bottom = 15.dp),
                 context,
                 markerPosition,
                 navController,
-                viewModel
+                viewModel,
+                    sliderValue.value,
             )
 
         }
     }
 }
+
+
+@Composable
+fun CustomSlider(sliderValue: MutableState<Float>,enabled: Boolean)
+{
+        Box(
+            modifier = Modifier
+                .offset(x = 120.dp) // ⬅ COMPENSA la rotazione
+                .rotate(-90f)
+                .width(300.dp)     // ⬅ questa è la "lunghezza" dopo la rotazione
+        ) {
+            Slider(
+                modifier = Modifier
+                    .width(250.dp),
+                value = sliderValue.value,
+                onValueChange = { sliderValue.value = it },
+                valueRange = 0f..50f,
+                steps = 100,
+                enabled = enabled,
+                colors = SliderDefaults.colors(
+                    thumbColor = Color(0xFF3F51B5),
+                    activeTrackColor = Color(0xFF3F51B5),
+                    inactiveTrackColor = Color.White
+                )
+            )
+        }
+    }
+
+
 
 @Composable
 fun CostumeButton(
@@ -106,24 +145,9 @@ fun CostumeButton(
     context: Context,
     markerPosition: MutableState<LatLng?>,
     navController: NavController,
-    viewModel: ResearchViewModel
+    viewModel: ResearchViewModel,
+    sliderValue: Float
 ) {
-    var showDialog by remember { mutableStateOf(false) }
-    var quantity by remember { mutableIntStateOf(0) }
-
-
-    if (showDialog) {
-        QuantityPickerDialog(
-            showDialog = true,
-            onDismiss = { showDialog = false },
-            onConfirm = {
-                quantity = it
-                showDialog = false
-                // Chiamata alla logica solo dopo conferma
-                onClick(navController,quantity, markerPosition, viewModel)
-            }
-        )
-    }
 
     Button(
         colors = ButtonDefaults.buttonColors(
@@ -133,7 +157,8 @@ fun CostumeButton(
         onClick = {
             val selected = markerPosition.value
             if (selected != null) {
-                showDialog = true
+                onClick(navController,sliderValue, markerPosition, viewModel)
+
             } else {
                 Toast.makeText(
                     context,
@@ -145,7 +170,7 @@ fun CostumeButton(
         modifier = modifier
     ) {
         Text(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.padding(3.dp),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             text = "Continua"
@@ -156,7 +181,7 @@ fun CostumeButton(
 
 fun onClick(
     navController: NavController,
-    quantity: Int,
+    quantity: Float,
     markerPosition: MutableState<LatLng?>,
     viewModel: ResearchViewModel
 ) {
@@ -169,42 +194,4 @@ fun onClick(
 }
 
 
-
-@Composable
-fun QuantityPickerDialog(
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
-) {
-    var sliderValue by remember { mutableFloatStateOf(0f) }
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text("Seleziona una distanza") },
-            text = {
-                Column {
-                    Text(text = "${sliderValue.toInt()} km", style = MaterialTheme.typography.bodyLarge)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Slider(
-                        value = sliderValue,
-                        onValueChange = { sliderValue = it },
-                        valueRange = 0f..100f,
-                        steps = 99 // 100 valori interi
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { onConfirm(sliderValue.toInt()) }) {
-                    Text("Conferma")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("Annulla")
-                }
-            }
-        )
-    }
-}
 

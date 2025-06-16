@@ -1,5 +1,7 @@
 package com.example.dietiestates.data.remote
 
+import android.util.Log
+import com.example.dietiestates.AppContainer
 import com.example.dietiestates.utility.TokenManager
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -7,9 +9,9 @@ import okhttp3.Response
 import kotlinx.coroutines.flow.firstOrNull
 
 
-class AuthInterceptor(private val tokenManager: TokenManager) : Interceptor {
+class AuthInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = tokenManager.getToken()
+        val token = TokenManager.getToken()
 
         val request = if (token != null) {
             chain.request().newBuilder()

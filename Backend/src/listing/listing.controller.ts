@@ -76,7 +76,6 @@ export class ListingController {
     @GetUser() user: UserItem,
   ): Promise<Listing> {
     const listing: Listing = await this.findListingOrThrow(listingId);
-
     this.checkAuthorization(user, listing);
 
     return this.listingService.changeListing(listing, modifyListingDto);
@@ -121,24 +120,21 @@ export class ListingController {
   }
 
   async findListingOrThrow(listingId: string): Promise<Listing> {
-    const listingResponse = await this.listingService.getListingById(listingId);
+    const listing = await this.listingService.getListingForCheck(listingId);
 
-    if (!listingResponse)
+    if (!listing)
       throw new BadRequestException(`Listing with id ${listingId} not found `);
 
-    const { imageUrls, ...listing } = listingResponse;
-
-    return listing as Listing;
+    return listing;
   }
 
   checkAuthorization(user: UserItem, listing: Listing): void {
     if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
 
-    if (user.supportAdmin && user.supportAdmin.agency !== listing.agency)
+    if (user.supportAdmin && user.supportAdmin.agency.id != listing.agency.id)
       throw new UnauthorizedException();
-
-    if (user.manager && user.manager.agency !== listing.agency)
+    if (user.manager && user.manager.agency.id != listing.agency.id)
       throw new UnauthorizedException();
   }
 
@@ -166,6 +162,14 @@ export class ListingController {
     return this.listingService.handleUploadedImages(listingId, files);
   }
 
+  @Get('/:id/agent')
+  async getAgentOfListing(
+    @Param('id', new ParseUUIDPipe()) listingId: string,
+    @GetUser() user: UserItem,
+  ) {
+    return this.listingService.getAgentOfListing(listingId);
+  }
+  
   @Get('/:id/images')
   async getListingImages(
     @Param('id', new ParseUUIDPipe()) listingId: string,

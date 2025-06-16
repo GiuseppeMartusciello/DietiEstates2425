@@ -44,7 +44,7 @@ class NotificationRepository(private val notificationApi: NotificationApi) {
         }
     }
 
-    suspend fun markNotificationAsRead(userNotificationId: String) {
+    suspend fun updateNotification(userNotificationId: String) {
         val response = notificationApi.markNotificationAsRead(userNotificationId)
 
         if (!response.isSuccessful) {

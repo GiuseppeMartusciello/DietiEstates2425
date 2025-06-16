@@ -25,7 +25,7 @@ export class ClientService {
   ): Promise<void> {
     const client = await this.clientRepository.findOne({ where: { userId } });
     if (!client) throw new NotFoundException('Client not found');
-
+  
     switch (dto.type) {
       case 'promotional':
         client.promotionalNotification = dto.value;
@@ -37,9 +37,11 @@ export class ClientService {
         client.searchNotification = dto.value;
         break;
       default:
-        throw new BadRequestException('Tipo di notifica non valido');
+        throw new BadRequestException(`Impossibile aggiornare le preferenze per '${dto.type}'.`);
+
     }
 
-    await this.clientRepository.save(client);
+   await this.clientRepository.save(client);
+  
   }
 }
