@@ -39,10 +39,9 @@ object AppContainer {
         private set
 
     fun reInit(context: Context) {
-        //tokenManager = TokenManager(context.applicationContext)
         TokenManager.init(context)
 
-        val retrofit = RetrofitClient.create(TokenManager)
+        val retrofit = RetrofitClient.create()
         clientRepository = ClientRepository(retrofit.createClientApi())
         listingRepository = ListingRepository(retrofit.createListingApi())
         agencyRepository = AgencyRepository(retrofit.createAgencyApi())

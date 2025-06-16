@@ -52,7 +52,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.zIndex
 import com.example.dietiestates.ui.screens.components.AppTopBar
-import com.example.dietiestates.ui.screens.components.GoBackButton
 import com.example.dietiestates.ui.screens.components.TopBarOffer
 
 
@@ -185,7 +184,7 @@ fun Filtering(viewModel: ResearchViewModel, navController: NavController) {
             textAlign = TextAlign.Center
         )
 
-        Divider( // riga orizzontale sopra la lista
+        Divider(
             thickness = 1.dp,
             color = Color(0xFF3F51B5),
             modifier = Modifier
@@ -517,7 +516,7 @@ fun CheckOptionWithIcon(
             .fillMaxWidth()
             .clickable { if(enabled) onCheckedChange(!checked) }
             .padding(vertical = 6.dp)
-            .alpha(if (enabled) 1f else 0.5f) // effetto visivo "disabilitato"
+            .alpha(if (enabled) 1f else 0.5f)
     ) {
         Icon(imageVector = icon, contentDescription = label)
         Spacer(modifier = Modifier.width(8.dp))

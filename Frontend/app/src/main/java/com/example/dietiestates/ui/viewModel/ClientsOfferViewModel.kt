@@ -17,8 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-//AppContainer.offerRepository.getOffersByListingAgent(listingId = listingId)
-
 data class ClientOffersState(
     val loading: Boolean = true,
     val offers: List<ClientsOffer> = emptyList(),

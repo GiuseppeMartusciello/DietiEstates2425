@@ -252,7 +252,7 @@ fun OfferScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                             .imePadding()
-                            .navigationBarsPadding(), // <-- per evitare che venga tagliato
+                            .navigationBarsPadding(), // per evitare che venga tagliato
                         contentAlignment = Alignment.Center
                         //.background(Color.Gray)
                     ) {
@@ -344,17 +344,6 @@ fun OfferScreen(
                 }
             }
 
-//            uiState.error != null -> {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(padding),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    Text("Errore: ${uiState.error}")
-//                }
-//            }
-
             else -> {
                 Column(
                     Modifier
@@ -385,9 +374,6 @@ fun OfferScreen(
                             uiState.offers,
                             key = { "${it.id}_${it.state}" }
                         ) { offer ->
-
-
-//                        Text("Offerta: € ${offer.price} - Stato: ${offer.state} - Data: ${offer.date}")
                             if (userRole == "CLIENT") {
                                 if (!offer.madeByUser) {
                                     OfferBubble(
@@ -430,8 +416,6 @@ fun OfferScreen(
                                             name = offer.guestName,
                                             surname = offer.guestSurname,
                                             email = offer.guestEmail
-
-
                                         )
                                     else {
                                         OfferBubble(
@@ -456,8 +440,6 @@ fun OfferScreen(
                                     )
                                 }
                             }
-
-
                         }
                     }
                 }

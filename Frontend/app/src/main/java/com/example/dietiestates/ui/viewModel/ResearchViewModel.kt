@@ -207,7 +207,6 @@ class ResearchViewModel : ViewModel() {
             return null
         }
 
-        // Nessun errore
         researchFormErrors = errors
 
         val hasErrors = listOfNotNull(

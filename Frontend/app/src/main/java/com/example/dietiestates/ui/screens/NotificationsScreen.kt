@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -222,9 +222,6 @@ fun NotificationItem(
                     )
                 }
 
-            //metto [0] perche la get resituisce un array di usernotification in cui ci sta come user notification
-            // solo la usernotification dello user che fa la query
-
             }
             if (notification.userNotifications.isNotEmpty() && !notification.userNotifications[0].isRead) {
 
@@ -258,34 +255,41 @@ fun NotificationDialog(
 
     val title = notification.title
     val description = notification.description
-    val isPromotional = notification.category == "PROMOTIONAL"
 
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             Row {
-                TextButton(
-                    modifier = Modifier,
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF3F51B5),
-                        contentColor = Color.White
-                    ),
-                    onClick = {
-                        if (isPromotional) {
-                            navController.navigate("listingscreen/${notification.listing?.id}")
-                        } else navController.navigate("offer")
+                if (notification.category != "PROMOTIONAL") {
+                    TextButton(
+                        modifier = Modifier,
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF3F51B5),
+                            contentColor = Color.White
+                        ),
+                        onClick = {
+                            if (notification.category == "SEARCH") {
+                                Log.d("output","id: ${notification.listing?.id}")
+                                navController.navigate("listingscreen/${notification.listing?.id}")
+                            }else if (notification.category == "OFFER")
+                                navController.navigate("offer")
+                        }
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .align(Alignment.CenterVertically),
+                            color = Color.White,
+                            text = if (notification.category == "SEARCH") {
+                                "Vai alla proprietà"
+                            } else {
+                                "Vai all'offerta"
+                            },
+                            fontFamily = RobotoSlab,
+                            fontWeight = FontWeight.Bold,
+                        )
                     }
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .align(Alignment.CenterVertically),
-                        color = Color.White,
-                        text = if (isPromotional) "Vai alla proprietà" else "Vai all'offerta",
-                        fontFamily = RobotoSlab,
-                        fontWeight = FontWeight.Bold,
-                    )
                 }
                 Spacer(Modifier.width(4.dp))
                 TextButton(onClick = onDismiss) {

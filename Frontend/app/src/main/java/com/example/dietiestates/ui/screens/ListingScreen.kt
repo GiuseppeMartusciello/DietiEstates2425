@@ -483,8 +483,6 @@ private fun BottomBar(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-    val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
     Surface(
         modifier
             .fillMaxWidth()
@@ -522,7 +520,7 @@ private fun BottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                CallButton("3242424242") /* ToDo reale numero agente*/
+                CallButton("+393661781550") /* ToDo reale numero agente*/
                 Spacer(modifier = Modifier.width(8.dp))
                 CustomButton(
                     text = "Proposta",

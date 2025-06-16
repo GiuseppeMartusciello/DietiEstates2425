@@ -23,7 +23,7 @@ object TokenManager {
         prefs.edit()
             .putString(TOKEN_KEY, token)
             .putString(ROLE_KEY, role)
-            .commit() // ⬅️ usa commit per salvare subito
+            .commit()
     }
 
     fun getToken(): String? {

@@ -58,7 +58,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             CompositionLocalProvider(LocalAppTypography provides CustomTypography) {
                 DietiEstatesTheme(darkTheme = false) {
-                    // A surface container using the 'background' color from the theme
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = Color.White
@@ -74,8 +73,6 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyApp() {
-    //SetStatusBarColor(Color(0xFF3F51B5), darkIcons = false)
-
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
     val startDestination = if (authViewModel.checkLogin()) "home" else "loginscreen"

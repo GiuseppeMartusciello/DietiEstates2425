@@ -27,33 +27,6 @@ class MyOfferViewModel: ViewModel(
         fetchListings()
     }
 
-
-//    private fun fetchListings() {
-//        viewModelScope.launch {
-//            _uiState.value = MyOffersState.Loading
-//
-//
-//            val result = AppContainer.offerRepository.getListingsByUser()
-//
-//            _uiState.value = when {
-//                result.isSuccess -> {
-//                    val listings = result.getOrNull().orEmpty().map { listing ->
-//                        listing.copy(imageUrls = listing.imageUrls ?: emptyList())
-//                    }
-//
-//                    MyOffersState.Success(listings) // sono già ListingOffer
-//                }
-//
-//                result.isFailure -> {
-//                    Log.e("DEBUG", "Errore: ${result.exceptionOrNull()?.message}")
-//                    MyOffersState.Error(result.exceptionOrNull()?.message ?: "Errore")
-//                }
-//
-//                else -> MyOffersState.Error("Errore sconosciuto")
-//            }
-//        }
-//    }
-
     private fun fetchListings() {
         viewModelScope.launch {
             _uiState.value = MyOffersState.Loading

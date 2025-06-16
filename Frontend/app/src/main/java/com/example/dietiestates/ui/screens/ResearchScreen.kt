@@ -1,5 +1,6 @@
 package com.example.dietiestates.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -62,11 +64,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.data.model.Research
-import com.example.dietiestates.ui.screens.components.AppTopBar
+import com.example.dietiestates.ui.screens.components.CustomButton
 import com.example.dietiestates.ui.screens.components.TopBarOffer
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.ResearchViewModel
 import com.example.tuaapp.ui.components.NavBar
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun ResearchScreen(
@@ -74,7 +83,9 @@ fun ResearchScreen(
     navController: NavController,
 ) {
     LaunchedEffect(Unit) {
-        if(viewModel.isOldResearch){viewModel.updateListResearch()}
+        if (viewModel.isOldResearch) {
+            viewModel.updateListResearch()
+        }
 
         viewModel.fetchResearch10()
 
@@ -134,6 +145,7 @@ fun Research(
         )
 
         History(
+            navController,
             onSelect = { selectedQuery, research ->
                 query = selectedQuery
                 viewModel.updateSelectedResearch(research)
@@ -158,7 +170,11 @@ fun Research(
 
 
 @Composable
-fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) {
+fun History(
+    navController: NavController,
+    onSelect: (String, Research) -> Unit,
+    viewModel: ResearchViewModel
+) {
 
     val state = viewModel.searchState.value
 
@@ -218,6 +234,7 @@ fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) 
                     ) {
                         items(viewModel.researchState.value.researches) { research ->
                             ResearchItem(
+                                navController = navController,
                                 research,
                                 onSelect,
                                 onDelete = { id ->
@@ -249,11 +266,13 @@ fun History(onSelect: (String, Research) -> Unit, viewModel: ResearchViewModel) 
 
 @Composable
 fun ResearchItem(
+    navController: NavController,
     research: Research,
     onSelect: (String, Research) -> Unit,
     onDelete: (String) -> Unit,
     viewModel: ResearchViewModel
 ) {
+    var showDialog by remember { mutableStateOf(false) }
 
     val content = if (!research.municipality.isNullOrBlank()) {
         research.municipality
@@ -261,13 +280,86 @@ fun ResearchItem(
         "latitudine:${research.latitude} longitudine:${research.longitude}"
     }
 
+
+    if (showDialog) {
+        val pos = LatLng(research.latitude!!, research.longitude!!)
+        val markerPosition = remember { mutableStateOf<LatLng?>(null) }
+        val targetLatLng = LatLng(research.latitude ?: 0.0, research.longitude ?: 0.0)
+
+        val cameraPositionState = rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(targetLatLng, 10f)
+        }
+
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Dettagli Ricerca") },
+            text = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .padding(2.dp)
+                ) {
+                    GoogleMap(
+                        modifier = Modifier.fillMaxSize(),
+                        cameraPositionState = cameraPositionState,
+                        onMapClick = { latLng ->
+                            markerPosition.value = latLng
+                        }
+                    ) {
+                        Marker(
+                            state = MarkerState(position = pos),
+                            title = "Posizione della ricerca"
+                        )
+                        Circle(
+                            center = pos,
+                            radius = research.radius!!.toDouble(), // in metri
+                            strokeColor = Color(0x663F51B5),
+                            fillColor = Color(0x333F51B5),
+                            strokeWidth = 2f
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+
+                    onSelect(content, research)
+                    viewModel.updateResearch()
+
+                    navController.navigate("searchedscreen")
+                }) {
+                    Text("Ripeti ricerca", fontSize = 16.sp)
+                }
+            },
+
+            dismissButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    //onExit()
+                }) {
+                    Text("Esci", fontSize = 16.sp)
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onSelect(content, research);  viewModel.updateResearch()}),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            .padding(vertical = 5.dp, horizontal = 10.dp)
+            .clickable(onClick = {
+                if (!research.municipality.isNullOrBlank()) {
+                    onSelect(content, research); viewModel.updateResearch()
+                } else {
+                    showDialog = true
+                }
+            }),
+        border = BorderStroke(1.dp, Color.LightGray),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF0FAFE),
+            containerColor = Color(0xFFF3F3F3),
         )
     )
     {
@@ -284,7 +376,7 @@ fun ResearchItem(
             )
 
             val text = if (!research.municipality.isNullOrBlank()) research.municipality
-            else "latitudine: ${research.latitude} longitudine: ${research.longitude}"
+            else "Ricerca per raggio ${research.radius?.toInt()}m"
 
             Box(modifier = Modifier.weight(1f)) {
                 Text(
@@ -314,33 +406,20 @@ fun MapButton(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
-    Button(
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF3F51B5),
-            contentColor = Color.White
-        ),
-        shape = RectangleShape,
-        onClick = {
-            viewModel.updateResearchFormState {
-                copy(
-                    municipality = "",
-                    searchType = "COORDINATES"
-                )
-            }
-            navController.navigate("mapscreen")
-        },
-        modifier = modifier
-            .shadow(10.dp),
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
+    CustomButton(onClick = {
+        viewModel.updateResearchFormState {
+            copy(
+                municipality = "",
+                searchType = "COORDINATES"
+            )
+        }
+        navController.navigate("mapscreen")
+    },
+        style = "blue",
+        icon = Icons.Outlined.Map,
+        text = "Ricerca Avanzata",
+        modifier = modifier.padding(10.dp)
     )
-    {
-        Text(
-            fontFamily = RobotoSlab,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            text = "Ricerca Avanzata"
-        )
-    }
 }
 
 @Composable
@@ -366,10 +445,9 @@ fun CustomOutlineTextField(
                     radius = ""
                 )
             }
-            if(viewModel.isOldResearch){
+            if (viewModel.isOldResearch) {
                 navController.navigate("searchedscreen")
-            }
-            else{
+            } else {
                 navController.navigate("filterscreen")
                 keyboardController?.hide()
             }
