@@ -10,6 +10,7 @@ import { UserRoles } from 'src/common/types/user-roles';
 import { Gender } from 'src/common/types/gender.enum';
 import { Provider } from 'src/common/types/provider.enum';
 
+// Tests defined using N-WECT: each equivalence class is covered at least once.
 describe('UserService - changePassword', () => {
   let userService: UserService;
   let userRepository: jest.Mocked<Partial<Repository<User>>>;
@@ -53,26 +54,30 @@ describe('UserService - changePassword', () => {
     jest.clearAllMocks();
   });
 
-  it('should update password if currentPassword matches and user exists', async () => {
+  it('TC1 - should update password if currentPassword matches and user exists', async () => {
+    // DTO's definition
     const dto: CredentialDto = {
       currentPassword: 'oldPass123',
       newPassword: 'newPass456!',
     };
 
+    const newHashedPassword = 'newHashedPassword123';
+
     const mockUserCopy = JSON.parse(JSON.stringify(mockUser));
+
+    // MOCK
     (userRepository.findOne as jest.Mock).mockResolvedValue(mockUserCopy);
     (userRepository.save as jest.Mock).mockResolvedValue(mockUserCopy);
 
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
-    const newHashedPassword = 'newHashedPassword123';
     jest
       .spyOn(userService as any, 'hashPassword')
       .mockResolvedValue(newHashedPassword);
-    // jest.spyOn(bcrypt, 'genSalt').mockResolvedValue('salt');
-    // jest.spyOn(bcrypt, 'hash').mockResolvedValue('newHashedPassword');
 
+    // ACT
     const result = await userService.changePassword(dto, mockUser.id);
 
+    // ASSERT
     expect(userRepository.findOne).toHaveBeenCalledWith({
       where: { id: mockUser.id },
     });
@@ -90,47 +95,36 @@ describe('UserService - changePassword', () => {
     expect(result).toEqual({ message: 'Password updated successfully' });
   });
 
-  it('should throw NotFoundException if user is not found', async () => {
-    (userRepository.findOne as jest.Mock).mockResolvedValue(null);
+  it('TC2 - should throw NotFoundException if user is not found', async () => {
+    // DTO's definition
     const dto: CredentialDto = {
       currentPassword: 'any',
       newPassword: 'any',
     };
 
+    // MOCK
+    (userRepository.findOne as jest.Mock).mockResolvedValue(null);
+
+    // ACT & ASSERT
     await expect(userService.changePassword(dto, 'invalid-id')).rejects.toThrow(
       NotFoundException,
     );
   });
 
-  it('should throw UnauthorizedException if currentPassword is wrong', async () => {
-    (userRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
-    jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
-
+  it('TC3 - should throw UnauthorizedException if currentPassword is wrong', async () => {
+    // DTO's definition
     const dto: CredentialDto = {
       currentPassword: 'wrongPass',
       newPassword: 'newPass',
     };
 
+    // MOCK
+    (userRepository.findOne as jest.Mock).mockResolvedValue(mockUser);
+    jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
+
+    // ACT & ASSERT
     await expect(userService.changePassword(dto, mockUser.id)).rejects.toThrow(
       UnauthorizedException,
     );
   });
 });
-
-/*
-  Strategia di test adottata:
-  Abbiamo identificato le classi di equivalenza per i parametri del metodo changePassword, considerando le condizioni di validità dei dati di input:
-
-  userId: esistente (V), inesistente (NV)
-
-  currentPassword: corretto (V), errato (NV)
-
-  Usando la strategia N-WEct, abbiamo definito il numero minimo di test (3) per coprire tutte le combinazioni delle classi di equivalenza valide e non valide, ottenendo:
-
-  Aggiornamento corretto della password
-
-  Mancato utente → NotFoundException
-
-  Password errata → UnauthorizedExceptio
-
-*/
