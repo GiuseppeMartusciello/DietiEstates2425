@@ -66,7 +66,6 @@ import kotlinx.coroutines.launch
 fun ClientsOfferScreen(
     navController: NavController,
     viewModel: ClientsOfferViewModel = viewModel(),
-    // onClick => Unit()
 ) {
 
     val snackbarHostState = remember { SnackbarHostState() }

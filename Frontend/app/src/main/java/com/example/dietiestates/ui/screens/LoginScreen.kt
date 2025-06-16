@@ -94,7 +94,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
         systemUiController.setStatusBarColor(
             Color.Transparent,
             darkIcons = true
-        ) // o false se immagine scura
+        )
     }
 
 

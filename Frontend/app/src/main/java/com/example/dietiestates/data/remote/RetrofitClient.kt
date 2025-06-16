@@ -33,15 +33,12 @@ class RetrofitClient private constructor(retrofit: Retrofit) {
     fun createResearchApi() = researchApi
 
     companion object {
-        fun create(tokenManager: TokenManager): RetrofitClient {
+        fun create(): RetrofitClient {
             val client = OkHttpClient.Builder()
                 .addInterceptor(AuthInterceptor())
                 .build()
 
             val retrofit = Retrofit.Builder()
-                    //todo leva i commenti e modifica manifest
-                 //.baseUrl("http://10.0.2.2:3000/")
-                //.baseUrl("http://192.168.1.2:3000/")
                  .baseUrl("${ApiConstants.BASE_URL}/")
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())

@@ -26,8 +26,6 @@ data class ListingOffersState(
 class ListingOfferViewModel(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-//    private val _uiState = mutableStateOf(ListingOffersState())
-//    val uiState: State<ListingOffersState> = _uiState
 
     private val _uiState = MutableStateFlow(ListingOffersState())
     val uiState: StateFlow<ListingOffersState> = _uiState.asStateFlow()
@@ -174,7 +172,6 @@ class ListingOfferViewModel(
                     return false
                 }
 
-                // 🔒 Check: offerta almeno al 50% del prezzo dell'immobile
                 val minimumPrice = listingPrice * 0.5
                 if (price < minimumPrice) {
                     _uiState.value = _uiState.value.copy(
@@ -219,8 +216,6 @@ class ListingOfferViewModel(
     }
 
     fun updateOfferStatus(offerId: String, status: String) {
-        //val listingId = listing.value?.id ?: return
-        val listingId = listingId!!
 
         viewModelScope.launch {
             try {
@@ -228,7 +223,7 @@ class ListingOfferViewModel(
                 val currentOffers = _uiState.value.offers
                 val updatedOffers = currentOffers.map { offer ->
                     if (offer.id == offerId) {
-                        offer.copy(state = status) // Assumendo che PropertyOffer abbia un metodo copy
+                        offer.copy(state = status)
                     } else {
                         offer
                     }
@@ -242,26 +237,6 @@ class ListingOfferViewModel(
 
                 // Ricarica dal server per essere sicuri che tutto sia sincronizzato
                 fetchOffers()
-//                val updatedOffer = AppContainer.offerRepository.updateOfferState(offerId, status)
-//                Log.d("DEBUG", "Offerta aggiornata: ${updatedOffer.state}")
-//
-//
-////
-//                val updatedList = _uiState.value.offers.map {
-//                    if (it.id == updatedOffer.id) {
-//                        updatedOffer
-//                    } else {
-//                        it
-//                    }
-//                }
-//
-//
-//
-//                _uiState.value = _uiState.value.copy(
-//                    offers = updatedList
-//                )
-//
-//                fetchOffers(listingId) // ricarica offerte aggiornate
             } catch (e: Exception) {
                 Log.e("OfferUpdate", "Errore nell'aggiornamento dell'offerta: ${e.message}")
                 _uiState.value = _uiState.value.copy(

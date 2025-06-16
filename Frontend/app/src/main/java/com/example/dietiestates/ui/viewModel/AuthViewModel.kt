@@ -60,10 +60,7 @@ class AuthViewModel : ViewModel() {
             onInvalid("Inserisci un'email.")
             return false
         }
-//        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-//            onInvalid("L'email inserita non è valida.")
-//            return false
-//        }
+
         if (password.isBlank()) {
             onInvalid("Inserisci una password.")
             return false
