@@ -170,20 +170,32 @@ export class OfferService {
 
     //crea notifica specifica
     //attenzione ! la notifica viene create l update è sull offerta ma la notifica è nuova
-    const notifica =
-      await this.notificationService.createSpecificNotificationOffer(
-        {
-          title: 'Un offerta è stata cambiata !',
-          description:
-            'Controlla l offerta per :' +
-            offer.listing.title +
-            'il suo nuovo stato adesso è' +
-            status,
-          category: NotificationType.SPECIFIC,
-        },
-        offer,
-        true,
-      );
+    const { title, description } =
+    status === 'ACCEPTED'
+      ? {
+          title: 'La tua offerta è stata accettata!',
+          description: `L'agente ha accettato la tua offerta per l'immobile: ${offer.listing.title}.`,
+        }
+      : status === 'DECLINED'
+      ? {
+          title: 'La tua offerta è stata rifiutata',
+          description: `L'agente ha rifiutato la tua offerta per l'immobile: ${offer.listing.title}.`,
+        }
+      : {
+          title: 'Lo stato della tua offerta è cambiato',
+          description: `Controlla la tua offerta per ${offer.listing.title}, il nuovo stato è: ${status}`,
+        };
+  
+  const notifica =
+    await this.notificationService.createSpecificNotificationOffer(
+      {
+        title,
+        description,
+        category: NotificationType.OFFER,
+      },
+      offer,
+      true,
+    );
 
     if (!notifica)
       throw new InternalServerErrorException('Notification not created');
@@ -359,7 +371,6 @@ export class OfferService {
   }
 
   checkAuthorization(user: UserItem, listing: Listing): void {
-    console.log('Controllo permessi di user: ', user);
     if (user.agent && user.agent.userId != listing.agent.userId)
       throw new UnauthorizedException();
 
@@ -424,7 +435,7 @@ export class OfferService {
         {
           title: 'Nuova offerta per ' + listing.title,
           description: `Ti è stata proposta una offerta di ${price}€ per l immobile: ${listing.title}.`,
-          category: NotificationType.SPECIFIC,
+          category: NotificationType.OFFER,
         },
         offer,
         false,

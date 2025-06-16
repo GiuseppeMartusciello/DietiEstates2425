@@ -24,23 +24,21 @@ export class NotificationController {
     private readonly notificationService: NotificationService,
   ) {}
 
-  @Post('/listing/:listingId')
+  @Post('/promotional')
   @Roles(UserRoles.ADMIN)
   createPromotionalNotification(
     @GetUser() user: UserItem,
-    @Body() createNotificationDto: CreateNotificationDto,
-    @Param('listingId') listingId: string,
+    @Body() createNotificationDto: CreateNotificationDto
   ): Promise<Notification> {
     return this.notificationService.createPromotionalNotification(
       user,
       createNotificationDto,
-      listingId,
     );
   }
 
   // lista di tutte le notifiche non lette
   @Get('/Notifications')
-  Notifications(@GetUser() user: UserItem): Promise<Notification[]> {
+  async Notifications(@GetUser() user: UserItem): Promise<Notification[]> {
     return this.notificationService.Notifications(user.id);
   }
 

@@ -15,12 +15,14 @@ import * as pathModule from 'path';
 import * as fs from 'fs';
 import { ListingResponse } from './dto/listing-with-image.dto';
 import { instanceToPlain } from 'class-transformer';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class ListingService {
   constructor(
     private readonly listingRepository: ListingRepository,
     private readonly geopifyService: GeoapifyService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async getListingByAgentId(
@@ -188,7 +190,7 @@ export class ListingService {
       lon,
     );
 
-    return this.listingRepository.createListing(
+    const listing = await this.listingRepository.createListing(
       createListingDto,
       agent.userId,
       agent.agency.id,
@@ -196,6 +198,10 @@ export class ListingService {
       lat,
       lon,
     );
+
+    this.notificationService.createResearchNotification(agent.user.id,listing.id)
+    
+    return listing;
   }
 
   async deleteListingById(

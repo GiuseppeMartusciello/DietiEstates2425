@@ -6,14 +6,16 @@ import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
 import { ConfigModule } from '@nestjs/config';
 import { Client } from 'src/client/client.entity';
+import { User } from 'src/auth/user.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 
 
 @Module({
-    imports: [ConfigModule, TypeOrmModule.forFeature([Notification,UserNotification,Client])], 
+    imports: [ConfigModule, TypeOrmModule.forFeature([Notification,UserNotification,User,Client])], 
     controllers: [NotificationController],
     providers: [NotificationService],
-    exports: [NotificationService],
+    exports: [NotificationService,TypeOrmModule],
 })
 export class NotificationModule {}
 

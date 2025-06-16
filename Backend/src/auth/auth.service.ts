@@ -88,8 +88,6 @@ export class AuthService {
       where: { email },
     });
 
-    console.log('User: ', user);
-
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -109,8 +107,6 @@ export class AuthService {
     const payload: JwtPayload = { userId: user.id, role: user.role };
 
     const accessToken = await this.createToken(payload, '2h');
-
-    console.log(user);
 
     return {
       accessToken: accessToken,
@@ -143,7 +139,6 @@ export class AuthService {
   }
 
   async socialLogin(googleUser: GoogleUser): Promise<AuthResponse> {
-    console.log(googleUser);
     const user = await this.userRepository.findOne({
       where: { email: googleUser.email },
     });

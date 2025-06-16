@@ -12,6 +12,7 @@ import { NotificationModule } from 'src/notification/notification.module';
 import { Notification } from 'src/notification/notification.entity';
 import { UserNotification } from 'src/notification/user-notification.entity';
 import { ListingService } from 'src/listing/listing.service';
+import { User } from 'src/auth/user.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ListingService } from 'src/listing/listing.service';
       Listing,
       Notification,
       UserNotification,
+      User,
     ]),
     NotificationModule,
   ],
