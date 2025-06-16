@@ -4,17 +4,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserNotification } from './user-notification.entity';
 import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
-import { PushNotificationService } from './push-notifications/push-notification.service';
 import { ConfigModule } from '@nestjs/config';
 import { Client } from 'src/client/client.entity';
+import { User } from 'src/auth/user.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 
 
 @Module({
-    imports: [ConfigModule, TypeOrmModule.forFeature([Notification,UserNotification,Client])], 
+    imports: [ConfigModule, TypeOrmModule.forFeature([Notification,UserNotification,User,Client])], 
     controllers: [NotificationController],
-    providers: [NotificationService,PushNotificationService],
-    exports: [NotificationService,PushNotificationService],
+    providers: [NotificationService],
+    exports: [NotificationService,TypeOrmModule],
 })
 export class NotificationModule {}
 

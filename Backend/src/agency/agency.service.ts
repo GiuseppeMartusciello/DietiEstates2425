@@ -179,7 +179,7 @@ export class AgencyService {
     if (!agent)
       throw new NotFoundException(`Agent with id "${agentId}" not found`);
 
-    if (agent?.agency.id !== agencyId) throw new UnauthorizedException('ciao');
+    if (agent?.agency.id !== agencyId) throw new UnauthorizedException();
 
     await this.userRepository.delete(agentId);
 

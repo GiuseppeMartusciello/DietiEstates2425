@@ -5,11 +5,12 @@ import { Notification } from './notification.entity';
 import { UserNotification } from './user-notification.entity';
 import { UserItem } from 'src/common/types/userItem';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { Listing } from 'src/listing/Listing.entity';
-import { Client } from 'src/client/client.entity';
 import { PropertyOffer } from 'src/property_offer/property_offer.entity';
 import { User } from 'src/auth/user.entity';
-
+import { UserRoles } from 'src/common/types/user-roles';
+import { NotificationType } from 'src/common/types/notification.enum';
+import { Listing } from 'src/listing/Listing.entity';
+import { Client } from 'src/client/client.entity';
 
 @Injectable()
 export class NotificationService {
@@ -20,23 +21,47 @@ export class NotificationService {
     @InjectRepository(UserNotification)
     private readonly userNotificationRepository: Repository<UserNotification>,
 
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+
     @InjectRepository(Client)
     private readonly clientRepository: Repository<Client>,
   ) {}
 
   //viene creata una notifica promozionale per un immobile
 
-  async createPromotionalNotification(
-    user: UserItem,
-    createNotificationDto: CreateNotificationDto,
-    listingId: string,
-  ): Promise<Notification> {
+  async createPromotionalNotification(user: User,createNotificationDto: CreateNotificationDto): Promise<Notification> {
     const result = this.notificationRepository.create({
       ...createNotificationDto,
       date: new Date(),
-      listing: { id: listingId } as Listing,
-      createdBy: { id: user.id } as User, // Associa l'utente che crea la notifica
+      createdBy: { id: user.id } as User,
     });
+
+
+    //viene salvata la notifica creata
+    const savedNotification = await this.notificationRepository.save(result);
+
+    const allClients = await this.userRepository.find({
+      where: { role: UserRoles.CLIENT },
+      select: ['id'], 
+    });
+  
+    // 3. Crea UserNotification per ciascun client
+    const userNotifications = allClients.map((client) => ({
+      user: { id: client.id }, // entità parziale User
+      notification: { id: savedNotification.id }, // entità parziale Notification
+      isRead: false,
+    }));
+  
+    await this.userNotificationRepository.save(userNotifications);
+
+    return savedNotification;
+  }
+
+  async createResearchNotification(
+    userId: string,
+    listingId: string,
+  ): Promise<Notification> {
 
     const listing = await this.notificationRepository.manager.findOne(Listing, {
       where: { id: listingId },
@@ -45,6 +70,15 @@ export class NotificationService {
     if (!listing) {
       throw new Error('Listing not found');
     }
+
+    const result = this.notificationRepository.create({
+      title: "Nuovo immobile in linea con le tue ricerche",
+      description: "È stato aggiunto recentemente un immobile in linea alle tue ricerche precedenti",
+      category: NotificationType.SEARCH,
+      date: new Date(),
+      listing: listing,
+      createdBy: { id: userId} as User, // Associa l'utente che crea la notifica
+    });
 
     //viene salvata la notifica creata
     const savedNotification = await this.notificationRepository.save(result);
@@ -58,9 +92,6 @@ export class NotificationService {
       .where('client.searchNotification = true')
       .andWhere('research.municipality = :municipality', { municipality })
       .getMany();
-
-    //testare! di nuovo
-    //vengono messi tutti i client in una map
 
     const userNotifications = AllClient.map((user) => ({
       user: { id: user.userId }, // entità parziale User
@@ -78,9 +109,8 @@ export class NotificationService {
   async createSpecificNotificationOffer(
     createNotificationDto: CreateNotificationDto,
     propertyOffer: PropertyOffer,
-    update : boolean,
+    update: boolean,
   ): Promise<Notification> {
-
     //se l offerta è stata fatta da un cliente viene notificato l agente
     //l agente vien recuperato da propertyOffer e listing
     //se l offerta è stata fatta da un agente viene notificato il cliente
@@ -88,22 +118,21 @@ export class NotificationService {
 
     //in caso di update la logica è esattamente il contrario
 
-if(propertyOffer.guestEmail) return new Notification()
+    let user: { userId: string };
+    if (propertyOffer.guestEmail) return new Notification();
 
-  let user: { userId: string };
+    if (!update) {
+      // Caso normale: offerta nuova
+      user = propertyOffer.madeByUser
+        ? propertyOffer.listing.agent
+        : propertyOffer.client;
+    } else {
+      // Caso update: inverti logica
+      user = propertyOffer.madeByUser
+        ? propertyOffer.client
+        : propertyOffer.listing.agent;
+    }
 
-  if (!update) {
-    // Caso normale: offerta nuova
-    user = propertyOffer.madeByUser
-      ? propertyOffer.listing.agent
-      : propertyOffer.client;
-  } else {
-    // Caso update: inverti logica
-    user = propertyOffer.madeByUser
-      ? propertyOffer.client
-      : propertyOffer.listing.agent;
-  }
-    
     const result = this.notificationRepository.create({
       ...createNotificationDto,
       date: new Date(),
@@ -128,22 +157,20 @@ if(propertyOffer.guestEmail) return new Notification()
     return savedNotification;
   }
 
-
   //restituisce tutte le notifiche non lette per un utente
   //viene utilizzato una qery builder personalizzata
-
- async Notifications(userId: string): Promise<Notification[]> {
-  const notifications = await this.notificationRepository
-    .createQueryBuilder('notification')
-    .innerJoinAndSelect('notification.userNotifications', 'userNotification', 'userNotification.user.id = :userId', { userId })
-    .leftJoinAndSelect('notification.listing', 'listing')
-    .leftJoinAndSelect('notification.propertyOffer', 'propertyOffer')
-    .orderBy('notification.date', 'DESC')
-    .getMany();
-
-  return notifications;
-}
-
+  
+  async Notifications(userId: string): Promise<Notification[]> {
+    const notifications = await this.notificationRepository
+      .createQueryBuilder('notification')
+      .innerJoinAndSelect('notification.userNotifications', 'userNotification', 'userNotification.user.id = :userId', { userId })
+      .leftJoinAndSelect('notification.listing', 'listing')
+      .leftJoinAndSelect('notification.propertyOffer', 'propertyOffer')
+      .orderBy('notification.date', 'DESC')
+      .getMany();
+  
+    return notifications;
+  }
 
   async NotificationById(notificationId: string): Promise<Notification> {
     const notification = await this.notificationRepository.findOneOrFail({

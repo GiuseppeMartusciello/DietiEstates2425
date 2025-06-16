@@ -55,6 +55,7 @@ export class Listing {
 
   @Column('float')
   price: number;
+
   @Column({ type: 'enum', enum: ListingCategory })
   category: ListingCategory;
 

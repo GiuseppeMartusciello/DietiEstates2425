@@ -120,7 +120,7 @@ export class OfferService {
     // cerco l oggetto offerta tramite l id dell offerta
     const offer = await this.offerRepository.findOne({
       where: { id: offerId },
-      relations: ['listing','client'],
+      relations: ['listing', 'client'],
     });
     if (!offer) throw new NotFoundException('Offer not found');
 
@@ -170,16 +170,32 @@ export class OfferService {
 
     //crea notifica specifica
     //attenzione ! la notifica viene create l update è sull offerta ma la notifica è nuova
-    const notifica =
-      await this.notificationService.createSpecificNotificationOffer(
-        {
-          title: 'Un offerta è stata cambiata !',
-          description: 'Controlla l offerta per :' + offer.listing.title + 'il suo nuovo stato adesso è' + status,
-          category: NotificationType.SPECIFIC,
-        },
-        offer,
-        true
-      );
+    const { title, description } =
+    status === 'ACCEPTED'
+      ? {
+          title: 'La tua offerta è stata accettata!',
+          description: `L'agente ha accettato la tua offerta per l'immobile: ${offer.listing.title}.`,
+        }
+      : status === 'DECLINED'
+      ? {
+          title: 'La tua offerta è stata rifiutata',
+          description: `L'agente ha rifiutato la tua offerta per l'immobile: ${offer.listing.title}.`,
+        }
+      : {
+          title: 'Lo stato della tua offerta è cambiato',
+          description: `Controlla la tua offerta per ${offer.listing.title}, il nuovo stato è: ${status}`,
+        };
+  
+  const notifica =
+    await this.notificationService.createSpecificNotificationOffer(
+      {
+        title,
+        description,
+        category: NotificationType.OFFER,
+      },
+      offer,
+      true,
+    );
 
     if (!notifica)
       throw new InternalServerErrorException('Notification not created');
@@ -295,9 +311,7 @@ export class OfferService {
     return result;
   }
 
-  async getClientsByListingId(
-    listingId: string,
-  ): Promise<PropertyOffer[]> {
+  async getClientsByListingId(listingId: string): Promise<PropertyOffer[]> {
     //essendo una query presonalizzata è stata inserirta nel repository del client
     //perchè non è una query standard di ricerca
     const uniqueClients = await this.findClientByListingId(listingId);
@@ -319,16 +333,6 @@ export class OfferService {
     });
   }
 
-  // async getAllOffersByListingId(listingId: string): Promise<PropertyOffer[]> {
-  //   return this.offerRepository.find({
-  //     where: {
-  //       listing: { id: listingId },
-  //     },
-  //     relations: ['client', 'listing'],
-  //     order: { date: 'ASC' },
-  //   });
-  // }
-
   async createExternalOffer(
     dto: CreateExternalOfferDto,
     user: UserItem,
@@ -345,7 +349,7 @@ export class OfferService {
 
     this.checkAuthorization(user, listing);
 
-    this.checkPrice(listing.price, price)
+    this.checkPrice(listing.price, price);
 
     const offer = this.offerRepository.create({
       price,
@@ -377,7 +381,6 @@ export class OfferService {
       throw new UnauthorizedException();
   }
 
-  // PRIVATE HELPERS
   private async findClientByListingId(
     listingId: string,
   ): Promise<PropertyOffer[]> {
@@ -391,7 +394,7 @@ export class OfferService {
 
     return offers;
   }
-  //agg
+
   private async checkValidate(listingId: string) {
     const exist = await this.offerRepository.findOne({
       where: { state: OfferState.ACCEPTED, listing: { id: listingId } },
@@ -402,7 +405,9 @@ export class OfferService {
 
   private checkPrice(listingPrice: number, userOffer: number) {
     if (listingPrice < userOffer)
-      throw new BadRequestException("L'offerta non puo' essere superiore al prezzo dell'immobile. (€410000)");
+      throw new BadRequestException(
+        "L'offerta non puo' essere superiore al prezzo dell'immobile. (€410000)",
+      );
 
     if (userOffer <= 0)
       throw new BadRequestException('Price can t be < then 0');
@@ -423,24 +428,22 @@ export class OfferService {
       client: { userId: clientId } as Client,
     });
 
-
-
     await this.offerRepository.save(offer);
     //crea notifica specifica per una nuova offerta
-     const notifica =
-       await this.notificationService.createSpecificNotificationOffer(
-         {
-           title: 'Nuova offerta per ' + listing.title,
-           description: `Ti è stata proposta una offerta di ${price}€ per l immobile: ${listing.title}.`,
-           category: NotificationType.SPECIFIC,
-         },
-         offer,
-         false,
-       );
+    const notifica =
+      await this.notificationService.createSpecificNotificationOffer(
+        {
+          title: 'Nuova offerta per ' + listing.title,
+          description: `Ti è stata proposta una offerta di ${price}€ per l immobile: ${listing.title}.`,
+          category: NotificationType.OFFER,
+        },
+        offer,
+        false,
+      );
 
-     if (!notifica)
-       throw new InternalServerErrorException('Notification not created');
+    if (!notifica)
+      throw new InternalServerErrorException('Notification not created');
 
-     return offer;
+    return offer;
   }
 }

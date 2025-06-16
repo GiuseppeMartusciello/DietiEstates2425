@@ -16,33 +16,29 @@ import { GetUser } from 'src/auth/get-user.decorator';
 import { UserItem } from 'src/common/types/userItem';
 import { Notification } from './notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { PushNotificationService } from './push-notifications/push-notification.service';
 
 @Controller('notification')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class NotificationController {
   constructor(
     private readonly notificationService: NotificationService,
-    private readonly pushNotificationService: PushNotificationService,
   ) {}
 
-  @Post('/listing/:listingId')
-  //@Roles(UserRoles.ADMIN, UserRoles.SUPPORT_ADMIN)
+  @Post('/promotional')
+  @Roles(UserRoles.ADMIN)
   createPromotionalNotification(
     @GetUser() user: UserItem,
-    @Body() createNotificationDto: CreateNotificationDto,
-    @Param('listingId') listingId: string,
+    @Body() createNotificationDto: CreateNotificationDto
   ): Promise<Notification> {
     return this.notificationService.createPromotionalNotification(
       user,
       createNotificationDto,
-      listingId,
     );
   }
 
   // lista di tutte le notifiche non lette
   @Get('/Notifications')
-  Notifications(@GetUser() user: UserItem): Promise<Notification[]> {
+  async Notifications(@GetUser() user: UserItem): Promise<Notification[]> {
     return this.notificationService.Notifications(user.id);
   }
 
@@ -63,17 +59,6 @@ export class NotificationController {
   ): Promise<void> {
     return this.notificationService.Notification(
       userNotificationId,
-    );
-  }
-
-  //non testato non so se funziona
-  @Post('test-push')
-  @Roles(UserRoles.ADMIN, UserRoles.SUPPORT_ADMIN, UserRoles.CLIENT)
-  async testPush(@Body() body: { token: string }) {
-    return this.pushNotificationService.sentToDevice(
-      body.token,
-      'Test FCM da NestJS',
-      'Questa è una notifica inviata dal backend',
     );
   }
 }

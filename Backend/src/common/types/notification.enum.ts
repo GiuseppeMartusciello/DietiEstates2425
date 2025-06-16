@@ -1,6 +1,6 @@
 export enum NotificationType 
 {
-    SPECIFIC = 'SPECIFIC',
+    OFFER = 'OFFER',
     PROMOTIONAL = 'PROMOTIONAL',
-    INFO = 'INFO',
+    SEARCH = 'SEARCH',
 }

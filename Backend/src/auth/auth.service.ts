@@ -34,16 +34,7 @@ export class AuthService {
   ) {}
 
   async signUp(authCredentialDto: AuthCredentialDto): Promise<AuthResponse> {
-    const {
-      name,
-      surname,
-      email,
-      password,
-      phone,
-      // birthDate,
-      // gender,
-      // address,
-    } = authCredentialDto;
+    const { name, surname, email, password, phone } = authCredentialDto;
 
     const found = await this.userRepository
       .createQueryBuilder('user')
@@ -63,8 +54,6 @@ export class AuthService {
       email,
       password: hashedPassword,
       phone,
-      // birthDate,
-      // gender,
       role: UserRoles.CLIENT,
       provider: Provider.LOCAL,
       lastPasswordChangeAt: new Date(),
@@ -84,7 +73,7 @@ export class AuthService {
       role: user.role,
     };
 
-    const accessToken = await this.createToken(payload, '1h');
+    const accessToken = await this.createToken(payload, '3h');
 
     return {
       accessToken: accessToken,
@@ -98,8 +87,6 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { email },
     });
-
-    console.log('User: ', user);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -119,9 +106,7 @@ export class AuthService {
 
     const payload: JwtPayload = { userId: user.id, role: user.role };
 
-    const accessToken = await this.createToken(payload, '120m');
-
-    console.log(user);
+    const accessToken = await this.createToken(payload, '2h');
 
     return {
       accessToken: accessToken,
@@ -154,7 +139,6 @@ export class AuthService {
   }
 
   async socialLogin(googleUser: GoogleUser): Promise<AuthResponse> {
-    console.log(googleUser);
     const user = await this.userRepository.findOne({
       where: { email: googleUser.email },
     });
@@ -163,7 +147,7 @@ export class AuthService {
       if (user.provider === Provider.GOOGLE) {
         const accessToken = await this.createToken(
           { userId: user.id, role: user.role },
-          '120m',
+          '2h',
         );
         return { accessToken, mustChangePassword: false };
       } else
@@ -194,7 +178,7 @@ export class AuthService {
 
     const accessToken = await this.createToken(
       { userId: newUser.id, role: newUser.role },
-      '120m',
+      '2h',
     );
     return { accessToken, mustChangePassword: false };
   }

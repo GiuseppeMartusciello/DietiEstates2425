@@ -41,7 +41,7 @@ describe('AgencyService - deleteAgentById', () => {
           useValue: supportAdminRepository,
         },
         { provide: getRepositoryToken(Agency), useValue: {} },
-        { provide: getRepositoryToken(Object), useValue: {} }, // per SupportAdmin
+        { provide: getRepositoryToken(Object), useValue: {} },
         {
           provide: ConfigService,
           useValue: {
@@ -56,42 +56,51 @@ describe('AgencyService - deleteAgentById', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('✔️ Dovrebbe eliminare correttamente un agente', async () => {
+  it('TC1 - It should properly delete an agent', async () => {
+    // MOCK
     (userRepository.findOneBy as jest.Mock).mockResolvedValue(user);
     (agentRepository.findOne as jest.Mock).mockResolvedValue(agent);
 
-    const result = await agencyService.deleteAgentById('agent-1', 'agency-1');
+    // ACT
+    const result = await agencyService.deleteAgentById(agent.userId, agency.id);
 
-    expect(userRepository.delete).toHaveBeenCalledWith('agent-1');
+    // ASSERT
+    expect(userRepository.delete).toHaveBeenCalledWith(agent.userId);
     expect(result).toEqual({ message: 'Agent delete successfully' });
   });
 
-  it('❌ Dovrebbe lanciare NotFoundException se l’utente non esiste', async () => {
+  it('TC2 - Should throw NotFoundException if user does not exist', async () => {
+    // MOCK
     (userRepository.findOneBy as jest.Mock).mockResolvedValue(null);
 
+    // ACT && ASSERT
     await expect(
-      agencyService.deleteAgentById('invalid-agent', 'agency-1'),
+      agencyService.deleteAgentById('invalid-agent', agency.id),
     ).rejects.toThrow(NotFoundException);
   });
 
-  it('❌ Dovrebbe lanciare NotFoundException se l’agente non esiste', async () => {
+  it('TC3 - Should throw NotFoundException if agent does not exist', async () => {
+    // MOCK
     (userRepository.findOneBy as jest.Mock).mockResolvedValue(user);
     (agentRepository.findOne as jest.Mock).mockResolvedValue(null);
 
+    // ACT && ASSERT
     await expect(
-      agencyService.deleteAgentById('agent-1', 'agency-1'),
+      agencyService.deleteAgentById(agent.userId, agency.id),
     ).rejects.toThrow(NotFoundException);
   });
 
-  it('❌ Dovrebbe lanciare UnauthorizedException se l’agenzia non corrisponde', async () => {
+  it('TC4 - Should throw UnauthorizedException if the agency does not correspond', async () => {
+    // MOCK
     (userRepository.findOneBy as jest.Mock).mockResolvedValue(user);
     (agentRepository.findOne as jest.Mock).mockResolvedValue({
       ...agent,
       agency: { id: 'agency-2' },
     });
 
+    // ACT && ASSERT
     await expect(
-      agencyService.deleteAgentById('agent-1', 'agency-1'),
+      agencyService.deleteAgentById(agent.userId, agency.id),
     ).rejects.toThrow(UnauthorizedException);
   });
 });

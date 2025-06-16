@@ -88,6 +88,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     } else if (user.role != UserRoles.ADMIN)
       throw new UnauthorizedException('Invalid role');
 
-      return userItem;
+    return userItem;
   }
 }
