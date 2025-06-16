@@ -40,9 +40,6 @@ export class AuthService {
       email,
       password,
       phone,
-      // birthDate,
-      // gender,
-      // address,
     } = authCredentialDto;
 
     const found = await this.userRepository
@@ -63,8 +60,6 @@ export class AuthService {
       email,
       password: hashedPassword,
       phone,
-      // birthDate,
-      // gender,
       role: UserRoles.CLIENT,
       provider: Provider.LOCAL,
       lastPasswordChangeAt: new Date(),

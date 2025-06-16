@@ -110,21 +110,3 @@ describe('UserService - changePassword', () => {
     );
   });
 });
-
-/*
-  Strategia di test adottata:
-  Abbiamo identificato le classi di equivalenza per i parametri del metodo changePassword, considerando le condizioni di validità dei dati di input:
-
-  userId: esistente (V), inesistente (NV)
-
-  currentPassword: corretto (V), errato (NV)
-
-  Usando la strategia N-WEct, abbiamo definito il numero minimo di test (3) per coprire tutte le combinazioni delle classi di equivalenza valide e non valide, ottenendo:
-
-  Aggiornamento corretto della password
-
-  Mancato utente → NotFoundException
-
-  Password errata → UnauthorizedExceptio
-
-*/

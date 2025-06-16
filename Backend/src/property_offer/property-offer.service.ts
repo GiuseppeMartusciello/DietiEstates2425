@@ -319,16 +319,6 @@ export class OfferService {
     });
   }
 
-  // async getAllOffersByListingId(listingId: string): Promise<PropertyOffer[]> {
-  //   return this.offerRepository.find({
-  //     where: {
-  //       listing: { id: listingId },
-  //     },
-  //     relations: ['client', 'listing'],
-  //     order: { date: 'ASC' },
-  //   });
-  // }
-
   async createExternalOffer(
     dto: CreateExternalOfferDto,
     user: UserItem,
@@ -377,7 +367,6 @@ export class OfferService {
       throw new UnauthorizedException();
   }
 
-  // PRIVATE HELPERS
   private async findClientByListingId(
     listingId: string,
   ): Promise<PropertyOffer[]> {
@@ -391,7 +380,7 @@ export class OfferService {
 
     return offers;
   }
-  //agg
+
   private async checkValidate(listingId: string) {
     const exist = await this.offerRepository.findOne({
       where: { state: OfferState.ACCEPTED, listing: { id: listingId } },

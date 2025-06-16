@@ -14,7 +14,7 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true, // Trasforma i payload in DTO automaticamente
       whitelist: true, // Rimuove proprietà non dichiarate nei DTO
-      forbidNonWhitelisted: true, // (opzionale) Lancia errore se ci sono proprietà extra
+      forbidNonWhitelisted: true, // Lancia errore se ci sono proprietà extra
     }),
   );
   app.useGlobalInterceptors(new TransformInterceptor());

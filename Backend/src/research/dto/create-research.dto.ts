@@ -44,7 +44,7 @@ export class ResearchListingDto {
 
   @IsOptional()
   @IsInt()
-  minSize?: number; //dimensione in metri quadri
+  minSize?: number;
 
   @IsOptional()
   @IsString()
@@ -62,6 +62,4 @@ export class ResearchListingDto {
   @IsBoolean()
   hasGarage?: boolean;
 
-  //@Validate(MunicipalityCoordinatesValidator)
-  //dummyPropertyForCustomValidation: any; // workaround per attivare la validazione sulla classe
 }

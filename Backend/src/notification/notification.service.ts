@@ -59,8 +59,6 @@ export class NotificationService {
       .andWhere('research.municipality = :municipality', { municipality })
       .getMany();
 
-    //testare! di nuovo
-    //vengono messi tutti i client in una map
 
     const userNotifications = AllClient.map((user) => ({
       user: { id: user.userId }, // entità parziale User

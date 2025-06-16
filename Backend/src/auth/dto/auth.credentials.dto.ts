@@ -25,16 +25,4 @@ export class AuthCredentialDto {
   @IsNotEmpty()
   @IsPhoneNumber('IT')
   phone: string;
-
-  // @IsDate()
-  // @Type(() => Date)
-  // birthDate: Date;
-
-  // @IsNotEmpty()
-  // @IsEnum(Gender)
-  // gender: string;
-
-  // @IsNotEmpty()
-  // @IsString()
-  // address: string;
 }
