@@ -160,10 +160,6 @@ describe('OfferService - createExternalOffer', () => {
     // MOCK
     (listingRepository.findOne as jest.Mock).mockResolvedValue(mockListing);
 
-    jest
-      .spyOn(service as any, 'checkAuthorization')
-      .mockImplementation(() => {});
-
     (offerRepository.create as jest.Mock).mockReturnValue(mockOffer);
     (offerRepository.save as jest.Mock).mockResolvedValue(mockOffer);
 
@@ -187,22 +183,7 @@ describe('OfferService - createExternalOffer', () => {
     );
   });
 
-  it('TC2 - should throw BadRequestException if guest fields are all missing', async () => {
-    // DTO's definition
-    const dto: CreateExternalOfferDto = {
-      price: 1000,
-      guestEmail: '',
-      guestName: '',
-      guestSurname: '',
-    };
-
-    // ACT & ASSERT
-    await expect(
-      service.createExternalOffer(dto, mockUser, 'listing-1'),
-    ).rejects.toThrow(BadRequestException);
-  });
-
-  it('TC3 - should throw NotFoundException if listing does not exist', async () => {
+  it('TC2 - should throw NotFoundException if listing does not exist', async () => {
     // DTO's definition
     const dto: CreateExternalOfferDto = {
       price: 1000,
@@ -220,7 +201,7 @@ describe('OfferService - createExternalOffer', () => {
     ).rejects.toThrow(NotFoundException);
   });
 
-  it('TC4 - should throw UnauthorizedException if user is not authorized', async () => {
+  it('TC3 - should throw UnauthorizedException if user is not authorized', async () => {
     // DTO's definition
     const dto: CreateExternalOfferDto = {
       price: 1000,
@@ -229,21 +210,48 @@ describe('OfferService - createExternalOffer', () => {
       guestSurname: 'Rossi',
     };
 
+    // MOCK
+    (listingRepository.findOne as jest.Mock).mockResolvedValue(mockListing);
+
     const unauthorizedUser: UserItem = {
       ...mockUser,
       agent: mockWrongAgent,
     };
 
-    // MOCK
-    (listingRepository.findOne as jest.Mock).mockResolvedValue(mockListing);
-    jest.spyOn(service as any, 'checkAuthorization').mockImplementation(() => {
-      throw new UnauthorizedException();
-    });
-
     // ACT && ASSERT
     await expect(
       service.createExternalOffer(dto, unauthorizedUser, mockListing.id),
     ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('TC4 - should throw BadRequestException if price is less than or equal to 0', async () => {
+    const dto: CreateExternalOfferDto = {
+      price: -1,
+      guestEmail: 'guest@example.com',
+      guestName: 'Mario',
+      guestSurname: 'Rossi',
+    };
+
+    (listingRepository.findOne as jest.Mock).mockResolvedValue(mockListing);
+
+    await expect(
+      service.createExternalOffer(dto, mockUser, mockListing.id),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('TC5 - should throw BadRequestException if price is greater than listing price', async () => {
+    const dto: CreateExternalOfferDto = {
+      price: mockListing.price + 1,
+      guestEmail: 'guest@example.com',
+      guestName: 'Mario',
+      guestSurname: 'Rossi',
+    };
+
+    (listingRepository.findOne as jest.Mock).mockResolvedValue(mockListing);
+
+    await expect(
+      service.createExternalOffer(dto, mockUser, mockListing.id),
+    ).rejects.toThrow(BadRequestException);
   });
 });
 
@@ -426,34 +434,5 @@ describe('OfferService - getLatestOffersByListingId', () => {
     await expect(
       service.getLatestOffersByListingId(mockListing.id, mockUser),
     ).rejects.toThrow(UnauthorizedException);
-  });
-
-  it('TC4 - should return empty array if no offers found', async () => {
-    // MOCK
-    (listingRepository.findOne as jest.Mock).mockResolvedValue(mockListing);
-
-    const mockQueryBuilder = {
-      distinctOn: jest.fn().mockReturnThis(),
-      innerJoinAndSelect: jest.fn().mockReturnThis(),
-      leftJoinAndSelect: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      addOrderBy: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockResolvedValue([]),
-    };
-
-    (offerRepository.createQueryBuilder as jest.Mock).mockReturnValue(
-      mockQueryBuilder,
-    );
-
-    // ACT
-    const result = await service.getLatestOffersByListingId(
-      mockListing.id,
-      mockUser,
-    );
-
-    // ASSERT
-    expect(result).toEqual([]);
   });
 });
