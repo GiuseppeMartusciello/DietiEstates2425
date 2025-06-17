@@ -101,7 +101,6 @@ fun ModifyListingScreen(navController: NavController) {
                         ?.savedStateHandle
                         ?.set("listingModified", true)
                     navController.popBackStack()
-                    navController.navigateUp()
                 }
 
             }
@@ -335,7 +334,7 @@ fun ModifyListingScreen(navController: NavController) {
                                 modifier = Modifier.width(130.dp)
                             )
                             dropDownMenu(
-                                label = "Piani",
+                                label = "Piano",
                                 value = form.floor,
                                 options = (0..20).map { it.toString() },
                                 onValueChange = { viewModel.onFieldChange { current -> current.copy(floor = it) } },

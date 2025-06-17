@@ -111,14 +111,13 @@ fun CreateListingScreen(navController: NavController) {
                         ?.savedStateHandle
                         ?.set("listingModified", true)
                     navController.popBackStack()
-                    navController.navigateUp()
                 }
 
             }
 
             editState.error != null -> {
                 val errorMessage = when (editState.operation) {
-                    EditOperation.POST -> "❌ Errore durante il caricamento"
+                    EditOperation.POST -> "❌ Errore durante il caricamento ${editState.error}"
                     else -> "❌ Errore generico"
                 }
                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
@@ -379,7 +378,7 @@ fun CreateListingScreen(navController: NavController) {
                             modifier = Modifier.width(130.dp)
                         )
                         dropDownMenu(
-                            label = "Piani",
+                            label = "Piano",
                             value = form.floor,
                             options = (0..20).map { it.toString() },
                             onValueChange = {

@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.dietiestates.ui.screens.components.AppTopBar
 import com.example.dietiestates.ui.screens.components.ListingCard
+import com.example.dietiestates.ui.theme.LocalAppTypography
 import com.example.dietiestates.ui.theme.RobotoSerif
 import com.example.dietiestates.ui.theme.RobotoSlab
 import com.example.dietiestates.ui.viewModel.HomeViewModel
@@ -106,6 +107,13 @@ fun HomeScreen(navController: NavController) {
                         .padding(paddingValues),
                     contentAlignment = Alignment.TopCenter // centra il contenuto nel Box
                 ) {
+                    if(viewState.list.isEmpty())
+                        Text(
+                            text = "Non ci sono immobili al momento, creano uno",
+                            style = LocalAppTypography.current.featureTitle,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(15.dp)
+                        )
                     LazyColumn(
                         horizontalAlignment = Alignment.CenterHorizontally, // per centrare gli elementi dentro
                         modifier = Modifier.wrapContentHeight()
