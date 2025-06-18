@@ -62,12 +62,7 @@ class ResearchViewModel : ViewModel() {
                 val dto = validateAndBuildDto() ?: run {
                     return@launch
                 }
-
-                println("📋 Form valido: $researchFormState")
-
-
                 val result = AppContainer.researchRepository.createResearch(dto)
-
                 _searchState.value = SearchedState(
                     loading = false,
                     listings = result,
@@ -221,7 +216,7 @@ class ResearchViewModel : ViewModel() {
             municipality = researchFormState.municipality.ifBlank { null },
             latitude = researchFormState.latitude.toDoubleOrNull(),
             longitude = researchFormState.longitude.toDoubleOrNull(),
-            radius = researchFormState.radius.toDoubleOrNull(),
+            radius = researchFormState.radius.toDoubleOrNull()?.toInt(),
             minPrice = researchFormState.minPrice,
             maxPrice = researchFormState.maxPrice,
             numberOfRooms = researchFormState.numberOfRooms,

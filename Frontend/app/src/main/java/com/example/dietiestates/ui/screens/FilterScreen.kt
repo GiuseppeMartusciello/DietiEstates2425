@@ -118,7 +118,7 @@ fun Filtering(viewModel: ResearchViewModel, navController: NavController) {
 
 
     val (currentMinValue, currentMaxValue, currentStep) = when (category) {
-        "SALE" -> listOf(100000f, 1000000f, 10000f)
+        "SALE" -> listOf(100000f, 10000000f, 10000f)
         else -> listOf(300f, 10000f, 100f)
     }
 
@@ -132,11 +132,11 @@ fun Filtering(viewModel: ResearchViewModel, navController: NavController) {
             onTypeSelected = {
                 if (it == "SALE") {
                     viewModel.updateResearchFormState {
-                        copy(category = "SALE", minPrice = 100000, maxPrice = 1000000)
+                        copy(category = "SALE", minPrice = 100000, maxPrice = 10000000)
                     }
                 } else {
                     viewModel.updateResearchFormState {
-                        copy(category = "RENT", minPrice = 300, maxPrice = 10000)
+                        copy(category = "RENT", minPrice = 300, maxPrice = 10000000)
                     }
                 }
                 viewModel.updateResearchFormState {

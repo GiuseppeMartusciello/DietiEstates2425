@@ -1,5 +1,6 @@
 package com.example.dietiestates.data.repository
 
+import android.util.Log
 import com.example.dietiestates.data.model.dto.CreateResearchDto
 import com.example.dietiestates.data.model.Listing
 import com.example.dietiestates.data.model.Research
@@ -37,6 +38,10 @@ data class ResearchRepository(private val api: ResearchApi, private val apiListi
             }
         } else {
             val code = if (!response.isSuccessful) response.code() else imagesResponse.code()
+            val errorMessage = response.errorBody()?.string() ?: "Unknown error"
+
+            // Log dei dettagli dell'errore
+            Log.e("output", "Errore nel caricamento dei dati: HTTP $code - $errorMessage")
             throw Exception("Errore nel caricamento dei dati: HTTP $code")
         }
     }

@@ -91,7 +91,6 @@ class AuthViewModel : ViewModel() {
     }
 
     fun login(email: String, password: String, context: Context) {
-        Log.d("output","sto loggando")
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             val result = authRepository.login(email, password)
